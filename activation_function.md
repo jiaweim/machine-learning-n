@@ -61,7 +61,7 @@ Sigmoid 型函数指一类 S 型曲线函数，为两端饱和函数。常用的
 Logistic 函数定义如下：
 
 $$
-\sigma (x)= \frac{1}{1+exp(-x)}
+\sigma (x)= \frac{1}{1+e^{-x}}
 $$
 
 特征：

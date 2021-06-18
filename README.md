@@ -1,5 +1,7 @@
 # 机器学习之学习笔记
 
+- [损失函数](数学基础/损失函数.md)
+
 ## 深度学习教程
 
 - http://neuralnetworksanddeeplearning.com/
