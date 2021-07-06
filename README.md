@@ -13,6 +13,7 @@
 - [Structuring Machine Learning Projects](https://www.coursera.org/learn/machine-learning-projects?specialization=deep-learning)
 - [Convolutional Neural Networks](https://www.coursera.org/learn/convolutional-neural-networks?specialization=deep-learning)
 - [Sequence Models](https://www.coursera.org/learn/nlp-sequence-models?specialization=deep-learning)
+- [Convolutional Neutral Networks for Visual Recognition, CS231n](http://cs231n.stanford.edu/)
 
 ## 参考书
 
