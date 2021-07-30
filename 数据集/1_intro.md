@@ -4,6 +4,7 @@
   - [概述](#概述)
     - [深度学习需要大数据](#深度学习需要大数据)
     - [深度学习有时会矫枉过正](#深度学习有时会矫枉过正)
+  - [数据表示形式](#数据表示形式)
   - [ImageNet](#imagenet)
   - [参考](#参考)
 
@@ -53,6 +54,15 @@ Halder, Rohit, Rajdeep Chatterjee, Debarshi Kumar Sanyal, and Pradeep Kumar Mall
 - 深度学习需要很多数据
 - 有些问题用传统方法解决更简单
 - 了解传统方法有助于理解深度学习
+
+## 数据表示形式
+
+机器学习需要处理的数据大部分可以表示为以下类型：
+
+- 向量数据：2D 张量，形状为 `(samples, features)`
+- 时间序列数据或序列数据：3D 张量，形状为 `(samples, timesteps, features)`
+- 图像：4D 张量，形状为 `(samples, height, width, channels)` 或 `(samples, channels, height, width)`
+- 视频：5D 张量，形状为 `(samples, frames, height, width, channels)`
 
 ## ImageNet
 

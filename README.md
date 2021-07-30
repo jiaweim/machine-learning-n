@@ -1,10 +1,12 @@
 # 机器学习之学习笔记
 
 - [损失函数](数学基础/损失函数.md)
+- [卷积神经网络](深度学习/卷积神经网络.md)
 
 ## 深度学习教程
 
 - http://neuralnetworksanddeeplearning.com/
+- [EDUCBA 机器学习教程](https://www.educba.com/data-science/data-science-tutorials/machine-learning-tutorial/)
 
 ## 网络课程
 
@@ -14,6 +16,12 @@
 - [Convolutional Neural Networks](https://www.coursera.org/learn/convolutional-neural-networks?specialization=deep-learning)
 - [Sequence Models](https://www.coursera.org/learn/nlp-sequence-models?specialization=deep-learning)
 - [Convolutional Neutral Networks for Visual Recognition, CS231n](http://cs231n.stanford.edu/)
+
+## 题库
+
+- [7 月在线](https://www.julyedu.com/questions/written)
+- [牛客网](https://www.nowcoder.com/)
+- [LeetCode](https://leetcode.com/)
 
 ## 参考书
 
@@ -41,3 +49,7 @@ Wright, S., & Nocedal, J. (1999). Springer Science, 35(67-68), 7.
 - Convex optimization
 
 Boyd, S., & Vandenberghe, L. (2004). Cambridge university press.
+
+## 实例
+
+- [图片分类效果](http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html)
