@@ -5,7 +5,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-from dataset.mnist import load_mnist
+from src.scratch.dataset.mnist import load_mnist
 from two_layer_net import TwoLayerNet
 
 sys.path.append(os.pardir)  # 为了导入父目录的文件而进行的设定

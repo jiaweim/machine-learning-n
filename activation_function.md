@@ -10,6 +10,7 @@
     - [Tanh 函数](#tanh-函数)
     - [Hard-Logistic 和 Hard-Tanh](#hard-logistic-和-hard-tanh)
   - [ReLU](#relu)
+  - [参考](#参考)
 
 2021-05-26, 15:47
 @Jiawei Mao
@@ -158,7 +159,7 @@ Tanh 函数的树池是零中心化的（zero-centered），而 Logistic 函数�
 
 ### Hard-Logistic 和 Hard-Tanh
 
-Logistic 函数和 Tanh 函数都是 Sigmoid 型函数，具有饱和性，但是计算开销较大。因为这两个函数都是在中间（0附近）近似线性，两端饱和，因此可以通过分段函数来近似。
+Logistic 函数和 Tanh 函数都是 Sigmoid 型函数，具有饱和性，但是计算开销较大。由于这两个函数都是在中间（0附近）近似线性，两端饱和，因此可以通过分段函数来近似。
 
 以 Logistic 函数 $\sigma(x)$ 为例，其导数 $\sigma'(x)=\sigma(x)(1-\sigma(x))$。Logistic 函数在 0 附近的一阶泰勒展开为：
 
@@ -185,3 +186,7 @@ Python 实现：
 def relu(x):
     return np.maximum(0, x)
 ```
+
+## 参考
+
+- 深度学习入门：基于 Python 的理论与实现，斋藤康毅

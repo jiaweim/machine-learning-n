@@ -31,6 +31,8 @@ Halder, Rohit, Rajdeep Chatterjee, Debarshi Kumar Sanyal, and Pradeep Kumar Mall
 
 ### 深度学习需要大数据
 
+> 数据是机器学习的命根子。从数据种寻找答案、从数据种发现模式、根据数据讲故事。如果没有数据，就无从谈起。
+
 深度学习需要数据，需要很多很多的数据。那些著名的图像分类模型都是在庞大的数据集上训练的。排名前三的数据集：
 
 - [ImageNet](http://www.image-net.org/), 包含 1000 个类别的150 万图片

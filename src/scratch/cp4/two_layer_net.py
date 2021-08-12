@@ -1,13 +1,7 @@
 # coding: utf-8
-import os
-import sys
 
-import numpy as np
-
-from common.functions import *
-from common.gradient import numerical_gradient
-
-sys.path.append(os.pardir)  # 为了导入父目录的文件而进行的设定
+from src.scratch.common.functions import *
+from src.scratch.common.gradient import numerical_gradient
 
 
 class TwoLayerNet:
@@ -22,10 +16,10 @@ class TwoLayerNet:
         """
         # params 保存神经网络的参数
         # W1 表示第1层的权重，b1 表示第1层的偏置
-        self.params = {'W1': weight_init_std * np.random.randn(input_size, hidden_size),
-                       'b1': np.zeros(hidden_size),
-                       'W2': weight_init_std * np.random.randn(hidden_size, output_size),
-                       'b2': np.zeros(output_size)}
+        self.params = {'W1': weight_init_std * np.random.randn(input_size, hidden_size),  # 第一层的权重
+                       'b1': np.zeros(hidden_size),  # 第一层的偏置
+                       'W2': weight_init_std * np.random.randn(hidden_size, output_size),  # 第二层的权重
+                       'b2': np.zeros(output_size)}  # 第二层的偏置
 
     def predict(self, x):
         """
@@ -87,7 +81,7 @@ class TwoLayerNet:
 
     def gradient(self, x, t):
         """
-        计算权重参数的梯度，速度更快。
+        使用误差反向传播计算权重参数的梯度，速度更快。
         :param x:
         :param t:
         :return:

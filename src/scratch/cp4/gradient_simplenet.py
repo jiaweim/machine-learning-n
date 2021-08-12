@@ -1,13 +1,9 @@
 # coding: utf-8
-import os
-import sys
 
 import numpy as np
 
-from common.functions import softmax, cross_entropy_error
-from common.gradient import numerical_gradient
-
-sys.path.append(os.pardir)  # 为了导入父目录中的文件而进行的设定
+from src.scratch.common.functions import softmax, cross_entropy_error
+from src.scratch.common.gradient import numerical_gradient
 
 
 class simpleNet:
