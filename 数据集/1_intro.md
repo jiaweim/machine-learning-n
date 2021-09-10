@@ -61,9 +61,9 @@ Halder, Rohit, Rajdeep Chatterjee, Debarshi Kumar Sanyal, and Pradeep Kumar Mall
 
 机器学习需要处理的数据大部分可以表示为以下类型：
 
-- 向量数据：2D 张量，形状为 `(samples, features)`
-- 时间序列数据或序列数据：3D 张量，形状为 `(samples, timesteps, features)`
-- 图像：4D 张量，形状为 `(samples, height, width, channels)` 或 `(samples, channels, height, width)`
+- 向量数据：2D 张量，形状为 `(samples, features)`，通常用全连接层（fully connected layer）或密集层（dense layer）处理；
+- 时间序列数据或序列数据：3D 张量，形状为 `(samples, timesteps, features)`，通常用循环层（recurrent layer，如 Keras 的 LSTM 层）处理；
+- 图像：4D 张量，形状为 `(samples, height, width, channels)` 或 `(samples, channels, height, width)`，通常用二维卷积层（Keras 的 Conv2D 处理）；
 - 视频：5D 张量，形状为 `(samples, frames, height, width, channels)`
 
 ## ImageNet
