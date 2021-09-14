@@ -38,5 +38,6 @@ def test_variable():
     assert torch.equal(w.grad, torch.Tensor([1]))
     assert torch.equal(x.grad, torch.Tensor([2]))
 
+
 def test_gpu():
     print(torch.cuda.is_available())
