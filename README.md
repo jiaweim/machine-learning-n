@@ -11,6 +11,8 @@
 
 ## 网络课程
 
+- [Machine Learning for Beginners - A Curriculum](https://github.com/microsoft/ML-For-Beginners)
+- [Data Science for Beginners - A Curriculum](https://github.com/microsoft/Data-Science-For-Beginners)
 - [Neural Networks and Deep Learning](https://www.coursera.org/learn/neural-networks-deep-learning?specialization=deep-learning)
 - [Improving Deep Neural Networks: Hyperparameter Tuning, Regularization and Optimization](https://www.coursera.org/learn/deep-neural-network?specialization=deep-learning)
 - [Structuring Machine Learning Projects](https://www.coursera.org/learn/machine-learning-projects?specialization=deep-learning)
