@@ -2,17 +2,45 @@
 
 - [tf.math](#tfmath)
   - [简介](#简介)
+  - [igamma](#igamma)
+  - [imag](#imag)
   - [log](#log)
   - [reduce_sum](#reduce_sum)
+  - [zeta](#zeta)
+  - [参考](#参考)
 
 2021-06-03, 20:11
+***
 
 ## 简介
 
 TensorFlow 提供了多种数学函数，包括：
 
 - 基本算术运算和三角函数；
-- 特殊的数学函数，如 `tf.math.igamma` 和 `tf.math.zeta`
+- 特殊的数学函数，如 [tf.math.igamma](#igamma) 和 [tf.math.zeta](#zeta)；
+- 复数函数，如 
+
+> 接受 `Tensor` 为参数的函数也接受 `tf.convert_to_tensor` 所接受的参数类型。
+
+## igamma
+
+计算低正则化不完全 Gamma 函数 `P(a, x)`。
+
+```py
+tf.math.igamma(
+    a, x, name=None
+)
+```
+
+## imag
+
+计算复数 tensor 的虚部。
+
+```py
+tf.math.imag(
+    input, name=None
+)
+```
 
 ## log
 
@@ -88,3 +116,11 @@ assert v == 6
 | keepdims | 如果为 true，则计算的维度保留，长度为 1 |
 
 等价于 `np.sum` ，除了 numpy 会将 `uint8` , `int32` 向上转换为 `int64` ，而 tensorflow 返回类型和输入相同类型。
+
+## zeta
+
+计算 Hurwitz zeta 函数 $\zeta(x,q)$。
+
+## 参考
+
+- https://tensorflow.google.cn/api_docs/python/tf/math

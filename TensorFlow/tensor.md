@@ -18,7 +18,15 @@
 
 张量（tensor）是单一类型（ `dtype` ）的多维数组。与 Python 字符串一样，所有 tensor 都是 immutable，如果要修改 tensor，只能创建一个新的 tensor。
 
+TensorFlow 支持三种类型的 Tensor:
+
+1. Constants，常量 tensor，其数值不允许改变；
+2. Variables，变量 tensor；
+3. Placeholders，用于将数值馈送到 tensorflow graph.
+
 TensorFlow 支持的 tensor 类型在 `tf.dtypes.DType` 中有详细列表。
+
+
 
 ## 创建 Tensor
 
