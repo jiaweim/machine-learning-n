@@ -1,6 +1,6 @@
-# Artificial Neutral Networks (ANNs)
+# 人工神经网络
 
-- [Artificial Neutral Networks (ANNs)](#artificial-neutral-networks-anns)
+- [人工神经网络](#人工神经网络)
   - [简介](#简介)
   - [感知机](#感知机)
   - [多层感知机](#多层感知机)

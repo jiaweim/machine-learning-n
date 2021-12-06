@@ -6,6 +6,7 @@
     - [属性](#属性)
     - [summary](#summary)
   - [keras.Sequential](#kerassequential)
+  - [参考](#参考)
 
 2021-06-04, 09:32
 ***
@@ -152,3 +153,7 @@ tf.keras.Sequential(
     layers=None, name=None
 )
 ```
+
+## 参考
+
+- https://keras.io/api/models/
