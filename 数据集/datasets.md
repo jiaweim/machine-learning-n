@@ -1,5 +1,7 @@
 # 数据集
 
+- [CIFAR](CIFAR.md)
+
 ## MNIST
 
 MNIST 数据集由美国国家标准与技术研究所（National Institute of Standards and Technology, NIST）收集，MNIST 数据集分为两部分。包含：
