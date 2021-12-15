@@ -3,7 +3,7 @@ import numpy as np
 
 class Sigmoid:
     def __init__(self):
-        self.params = []
+        self.params = []  # 没有需要学习的参数，初始化为空 list
 
     def forward(self, x):
         return 1 / (1 + np.exp(-x))
