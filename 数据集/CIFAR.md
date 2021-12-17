@@ -5,6 +5,7 @@
   - [CIFAR-10](#cifar-10)
     - [下载 CIFAR-10](#下载-cifar-10)
   - [CIFAR-100](#cifar-100)
+    - [下载 CIFAR-100](#下载-cifar-100)
   - [参考](#参考)
 
 2021-12-15, 14:50
@@ -62,6 +63,14 @@ CIFAR-100 的 100 个分类可以归为 20 个超类。每个图片带有一个�
 |trees|maple, oak, palm, pine, willow|
 |vehicles 1|bicycle, bus, motorcycle, pickup truck, train|
 |vehicles 2|lawn-mower, rocket, streetcar, tank, tractor|
+
+### 下载 CIFAR-100
+
+|版本|大小|md5sum|
+|---|---|---|
+[CIFAR-100 python version](https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz)|161 MB|eb9058c3a382ffc7106e4002c42a8d85|
+|[CIFAR-100 Matlab version](https://www.cs.toronto.edu/~kriz/cifar-100-matlab.tar.gz)|175 MB|6a4bfa1dcd5c9453dda6bb54194911f4|
+|[CIFAR-100 binary version (适合 C 语言)](https://www.cs.toronto.edu/~kriz/cifar-100-binary.tar.gz)|161 MB|03b5dce01913d631647c71ecec9e9cb8|
 
 ## 参考
 

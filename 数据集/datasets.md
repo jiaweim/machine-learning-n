@@ -1,6 +1,7 @@
 # 数据集
 
 - [CIFAR](CIFAR.md)
+- [Oxford-IIIT Pet](oxford-IIIT-Pet.md)
 
 ## MNIST
 
