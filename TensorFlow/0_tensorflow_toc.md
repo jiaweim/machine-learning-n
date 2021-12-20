@@ -1,8 +1,9 @@
 # TensorFlow
 
-## Basic
+## 基础
 
 - [TensorFlow 基础](basic_1.md)
+- [Tensor 指南](basic_tensor.md)
 
 ## 学习笔记
 
