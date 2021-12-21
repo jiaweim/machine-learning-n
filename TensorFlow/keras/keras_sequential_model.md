@@ -1,7 +1,8 @@
-# 序列模型
+# Sequential model
 
-- [序列模型](#序列模型)
-  - [简介](#简介)
+- [Sequential model](#sequential-model)
+  - [配置](#配置)
+  - [何时使用序列模型](#何时使用序列模型)
   - [创建 Sequential 模型](#创建-sequential-模型)
   - [指定输入 shape](#指定输入-shape)
   - [通用调试工作流](#通用调试工作流)
@@ -10,21 +11,25 @@
   - [基于序列模型的迁移学习](#基于序列模型的迁移学习)
   - [参考](#参考)
 
-2021-11-10, 14:46
+2021-12-21, 17:27
 ***
 
-## 简介
+## 配置
 
-序列（`Sequential`）模型适合于简单的神经网络层的堆栈，每层只有一个输入 tensor 和一个输出 tensor。
-
-下面定义一个 Sequential 模型：
-
-```py
+```python
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+```
 
-# 使用 3 层网络定义 Sequential 模型
+## 何时使用序列模型
+
+序列（`Sequential`）模型适合于普通的层堆栈，每一层有且只有一个输入张量和一个输出张量。
+
+从语法上来说，下面的序列模型：
+
+```python
+# 3 层 Sequential 模型
 model = keras.Sequential(
     [
         layers.Dense(2, activation='relu', name='layer1'),
@@ -32,14 +37,14 @@ model = keras.Sequential(
         layers.Dense(4, name='layer3')
     ]
 )
-# 对测试样本调用模型
+# 对示例样本调用模型
 x = tf.ones((3, 3))
 y = model(x)
 ```
 
 等价于下面的函数式定义：
 
-```py
+```python
 # Create 3 layers
 layer1 = layers.Dense(2, activation="relu", name="layer1")
 layer2 = layers.Dense(3, activation="relu", name="layer2")
@@ -50,7 +55,7 @@ x = tf.ones((3, 3))
 y = layer3(layer2(layer1(x)))
 ```
 
-在下面的情形不适合用 `Sequential` 模型：
+以下情形不适合用 `Sequential` 模型：
 
 - 有多个输入或多个输出；
 - 任意一个网络层有多个输入或多个输出；
@@ -59,9 +64,9 @@ y = layer3(layer2(layer1(x)))
 
 ## 创建 Sequential 模型
 
-可以直接将 layer 列表传递给 `Sequential` 构造函数常见 `Sequential` 模型：
+可以直接将 layer 列表传递给 `Sequential` 的构造函数创建 `Sequential` 模型：
 
-```py
+```python
 model = keras.Sequential(
     [
         layers.Dense(2, activation="relu"),
@@ -71,7 +76,7 @@ model = keras.Sequential(
 )
 ```
 
-可以通过 `layers` 属性访问 layers：
+可以通过 `layers` 属性访问网络层：
 
 ```py
 >>> model.layers
@@ -80,16 +85,16 @@ model = keras.Sequential(
  <keras.layers.core.dense.Dense at 0x1e0d4f2aa30>]
 ```
 
-也可以依次调用 `add()` 创建：
+也可以通过调用 `add()` 创建序列模型：
 
-```py
+```python
 model = keras.Sequential()
 model.add(layers.Dense(2, activation="relu"))
 model.add(layers.Dense(3, activation="relu"))
 model.add(layers.Dense(4))
 ```
 
-也可以使用 `pop()` 方法移除 layer：
+可以使用 `pop()` 方法移除 layer：
 
 ```py
 >>> model.pop()
@@ -432,4 +437,4 @@ model.fit(...)
 
 ## 参考
 
-- https://tensorflow.google.cn/guide/keras/sequential_model#creating_a_sequential_model
+- https://www.tensorflow.org/guide/keras/sequential_model

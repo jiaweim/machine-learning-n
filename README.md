@@ -8,6 +8,7 @@
 
 - http://neuralnetworksanddeeplearning.com/
 - [EDUCBA 机器学习教程](https://www.educba.com/data-science/data-science-tutorials/machine-learning-tutorial/)
+- https://e2eml.school/blog.html
 
 ## 网络课程
 

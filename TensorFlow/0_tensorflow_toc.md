@@ -4,6 +4,11 @@
 
 - [TensorFlow 基础](basic_1.md)
 - [Tensor](basic_tensor.md)
+- [Variable](basic_variable.md)
+
+## keras
+
+- [序列模型](keras/keras_sequential_model.md)
 
 ## 学习笔记
 
