@@ -5,6 +5,7 @@
 - [TensorFlow 基础](basic_1.md)
 - [Tensor](basic_tensor.md)
 - [Variable](basic_variable.md)
+- [自动微分和梯度](basic_autodiff.md)
 
 ## keras
 
