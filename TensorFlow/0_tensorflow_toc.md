@@ -11,6 +11,10 @@
 
 - [序列模型](keras/keras_sequential_model.md)
 
+## 性能
+
+- [tf.function 性能](performance_function.md)
+
 ## 学习笔记
 
 - [即时执行](eagar.md)
