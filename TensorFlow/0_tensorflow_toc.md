@@ -30,6 +30,9 @@
 
 ## API
 
+### tf
+
+- [tf.linspace](api/tf/tf.linspace.md)
 - [tf.math](api/tf.math.md)
 - [tf.nn](api_tf.nn.md)
 - [tf.keras.losses](api_tf.keras.losses.md)
