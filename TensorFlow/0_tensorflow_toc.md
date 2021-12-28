@@ -1,6 +1,6 @@
 # TensorFlow
 
-## 基础
+## 基础指南
 
 - [TensorFlow 基础](basic_1.md)
 - [Tensor](basic_tensor.md)
