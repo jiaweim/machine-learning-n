@@ -1,5 +1,13 @@
 # TensorFlow
 
+## 教程
+
+- [TensorFlow 2 快速入门（初学者）](tutorials/quickstart_beginner.md)
+
+### Text
+
+
+
 ## 基础指南
 
 - [TensorFlow 基础](basic_1.md)

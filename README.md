@@ -20,6 +20,7 @@
 - [Convolutional Neural Networks](https://www.coursera.org/learn/convolutional-neural-networks?specialization=deep-learning)
 - [Sequence Models](https://www.coursera.org/learn/nlp-sequence-models?specialization=deep-learning)
 - [Convolutional Neutral Networks for Visual Recognition, CS231n](http://cs231n.stanford.edu/)
+- [机器学习-李宏毅（台湾大学）](https://speech.ee.ntu.edu.tw/~hylee/ml/2021-spring.html)
 
 ## 题库
 
