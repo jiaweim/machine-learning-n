@@ -38,6 +38,8 @@
 
 ## API
 
+- [tf](api/tf/tf.md)
+
 ### tf
 
 - [tf.linspace](api/tf/tf.linspace.md)

@@ -4,7 +4,7 @@
   - [简介](#简介)
   - [导入 TensorFlow](#导入-tensorflow)
   - [载入数据集](#载入数据集)
-  - [构建机器学习模型](#构建机器学习模型)
+  - [构建神经网络模型](#构建神经网络模型)
   - [训练和评估模型](#训练和评估模型)
   - [参考](#参考)
 
@@ -14,10 +14,10 @@
 
 ## 简介
 
-这篇入门教程，介绍使用 Keras 执行如下操作：
+这篇入门教程，介绍如何使用 Keras 执行如下操作：
 
-1. 载入预先构建的数据集；
-2. 建立一个图像分类的神经网络机器学习模型；
+1. 载入数据集；
+2. 建立一个图像分类的神经网络模型；
 3. 训练神经网络；
 4. 评估模型的准确性。
 
@@ -37,7 +37,7 @@ TensorFlow version:  2.7.0
 
 ## 载入数据集
 
-载入 MNIST 数据集，将数据从整数转换为浮点数：
+载入 MNIST 数据集，并将数据从整型转换为浮点类型：
 
 ```python
 mnist = tf.keras.datasets.mnist
@@ -46,7 +46,7 @@ mnist = tf.keras.datasets.mnist
 x_train, x_test = x_train / 255.0, x_test / 255.0
 ```
 
-## 构建机器学习模型
+## 构建神经网络模型
 
 通过叠加层建立 `tf.keras.Sequential` 模型：
 
@@ -59,7 +59,7 @@ model = tf.keras.models.Sequential([
 ])
 ```
 
-对每个示例，模型都返回一个 logit 向量，每个类别对应一个值。例如：
+对每个示例，该模型都返回一个 logit 向量，每个类别对应一个值。每个 TensorFlow 模型，都可以当做一个可调用函数，接受输入参数，返回预测值。例如：
 
 ```python
 predictions = model(x_train[:1]).numpy()
@@ -72,7 +72,7 @@ array([[ 0.27800095, -0.18243524, -0.32130682, -0.0138693 , -0.05083328,
       dtype=float32)
 ```
 
-`tf.nn.softmax` 函数可以将 logit 值转换为概率值：
+可以使用 `tf.nn.softmax` 函数可以将上面的 logit 值转换为概率值，这样结果更直观：
 
 ```python
 tf.nn.softmax(predictions).numpy()
@@ -84,17 +84,17 @@ array([[0.13980936, 0.08822086, 0.07678213, 0.10441878, 0.1006295 ,
       dtype=float32)
 ```
 
-> 注意：可以将 `tf.nn.softmax` 函数作为神经网络最后一层的激活函数。这可以使模型直接输出可解释的值，但不鼓励使用这种方法，因为 softmax 输出无法为所有模型提供精确且数值稳定的损失计算。
+> 注意：虽然可以把 `tf.nn.softmax` 函数作为神经网络最后一层的激活函数，这样模型就可以直接输出便于理解的概率值，但不鼓励使用这种方法，因为 softmax 的输出无法为所有模型提供精确且数值稳定的损失计算。
 
-使用 `losses.SparseCategoricalCrossentropy` 定义训练所需损失函数：
+使用 `losses.SparseCategoricalCrossentropy` 定义损失函数：
 
 ```python
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 ```
 
-该损失值等于真实类别概率的负对数，如果模型预测正确，损失值为 0。
+这个损失函数计算得到的损失值是真实类别概率的负对数，如果模型预测正确，损失值为 0。
 
-未经训练的模型给出的概率接近随机（每个类的概率为 1/10），因此初始损失应该接近于 $-tf.math.log(1/10) ~= 2.3$。
+未经训练的模型给出的概率接近随机值（每个类的概率为 1/10），因此初始损失应该接近于 $-tf.math.log(1/10) ~= 2.3$。
 
 ```python
 loss_fn(y_train[:1], predictions).numpy()
@@ -104,7 +104,11 @@ loss_fn(y_train[:1], predictions).numpy()
 2.2223506
 ```
 
-在训练之前，使用 Keras 的 `Model.compile` 配置和编译模型。将 `optimizer` 设置为 `adam`，将 `loss` 设置为前面定义的 `loss_fn`，将评估模型的度量 `metrics` 参数设置为 `accuracy`。
+在训练之前，使用 Keras 的 `Model.compile` 配置和编译模型：
+
+- 将 `optimizer` 设置为 `adam`；
+- 将 `loss` 设置为前面定义的 `loss_fn`；
+- 将评估模型的度量 `metrics` 参数设置为 `accuracy`。
 
 ```python
 model.compile(optimizer='adam',
@@ -114,7 +118,7 @@ model.compile(optimizer='adam',
 
 ## 训练和评估模型
 
-使用 `Model.fit` 调整模型参数，最小化损失：
+使用 `Model.fit` 调整模型参数，最小化损失值：
 
 ```python
 model.fit(x_train, y_train, epochs=5)
@@ -134,7 +138,7 @@ Epoch 5/5
 <keras.callbacks.History at 0x1a831c5fa00>
 ```
 
-`Model.evaluate` 方法用于检查模型性能，通常对验证集或测试集数据。
+`Model.evaluate` 方法用于评估模型性能，通常使用验证集或测试集评估模型：
 
 ```python
 model.evaluate(x_test,  y_test, verbose=2)
@@ -145,9 +149,9 @@ model.evaluate(x_test,  y_test, verbose=2)
 [0.0716572180390358, 0.9775000214576721]
 ```
 
-分类器在这个数据集上的准确率接近 98%。
+可以看出，分类器在这个数据集上的准确率接近 98%。
 
-如果你希望模型返回一个概率，可以把训练好的模型包装起来，额外加一个 softmax：
+如果你希望模型返回一个概率值，可以把上面训练好的模型和 softmax 函数组装到一起：
 
 ```python
 probability_model = tf.keras.Sequential([
