@@ -189,7 +189,7 @@
 |is_tensor(...)|Checks whether x is a TF-native type that can be passed to many TF ops.|
 |less(...)|Returns the truth value of (x < y) element-wise.|
 |less_equal(...)|Returns the truth value of (x <= y) element-wise.|
-|linspace(...)|Generates evenly-spaced values in an interval along a given axis.|
+|[linspace(...)](tf.linspace.md)|Generates evenly-spaced values in an interval along a given axis.|
 |load_library(...)|Loads a TensorFlow plugin.|
 |load_op_library(...)|Loads a TensorFlow plugin, containing custom ops and kernels.|
 |logical_and(...)|Returns the truth value of x AND y element-wise.|
