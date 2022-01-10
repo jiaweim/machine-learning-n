@@ -1,0 +1,132 @@
+# RNN with Keras
+
+- [RNN with Keras](#rnn-with-keras)
+  - [简介](#简介)
+  - [配置](#配置)
+  - [内置 RNN 层](#内置-rnn-层)
+  - [输出和状态](#输出和状态)
+  - [参考](#参考)
+
+2022-01-07, 16:27
+***
+
+## 简介
+
+循环神经网络（Recurrent neural network, RNN）是一类擅长对时间序列或自然语言等序列数据建模的神经网络。
+
+理论上，RNN layer 使用 `for` 循环来迭代序列的 timesteps，同时维护一个内部状态，该状态对看到的 timesteps 信息进行编码。
+
+Keras RNN API 的特点是：
+
+- 使用简单：内置的 `keras.layers.RNN`, `keras.layers.LSTM` 和 `keras.layers.GRU` 可用于快速构建 RNN 模型；
+- 自定义简单：可以自定义 RNN cell layer（`for` 循环内部），并将其与通用的 `keras.layers.RNN` layer (`for` 循环本身)一起使用。这样可以快速构建 RNN 模型。
+
+## 配置
+
+```python
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+```
+
+## 内置 RNN 层
+
+Keras 有三个内置的 RNN 层：
+
+1. `keras.layers.SimpleRNN`，全连接 RNN，上一个 timestep 的输出送到下一个 timestep；
+2. `keras.layers.GRU`
+3. `keras.layers.LSTM`
+
+在 2015 年初，Keras 推出了第一个可重用的 LSTM 和 GRU 的开源 Python 实现。
+
+下面是一个简单的 `Sequential` 模型，该模型处理整数序列，将每个整数嵌入到 64 维向量中，然后使用 LSTM 层处理向量序列：
+
+```python
+model = keras.Sequential()
+# Add an Embedding layer expecting input vocab of size 1000, and
+# output embedding dimension of size 64.
+model.add(layers.Embedding(input_dim=1000, output_dim=64))
+
+# Add a LSTM layer with 128 internal units.
+model.add(layers.LSTM(128))
+
+# Add a Dense layer with 10 units.
+model.add(layers.Dense(10))
+
+model.summary()
+```
+
+```sh
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+embedding (Embedding)        (None, None, 64)          64000     
+_________________________________________________________________
+lstm (LSTM)                  (None, 128)               98816     
+_________________________________________________________________
+dense (Dense)                (None, 10)                1290      
+=================================================================
+Total params: 164,106
+Trainable params: 164,106
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+内置 RNN 支持许多有用特性：
+
+- 通过 `dropout` 和 `recurrent_dropout` 参数提供循环 dropout 功能；
+- 通过 `go_backwards` 参数提供反向处理输入序列的功能；
+- 通过 `unroll` 参数展开循环，在 CPU 上处理短序列时可以大大提高速度。
+
+## 输出和状态
+
+RNN 层对每个样本默认输出一个向量，对应最后一个 timestep 的输出。输出 shape 为 `(batch_size, units)`，其中 `units` 和 layer 构造函数的 `units` 参数一致。
+
+如果设置 `return_sequences=True`，RNN layer 可以返回样本的整体输出序列，即每个 timestep 对应一个向量。此时输出 shape 位 `(batch_sizee, timesteps, units)`。
+
+```python
+model = keras.Sequential()
+model.add(layers.Embedding(input_dim=1000, output_dim=64))
+
+# The output of GRU will be a 3D tensor of shape (batch_size, timesteps, 256)
+model.add(layers.GRU(256, return_sequences=True))
+
+# The output of SimpleRNN will be a 2D tensor of shape (batch_size, 128)
+model.add(layers.SimpleRNN(128))
+
+model.add(layers.Dense(10))
+
+model.summary()
+```
+
+```sh
+Model: "sequential_1"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+embedding_1 (Embedding)      (None, None, 64)          64000     
+_________________________________________________________________
+gru (GRU)                    (None, None, 256)         247296    
+_________________________________________________________________
+simple_rnn (SimpleRNN)       (None, 128)               49280     
+_________________________________________________________________
+dense_1 (Dense)              (None, 10)                1290      
+=================================================================
+Total params: 361,866
+Trainable params: 361,866
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+另外，RNN layer 还可以返回其内部的最终状态。返回的内部状态可用于恢复 RNN 状态，或用来初始化另一个 RNN。该设置通常用在 encoder-decoder sequence-to-sequence 模型，其中 encoder 的最终状态用于 decoder 的初始状态。
+
+将 `return_state` 设置为 `True` 使 RNN 返回其内部状态。注意 LSTM 有 2 个状态张量，但是 `GRU` 只有一个。
+
+
+
+
+## 参考
+
+- https://www.tensorflow.org/guide/keras/rnn

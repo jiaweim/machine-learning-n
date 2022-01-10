@@ -4,8 +4,9 @@
   - [教程](#教程)
     - [Keras 基础](#keras-基础)
     - [Text](#text)
-  - [基础指南](#基础指南)
-  - [keras](#keras)
+  - [指南](#指南)
+    - [TensorFlow 基础](#tensorflow-基础)
+    - [keras](#keras)
   - [保存模型](#保存模型)
   - [性能](#性能)
   - [学习笔记](#学习笔记)
@@ -18,26 +19,28 @@
 - [TensorFlow 2 快速入门（初学者）](tutorials/quickstart_beginner.md)
 - [TensorFlow 2 快速入门（专家）](tutorials/quickstart_experts.md)
 
+
 ### Keras 基础
 
 - [基本图像分类：Fashion MNIST 分类](tutorials/keras_begin/basic_image_classification.md)
+- [基本文本分类](tutorials/keras_begin/basic_text_classification.md)
 - [过拟合和欠拟合](tutorials/keras_begin/overfit_underfit.md)
 
 ### Text
 
+## 指南
 
+### TensorFlow 基础
 
-## 基础指南
+- [概述](guide/basic/basic_1.md)
+- [Tensor](guide/basic/basic_tensor.md)
+- [Variable](guide/basic/basic_variable.md)
+- [自动微分和梯度](guide/basic/basic_autodiff.md)
+- [graph 执行](guide/basic/basic_graph.md)
+- [模块、模型和层](guide/basic/basic_module.md)
+- [训练循环基础](guide/basic/basic_training_loop.md)
 
-- [TensorFlow 基础](basic_1.md)
-- [Tensor](basic_tensor.md)
-- [Variable](basic_variable.md)
-- [自动微分和梯度](basic_autodiff.md)
-- [graph 执行](basic_graph.md)
-- [模块、模型和层](basic_module.md)
-- [训练循环基础](basic_training_loop.md)
-
-## keras
+### keras
 
 - [序列模型](keras/keras_sequential_model.md)
 
