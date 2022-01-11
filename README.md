@@ -6,9 +6,12 @@
 
 ## 深度学习笔记
 
-- [门控循环单元（GRU）](RNN/rnn_gru.md)
-- [长短期记忆网络（LSTM）](RNN/rnn_LSTM.md)
-- [深度循环神经网络](RNN/rnn_deep.md)
+- [循环神经网络](RNN/rnn.md)
+  - [门控循环单元（GRU）](RNN/rnn_gru.md)
+  - [长短期记忆网络（LSTM）](RNN/rnn_LSTM.md)
+  - [深度循环神经网络](RNN/rnn_deep.md)
+  - [双向 RNN](RNN/rnn_bidirection.md)
+  - [编码器-解码器](RNN/encoder-decoder.md)
 
 ## 深度学习教程
 
