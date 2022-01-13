@@ -14,12 +14,12 @@
 
 循环神经网络（Recurrent neural network, RNN）是一类擅长对时间序列或自然语言等序列数据建模的神经网络。
 
-理论上，RNN layer 使用 `for` 循环来迭代序列的 timesteps，同时维护一个内部状态，该状态对看到的 timesteps 信息进行编码。
+RNN layer 使用 `for` 循环来迭代序列的时间步，同时维护一个内部状态，该状态对看过的时间步信息进行编码。
 
 Keras RNN API 的特点是：
 
 - 使用简单：内置的 `keras.layers.RNN`, `keras.layers.LSTM` 和 `keras.layers.GRU` 可用于快速构建 RNN 模型；
-- 自定义简单：可以自定义 RNN cell layer（`for` 循环内部），并将其与通用的 `keras.layers.RNN` layer (`for` 循环本身)一起使用。这样可以快速构建 RNN 模型。
+- 自定义简单：可以自定义 RNN cell layer（`for` 循环内部），并将其与通用的 `keras.layers.RNN` layer (`for` 循环本身)一起使用。这样可以快速构建自定义 RNN 模型。
 
 ## 配置
 
@@ -34,13 +34,13 @@ from tensorflow.keras import layers
 
 Keras 有三个内置的 RNN 层：
 
-1. `keras.layers.SimpleRNN`，全连接 RNN，上一个 timestep 的输出送到下一个 timestep；
+1. `keras.layers.SimpleRNN`，全连接 RNN，上一个时间步的输出送到下一个时间步；
 2. `keras.layers.GRU`
 3. `keras.layers.LSTM`
 
 在 2015 年初，Keras 推出了第一个可重用的 LSTM 和 GRU 的开源 Python 实现。
 
-下面是一个简单的 `Sequential` 模型，该模型处理整数序列，将每个整数嵌入到 64 维向量中，然后使用 LSTM 层处理向量序列：
+下面是一个简单的 `Sequential` 模型，该模型处理整数序列，将每个整数嵌入到 64 维向量中，然后在 `LSTM` 层中处理：
 
 ```python
 model = keras.Sequential()
@@ -74,7 +74,7 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-内置 RNN 支持许多有用特性：
+内置 RNN 支持许多特性：
 
 - 通过 `dropout` 和 `recurrent_dropout` 参数提供循环 dropout 功能；
 - 通过 `go_backwards` 参数提供反向处理输入序列的功能；
@@ -82,9 +82,9 @@ _________________________________________________________________
 
 ## 输出和状态
 
-RNN 层对每个样本默认输出一个向量，对应最后一个 timestep 的输出。输出 shape 为 `(batch_size, units)`，其中 `units` 和 layer 构造函数的 `units` 参数一致。
+RNN 层对每个样本默认输出一个向量，对应最后一个时间步 RNN cell 的输出。输出 shape 为 `(batch_size, units)`，其中 `units` 和 RNN 层构造函数的 `units` 参数一致。
 
-如果设置 `return_sequences=True`，RNN layer 可以返回样本的整体输出序列，即每个 timestep 对应一个向量。此时输出 shape 位 `(batch_sizee, timesteps, units)`。
+如果设置 `return_sequences=True`，RNN 层可以返回整个输出序列，即每个时间步对应一个向量。此时输出 shape 为 `(batch_size, timesteps, units)`。
 
 ```python
 model = keras.Sequential()
@@ -120,11 +120,11 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-另外，RNN layer 还可以返回其内部的最终状态。返回的内部状态可用于恢复 RNN 状态，或用来初始化另一个 RNN。该设置通常用在 encoder-decoder sequence-to-sequence 模型，其中 encoder 的最终状态用于 decoder 的初始状态。
+另外，RNN 层还可以返回其内部的最终状态。返回的内部状态可用于恢复 RNN 状态，也可以用来初始化另一个 RNN。该设置通常用在编码器-解码器模型，其中 encoder 的最终状态用于 decoder 的初始状态。
 
-将 `return_state` 设置为 `True` 使 RNN 返回其内部状态。注意 LSTM 有 2 个状态张量，但是 `GRU` 只有一个。
+将 `return_state` 设置为 `True` 使 RNN 返回其内部状态。注意 LSTM 有 2 个状态张量，`GRU` 只有一个。
 
-
+使用 `initial_state` 配置 RNN 层的初始状态。
 
 
 ## 参考

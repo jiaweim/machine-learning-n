@@ -43,6 +43,7 @@
 ### keras
 
 - [序列模型](keras/keras_sequential_model.md)
+- [RNN with keras](guide/keras/keras_rnn.md)
 
 ## 保存模型
 
