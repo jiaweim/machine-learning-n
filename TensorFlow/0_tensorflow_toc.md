@@ -7,6 +7,7 @@
   - [指南](#指南)
     - [TensorFlow 基础](#tensorflow-基础)
     - [keras](#keras)
+    - [数据输入管道](#数据输入管道)
   - [保存模型](#保存模型)
   - [性能](#性能)
   - [学习笔记](#学习笔记)
@@ -44,6 +45,12 @@
 
 - [序列模型](keras/keras_sequential_model.md)
 - [RNN with keras](guide/keras/keras_rnn.md)
+
+### 数据输入管道
+
+- [构建 TensorFlow 数据输入管道](guide/data/tf.data.md)
+- [TensorFlow 数据输入管道性能优化](guide/data/data_performance.md)
+- [使用 TF Profiler 分析数据输入管道性能](guide/data/analyze_performance.md)
 
 ## 保存模型
 

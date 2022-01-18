@@ -3,16 +3,18 @@
 - [ImageDataGenerator](#imagedatagenerator)
   - [简介](#简介)
   - [参数](#参数)
+    - [width_shift_range](#width_shift_range)
+    - [fill_mode](#fill_mode)
   - [方法](#方法)
     - [flow_from_directory](#flow_from_directory)
   - [参考](#参考)
 
-2021-12-14, 13:41
+2022-01-15, 11:03
 ***
 
 ## 简介
 
-通过**实时数据增强**生成批量的图像张量数据。
+通过**数据增强**生成批量的图像张量数据。
 
 ```python
 tf.keras.preprocessing.image.ImageDataGenerator(
@@ -38,17 +40,70 @@ Boolean，是否将每个样本的均值设置为 0.
 
 - `featurewise_std_normalization`
 
-Boolean，是否将输入除以 std，feature-wise。
+Boolean，是否将输入除以数据集的标准偏差（std），feature-wise。
 
 - `samplewise_std_normalization`
 
-- `rotation_range`
-
-Int, 随机旋转的最大角度。
+Boolean，对每个输入，除以其 std。
 
 - `rescale`
 
-缩放因子。默认为 `None`，如果为 `None` 或 0，不执行缩放，否则对输入值乘以 `rescale`。
+缩放因子，默认 `None`。如果设置为 `None` 或 0，无缩放，否则在应用其它转换后，所有值乘以 `rescale` 缩放因子。
+
+- `rotation_range`
+
+Int 类型，随机旋转的最大角度值。例如 `rotation_range=40` 表示随机旋转的最大角度为 40°。
+
+- `height_shift_range`
+
+同 `width_shift_range`。
+
+- `shear_range`
+
+Float。剪切强度（逆时针方向的剪切角，以度表示）
+
+- `zoom_range`
+
+Float 或 [lower, upper]，指定随机缩放的范围。
+
+如果是 Float 类型，此时范围为 [1-zoom_range, 1+zoom_range]。
+
+例如，`zoom_range=0.2` 表示随机缩放的比例最大为 20%.
+
+- `horizontal_flip`
+
+Boolean，随机水平翻转。
+
+- `vertical_flip`
+
+Boolean，随机垂直翻转。
+
+### width_shift_range
+
+水平方向平移。
+
+支持 Float, 1D 数组或 int 类型：
+
+- float: 如果 <1，则为总宽度的比例值；如果 >=1，则为 pixels 值；
+- 1-D 数组：数组中的随机元素；
+- int: 整数指定像素值区间为 `(-width_shift_range, +width_shift_range)`。
+
+如果 `width_shift_range=2`，则可选值包括整数 [-1, 0, +1]，和使用 1D 数组 `width_shift_range=[-1, 0, +1]` 等价；
+
+如果 `width_shift_range=1.0`，采用浮点数，此时区间为 $[-1.0, +1.0)$。
+
+例如，`width_shift_range=0.2` 表示随机水平平移最大距离为宽度的 20%。
+
+### fill_mode
+
+常量 {"constant", "nearest", "reflect" or "wrap"} 中的一个。默认 'nearest'。输入边界外的点根据该模式进行填充：
+
+- 'constant'， kkkkkkkk|abcd|kkkkkkkk (cval=k)，边界外填充常量；
+- 'nearest'，aaaaaaaa|abcd|dddddddd，边界外的点用最近的点填充；
+- 'reflect'，abcddcba|abcd|dcbaabcd，以映射翻转的形式填充；
+- 'wrap'， abcdabcd|abcd|abcdabcd
+
+`cval`：Float or Int。当 `fill_mode = "constant"` 用来指定填充值。
 
 ## 方法
 
@@ -81,7 +136,7 @@ string, 目标目录。每个类别对应一个子目录。每个子目录中的
 
 可选的子目录类别列表，如 `['dogs', 'cats']`。默认 `None`。如果不提供 `classes`，则默认从 `directory` 下的子目录结构推断，每个子目录视为一个类，类的顺序（映射到标签索引）按照 alphanumeric 顺序。类名到类索引的 dict 可以通过 `class_indices` 属性查询。
 
-- `class_mode`
+**`class_mode`**
 
 可选值："categorical", "binary", "sparse", "input" 或 `None`。默认 "categorical"。设置返回的标签数组类型：
 
@@ -91,10 +146,10 @@ string, 目标目录。每个类别对应一个子目录。每个子目录中的
 - "input" 和输入图像相同的图像，主要用于 autoencoder；
 - `None`，不返回标签，生成器只生成图像数据 batch，和 `model.predict()` 一起使用很有用。
 
-- `batch_size`
+**`batch_size`**
 
 批量数据大小，默认 32.
 
 ## 参考
 
-- https://tensorflow.google.cn/api_docs/python/tf/keras/preprocessing/image/ImageDataGenerator?hl=en#args
+- https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/ImageDataGenerator
