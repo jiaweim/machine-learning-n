@@ -2,6 +2,11 @@
 
 - [tf.data.Dataset](#tfdatadataset)
   - [方法](#方法)
+    - [batch](#batch)
+    - [cache](#cache)
+    - [map](#map)
+    - [prefetch](#prefetch)
+    - [shuffle](#shuffle)
     - [take](#take)
   - [参考](#参考)
 
@@ -9,6 +14,47 @@
 ***
 
 ## 方法
+
+### batch
+
+```python
+batch(
+    batch_size, drop_remainder=False, num_parallel_calls=None, deterministic=None,
+    name=None
+)
+```
+
+### cache
+
+```python
+cache(
+    filename='', name=None
+)
+```
+
+### map
+
+```python
+map(
+    map_func, num_parallel_calls=None, deterministic=None, name=None
+)
+```
+
+### prefetch
+
+```python
+prefetch(
+    buffer_size, name=None
+)
+```
+
+### shuffle
+
+```python
+shuffle(
+    buffer_size, seed=None, reshuffle_each_iteration=None, name=None
+)
+```
 
 ### take
 
