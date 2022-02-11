@@ -5,6 +5,8 @@
   - [配置](#配置)
   - [内置 RNN 层](#内置-rnn-层)
   - [输出和状态](#输出和状态)
+  - [RNN layers and RNN cells](#rnn-layers-and-rnn-cells)
+  - [cross-batch statefullness](#cross-batch-statefullness)
   - [参考](#参考)
 
 2022-01-07, 16:27
@@ -14,7 +16,9 @@
 
 循环神经网络（Recurrent neural network, RNN）是一类擅长对时间序列或自然语言等序列数据建模的神经网络。
 
-RNN layer 使用 `for` 循环来迭代序列的时间步，同时维护一个内部状态，该状态对看过的时间步信息进行编码。
+RNN layer 使用 `for` 循环来迭代序列的时间步，同时维护一个内部状态（internal state），该状态对看过的时间步信息进行编码。
+
+> internal state 不是 weight，而是记录序列、时间步等信息。
 
 Keras RNN API 的特点是：
 
@@ -125,6 +129,29 @@ _________________________________________________________________
 将 `return_state` 设置为 `True` 使 RNN 返回其内部状态。注意 LSTM 有 2 个状态张量，`GRU` 只有一个。
 
 使用 `initial_state` 配置 RNN 层的初始状态。
+
+## RNN layers and RNN cells
+
+除了内置的 RNN layers，RNN API 还提供了 cell-level API。与处理批量输出序列的 RNN layers 不同，RNN cell 只处理单个时间步。
+
+cell 是 RNN layer 的 `for` 循环内部部分。将 cell 包裹在 `keras.layers.RNN` layer 中，就获得能够处理批量序列的 layer，例如 `RNN(LSTMCell(10))`。
+
+在数学上，`RNN(LSTMCell(10))` 与 `LSTM(10)` 产生相同的结果。实际上，在 TF v1.x 中，`LSTM` layer 的实现就是用 `RNN` layer 包裹 `LSTMCell` 实现的。不过，实现内置的 `GRU` 和 `LSTM` layer 可以使用 CuDNN，从而提高性能。
+
+有三个内置的 RNN cell，对三个 RNN layer 对应：
+
+- `keras.layers.SimpleRNNCell`
+- `keras.layers.GRUCell`
+- `keras.layers.LSTMCell`
+
+cell 结合 `keras.layers.RNN` 类，可以很容易实现自定义 RNN 框架。
+
+## cross-batch statefullness
+
+在处理非常长的序列时，可能需要使用 cross-batch statefullness 模式。
+
+通常情况下，RNN layer 的内部状态会在每次看到一个新的批次时重置（即该层看到的每个样本被认为是独立于过去的）。在处理给定的样本时，该 layer 只维护一个状态。
+
 
 
 ## 参考

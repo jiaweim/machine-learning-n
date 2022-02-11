@@ -47,17 +47,17 @@ import tensorflow_datasets as tfds
 
 应用如下转换：
 
-- [tf.data.Dataset.map](../../api/tf.data/Dataset.md#map)：TFDS 提供的图像类型为 `tf.uint8`，而模型需要 `tf.float32` 类型，因此，需要对图像进行归一化处理；
-- [tf.data.Dataset.cache](../../api/tf.data/Dataset.md#cache)：在 shuffle 前缓存数据集可以提高性能。
+- [tf.data.Dataset.map](../../api/tf/data/Dataset.md#map)：TFDS 提供的图像类型为 `tf.uint8`，而模型需要 `tf.float32` 类型，因此，需要对图像进行归一化处理；
+- [tf.data.Dataset.cache](../../api/tf/data/Dataset.md#cache)：在 shuffle 前缓存数据集可以提高性能。
 
 > ⚡ 应该在缓存之后应用随机转换。
 
-- [tf.data.Dataset.shuffle](../../api/tf.data/Dataset.md#shuffle)：为了实现真正的随机，应该将 shuffer buffer 设置为数据集大小。
+- [tf.data.Dataset.shuffle](../../api/tf/data/Dataset.md#shuffle)：为了实现真正的随机，应该将 shuffer buffer 设置为数据集大小。
 
 > ⚡ 对内存无法容纳的大型数据集，如果系统允许，可以设置 `buffer_size=1000`。
 
-- [tf.data.Dataset.batch](../../api/tf.data/Dataset.md#batch)：每个 epoch对数据集 shuffle 之后，再分批，保证每次训练的 batch 都不同。
-- [tf.data.Dataset.prefetch](../../api/tf.data/Dataset.md#prefetch)：推荐通过 prefetch 来结束管道流，可以提高性能。
+- [tf.data.Dataset.batch](../../api/tf/data/Dataset.md#batch)：每个 epoch对数据集 shuffle 之后，再分批，保证每次训练的 batch 都不同。
+- [tf.data.Dataset.prefetch](../../api/tf/data/Dataset.md#prefetch)：推荐通过 prefetch 来结束管道流，可以提高性能。
 
 ```python
 def normalize_img(image, label):

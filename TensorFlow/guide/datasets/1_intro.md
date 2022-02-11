@@ -170,7 +170,7 @@ for image, label in ds:  # example is (image, label)
 `tfds.as_numpy` 执行如下转换：
 
 - [tf.Tensor](../../api/tf/Tensor.md) -> `np.array`
-- [tf.data.Dataset](../../api/tf.data/Dataset.md) -> `Iterator[Tree[np.array]]`，`Tree` 可以是任意嵌套的 `dict`, `tuple`
+- [tf.data.Dataset](../../api/tf/data/Dataset.md) -> `Iterator[Tree[np.array]]`，`Tree` 可以是任意嵌套的 `dict`, `tuple`
 
 ```python
 ds = tfds.load('mnist', split='train', as_supervised=True)

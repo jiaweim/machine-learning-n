@@ -79,4 +79,4 @@
 
 ## 参考
 
-- https://tensorflow.google.cn/tutorials
+- https://www.tensorflow.org/
