@@ -42,7 +42,7 @@ x = tf.ones((3, 3))
 y = model(x)
 ```
 
-与下面的函数式定义等价：
+与下面的函数定义等价：
 
 ```python
 # Create 3 layers
