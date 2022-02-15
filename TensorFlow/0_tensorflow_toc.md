@@ -29,6 +29,8 @@
 
 ### Text
 
+- [使用 RNN 生成文本](tutorials/text/text_generation.md)
+
 ## 指南
 
 ### TensorFlow 基础
@@ -45,6 +47,7 @@
 
 - [序列模型](keras/keras_sequential_model.md)
 - [RNN with keras](guide/keras/keras_rnn.md)
+- [Masking and padding with Keras](guide/keras/masking_and_padding.md)
 
 ### 数据输入管道
 

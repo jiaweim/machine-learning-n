@@ -13,7 +13,7 @@
 
 ## 简介
 
-`Embedding` 类如下：
+嵌入层 `Embedding` 类如下：
 
 ```python
 tf.keras.layers.Embedding(
@@ -103,3 +103,4 @@ with tf.device('cpu:0'):
 ## 参考
 
 - https://keras.io/api/layers/core_layers/embedding/
+- https://www.tensorflow.org/api_docs/python/tf/keras/layers/Embedding

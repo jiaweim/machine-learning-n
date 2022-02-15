@@ -212,7 +212,7 @@
 |not_equal(...)|Returns the truth value of (x != y) element-wise.|
 |numpy_function(...)|Wraps a python function and uses it as a TensorFlow op.|
 |one_hot(...)|Returns a one-hot tensor.|
-|ones(...)|Creates a tensor with all elements set to one (1).|
+|[ones(...)](ones.md)|Creates a tensor with all elements set to one (1).|
 |ones_like(...)|Creates a tensor of all ones that has the same shape as the input.|
 |pad(...)|Pads a tensor.|
 |parallel_stack(...)|Stacks a list of rank-R tensors into one rank-(R+1) tensor in parallel.|

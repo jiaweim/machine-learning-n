@@ -24,12 +24,12 @@ from tensorflow.keras import layers
 
 ## 何时使用序列模型
 
-序列（`Sequential`）模型适合于普通的层堆栈，每一层有且只有一个输入张量和一个输出张量。
+序列（`Sequential`）模型适合于简单的层堆栈，每一层只有一个输入张量和一个输出张量。
 
 从语法上来说，下面的序列模型：
 
 ```python
-# 3 层 Sequential 模型
+# 定义 3 层 Sequential 模型
 model = keras.Sequential(
     [
         layers.Dense(2, activation='relu', name='layer1'),
@@ -42,7 +42,7 @@ x = tf.ones((3, 3))
 y = model(x)
 ```
 
-等价于下面的函数式定义：
+与下面的函数式定义等价：
 
 ```python
 # Create 3 layers

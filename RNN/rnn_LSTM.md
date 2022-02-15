@@ -23,6 +23,30 @@ LSTM 记忆元结构如下：
 
 ![](images/2022-01-10-13-14-38.png)
 
+$$I_t=\sigma(X_t W_{xi}+H_{t-1}W_{hi}+b_i)$$
+
+$$F_t=\sigma(X_tW_{xf}+H_{t-1}W_{hf}+b_f)$$
+
+$$O_t=\sigma(X_tW_{xo}+H_{t-1}W_{ho}+b_o)$$
+
+$$\tilde{C}_t=tanh(X_tW_{xc}+H_{t-1}W_{hc}+b_c)$$
+
+$$C_t=F_t\bigodot C_{t-1}+I_t\bigodot \tilde{C}_t$$
+
+$$H_t=O_t\bigodot tanh(C_t)$$
+
+说明：
+
+- 批量大小为 $n$，输入数为 $d$，即输入 $X_t \isin \Reals^{n\times d}$
+- 假设有 $h$ 个隐藏单元
+- $W_{xi}, W_{xf}, W_{xo}\isin \Reals^{d\times h}$ 为权重参数
+- 前一时间步的隐状态为 $H_{t-1}\isin \Reals^{n\times h}$
+- $W_{hi}, W_{hf}, W_{ho} \isin \Reals^{h\times h}$ 是权重参数
+- $b_i, b_f, b_o \isin \Reals^{1\times h}$ 是偏置参数
+- 输入门 $I_t\isin \Reals^{n\times h}$
+- 遗忘门 $F_t\isin \Reals^{n\times h}$
+- 输出门 $O_t\isin \Reals^{n\times h}$
+
 ### 门
 
 和 GRU 一样，当前时间步的输入和前一个时间步的*隐状态*作为数据送入 LSTM 的门中，如下图所示：
@@ -39,7 +63,7 @@ $$F_t=\sigma(X_tW_{xf}+H_{t-1}W_{hf}+b_f)$$
 
 $$O_t=\sigma(X_tW_{xo}+H_{t-1}W_{ho}+b_o)$$
 
-其中 $W_{xy}, W_{xf}, W_{xo}\isin \Reals^{d\times h}$ 和 $W_{hi}, W_{hf}, W_{ho} \isin \Reals^{h\times h}$ 是权重参数，$b_i, b_f, b_o \isin \Reals^{1\times h}$ 是偏置参数。
+其中 $W_{xi}, W_{xf}, W_{xo}\isin \Reals^{d\times h}$ 和 $W_{hi}, W_{hf}, W_{ho} \isin \Reals^{h\times h}$ 是权重参数，$b_i, b_f, b_o \isin \Reals^{1\times h}$ 是偏置参数。
 
 ### 候选记忆单元
 
