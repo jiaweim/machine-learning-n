@@ -45,7 +45,7 @@
 
 ### keras
 
-- [序列模型](keras/keras_sequential_model.md)
+- [序列模型](guide/keras/sequential_model.md)
 - [RNN with keras](guide/keras/keras_rnn.md)
 - [Masking and padding with Keras](guide/keras/masking_and_padding.md)
 
