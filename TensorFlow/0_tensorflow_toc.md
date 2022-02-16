@@ -1,20 +1,5 @@
 # TensorFlow
 
-- [TensorFlow](#tensorflow)
-  - [教程](#教程)
-    - [Keras 基础](#keras-基础)
-    - [Text](#text)
-  - [指南](#指南)
-    - [TensorFlow 基础](#tensorflow-基础)
-    - [keras](#keras)
-    - [数据输入管道](#数据输入管道)
-  - [保存模型](#保存模型)
-  - [性能](#性能)
-  - [学习笔记](#学习笔记)
-  - [API](#api)
-    - [tf](#tf)
-  - [参考](#参考)
-
 ## 教程
 
 - [TensorFlow 2 快速入门（初学者）](tutorials/quickstart_beginner.md)
