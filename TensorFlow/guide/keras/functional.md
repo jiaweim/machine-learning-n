@@ -107,6 +107,195 @@ _________________________________________________________________
 keras.utils.plot_model(model, "my_first_model.png")
 ```
 
+> 导出图片需要安装 [Graphviz](https://graphviz.org/)，同时安装 python 包 pydot
+
+![](images/2022-02-16-12-10-57.png)
+
+并且，可以将每个 layer 的输入和输出 shape 绘制图形中:
+
+![](images/2022-02-16-12-31-53.png)
+
+该图和代码几乎相同。在代码版本中，连接箭头被方法调用替换。
+
+## 训练、评估和推断
+
+使用函数 API 构建的模型，在训练、评估和推断方面与 [Sequential](sequential_model.md) 模型完全相同。
+
+`Model` 类内置有训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的算法，如 GAN。
+
+下面，我们载入 MNIST 图像数据集，将其 reshape 为向量，训练上面创建的模型（同时在 validation split 上监视性能），并使用测试集评估模型：
+
+```python
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+
+x_train = x_train.reshape(60000, 784).astype("float32") / 255
+x_test = x_test.reshape(10000, 784).astype("float32") / 255
+
+model.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=keras.optimizers.RMSprop(),
+    metrics=["accuracy"],
+)
+
+history = model.fit(x_train, y_train, batch_size=64, epochs=2, validation_split=0.2)
+
+test_scores = model.evaluate(x_test, y_test, verbose=2)
+print("Test loss:", test_scores[0])
+print("Test accuracy:", test_scores[1])
+```
+
+```sh
+Epoch 1/2
+750/750 [==============================] - 1s 1ms/step - loss: 0.3340 - accuracy: 0.9047 - val_loss: 0.1792 - val_accuracy: 0.9486
+Epoch 2/2
+750/750 [==============================] - 1s 907us/step - loss: 0.1558 - accuracy: 0.9530 - val_loss: 0.1485 - val_accuracy: 0.9569
+313/313 - 0s - loss: 0.1512 - accuracy: 0.9560 - 152ms/epoch - 486us/step
+Test loss: 0.15118415653705597
+Test accuracy: 0.9559999704360962
+```
+
+## 保存和序列化
+
+使用函数式 API 创建的模型的保存与序列化方式与使用 [Sequential](sequential_model.md) 创建的模型相同。
+
+保存函数式 API 模型的标准方法是调用 `model.save()` 方法将整个模型保存为单个文件。以后可以以该文件重新创建相同的模型，即时没有生成该模型的代码。
+
+该文件包括：
+
+- 模型结构
+- 模型权重值
+- 模型训练参数（传递给 `compile` 的参数）
+- optimizer 及其状态（可以从中断处重新开始训练）
+
+保存模型：
+
+```python
+model_path = r"D:\it\test\model"
+model.save(model_path)
+```
+
+```sh
+INFO:tensorflow:Assets written to: D:\it\test\model\assets
+```
+
+然后重新载入模型：
+
+```python
+del model
+model = keras.models.load_model(model_path
+```
+
+## 使用相同的 graph layers 定义多个模型
+
+在函数式 API 中，通过指定 layers 的输入和输出创建模型。这意味着可以使用单个 graph of layers 生成多个模型。
+
+下面我们演示使用相同的 layers 堆栈创建两个模型：一个 `encoder` 模型用于将输入图像转换为 16 维向量，一个用于训练的 end-to-end autoencoder。
+
+```python
+encoder_input = keras.Input(shape=(28, 28, 1), name='img')
+x = layers.Conv2D(16, 3, activation='relu')(encoder_input)
+x = layers.Conv2D(32, 3, activation='relu')(x)
+x = layers.MaxPooling2D(3)(x)
+x = layers.Conv2D(32, 3, activation='relu')(x)
+x = layers.Conv2D(16, 3, activation='relu')(x)
+encoder_output = layers.GlobalMaxPooling2D()(x)
+
+encoder = keras.Model(encoder_input, encoder_output, name='encoder')
+encoder.summary()
+```
+
+```sh
+Model: "encoder"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ img (InputLayer)            [(None, 28, 28, 1)]       0         
+                                                                 
+ conv2d (Conv2D)             (None, 26, 26, 16)        160       
+                                                                 
+ conv2d_1 (Conv2D)           (None, 24, 24, 32)        4640      
+                                                                 
+ max_pooling2d (MaxPooling2D  (None, 8, 8, 32)         0         
+ )                                                               
+                                                                 
+ conv2d_2 (Conv2D)           (None, 6, 6, 32)          9248      
+                                                                 
+ conv2d_3 (Conv2D)           (None, 4, 4, 16)          4624      
+                                                                 
+ global_max_pooling2d (Globa  (None, 16)               0         
+ lMaxPooling2D)                                                  
+                                                                 
+=================================================================
+Total params: 18,672
+Trainable params: 18,672
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+```python
+x = layers.Reshape((4, 4, 1))(encoder_output)
+x = layers.Conv2DTranspose(16, 3, activation='relu')(x)
+x = layers.Conv2DTranspose(32, 3, activation='relu')(x)
+x = layers.UpSampling2D(3)(x)
+x = layers.Conv2DTranspose(16, 3, activation='relu')(x)
+decoder_output = layers.Conv2DTranspose(1, 3, activation="relu")(x)
+
+autoencoder = keras.Model(encoder_input, decoder_output, name='autoencoder')
+autoencoder.summary()
+```
+
+```sh
+Model: "autoencoder"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ img (InputLayer)            [(None, 28, 28, 1)]       0         
+                                                                 
+ conv2d (Conv2D)             (None, 26, 26, 16)        160       
+                                                                 
+ conv2d_1 (Conv2D)           (None, 24, 24, 32)        4640      
+                                                                 
+ max_pooling2d (MaxPooling2D  (None, 8, 8, 32)         0         
+ )                                                               
+                                                                 
+ conv2d_2 (Conv2D)           (None, 6, 6, 32)          9248      
+                                                                 
+ conv2d_3 (Conv2D)           (None, 4, 4, 16)          4624      
+                                                                 
+ global_max_pooling2d (Globa  (None, 16)               0         
+ lMaxPooling2D)                                                  
+                                                                 
+ reshape (Reshape)           (None, 4, 4, 1)           0         
+                                                                 
+ conv2d_transpose (Conv2DTra  (None, 6, 6, 16)         160       
+ nspose)                                                         
+                                                                 
+ conv2d_transpose_1 (Conv2DT  (None, 8, 8, 32)         4640      
+ ranspose)                                                       
+                                                                 
+ up_sampling2d (UpSampling2D  (None, 24, 24, 32)       0         
+ )                                                               
+                                                                 
+ conv2d_transpose_2 (Conv2DT  (None, 26, 26, 16)       4624      
+ ranspose)                                                       
+                                                                 
+ conv2d_transpose_3 (Conv2DT  (None, 28, 28, 1)        145       
+ ranspose)                                                       
+                                                                 
+=================================================================
+Total params: 28,241
+Trainable params: 28,241
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+这里解码架构与编码架构严格对称，因此输出形状如输入形状 `(28, 28, 1)` 相同。
+
+`Conv2D` 层反过来是 `Conv2DTranspose` 层，`MaxPooling2D` 层反过来是 `UpSampling2D`层。
+
+## 模型是可调用的
+
+
 
 ## 参考
 

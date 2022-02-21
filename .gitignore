@@ -127,3 +127,10 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+/NLP/dataset/ptb.test.npy
+/NLP/dataset/ptb.test.txt
+/NLP/dataset/ptb.train.npy
+/NLP/dataset/ptb.train.txt
+/NLP/dataset/ptb.valid.npy
+/NLP/dataset/ptb.valid.txt
+/NLP/dataset/ptb.vocab.pkl
