@@ -1,14 +1,5 @@
 # RNN with Keras
 
-- [RNN with Keras](#rnn-with-keras)
-  - [简介](#简介)
-  - [配置](#配置)
-  - [内置 RNN 层](#内置-rnn-层)
-  - [输出和状态](#输出和状态)
-  - [RNN layers and RNN cells](#rnn-layers-and-rnn-cells)
-  - [cross-batch statefullness](#cross-batch-statefullness)
-  - [参考](#参考)
-
 2022-01-07, 16:27
 ***
 
@@ -16,9 +7,9 @@
 
 循环神经网络（Recurrent neural network, RNN）是一类擅长对时间序列或自然语言等序列数据建模的神经网络。
 
-RNN layer 使用 `for` 循环来迭代序列的时间步，同时维护一个内部状态（internal state），该状态对看过的时间步信息进行编码。
+RNN layer 使用 `for` 循环迭代序列的时间步，同时维护一个内部状态（internal state），该状态对看过的时间步信息进行编码。
 
-> internal state 不是 weight，而是记录序列、时间步等信息。
+> internal state 不是 weight，而是记录序列、时间步等状态信息。
 
 Keras RNN API 的特点是：
 

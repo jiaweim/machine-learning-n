@@ -134,3 +134,4 @@ dmypy.json
 /NLP/dataset/ptb.valid.npy
 /NLP/dataset/ptb.valid.txt
 /NLP/dataset/ptb.vocab.pkl
+/NLP/gated_rnn/Rnnlm.pkl

@@ -104,6 +104,22 @@ class RnnlmTrainer:
 
     def fit(self, xs, ts, max_epoch=10, batch_size=20, time_size=35,
             max_grad=None, eval_interval=20):
+        """
+
+        Parameters
+        ----------
+        xs
+        ts
+        max_epoch
+        batch_size
+        time_size
+        max_grad 用于梯度裁剪
+        eval_interval 多少次迭代进行一次评价
+
+        Returns
+        -------
+
+        """
         data_size = len(xs)
         max_iters = data_size // (batch_size * time_size)
         self.time_idx = 0
@@ -122,8 +138,10 @@ class RnnlmTrainer:
                 loss = model.forward(batch_x, batch_t)
                 model.backward()
                 params, grads = remove_duplicate(model.params, model.grads)  # 将共享的权重整合为1个
+                # 裁剪梯度
                 if max_grad is not None:
                     clip_grads(grads, max_grad)
+                # 更新参数
                 optimizer.update(params, grads)
                 total_loss += loss
                 loss_count += 1

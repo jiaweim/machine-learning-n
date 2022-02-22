@@ -134,23 +134,36 @@ class LSTM:
         '''
         self.params = [Wx, Wh, b]
         self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
-        self.cache = None
+        self.cache = None  # 保存正向传播的中间结果
 
     def forward(self, x, h_prev, c_prev):
+        """
+
+        Parameters
+        ----------
+        x 当前时刻的输入
+        h_prev 上一时刻的隐藏状态
+        c_prev 上一时刻的记忆单元
+
+        Returns 下一时刻的隐藏状态和记忆单元
+        -------
+
+        """
         Wx, Wh, b = self.params
         N, H = h_prev.shape
 
         A = np.dot(x, Wx) + np.dot(h_prev, Wh) + b
 
+        # slice，将仿射变换结果均等分为四份
         f = A[:, :H]
         g = A[:, H:2 * H]
         i = A[:, 2 * H:3 * H]
         o = A[:, 3 * H:]
 
-        f = sigmoid(f)
-        g = np.tanh(g)
-        i = sigmoid(i)
-        o = sigmoid(o)
+        f = sigmoid(f)  # forget gate weights
+        g = np.tanh(g)  # candidate cell state
+        i = sigmoid(i)  # input date
+        o = sigmoid(o)  # output gate
 
         c_next = f * c_prev + g * i
         h_next = o * np.tanh(c_next)
@@ -212,7 +225,7 @@ class TimeLSTM:
         self.layers = []
         hs = np.empty((N, T, H), dtype='f')
 
-        if not self.stateful or self.h is None:
+        if not self.stateful or self.h is None:  # 是否初始化
             self.h = np.zeros((N, H), dtype='f')
         if not self.stateful or self.c is None:
             self.c = np.zeros((N, H), dtype='f')
