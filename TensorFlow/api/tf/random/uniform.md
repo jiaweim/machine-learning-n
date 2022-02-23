@@ -41,7 +41,23 @@ tf.random.uniform(
 <tf.Tensor: shape=(), dtype=int64, numpy=7>
 ```
 
-设置固定的 `seed` 参数，可以在多次调用生成相同的随机数。使用 `tf.random.set_seed` 设置
+设置固定的 `seed` 参数，可以在多次调用生成相同的随机数。使用 `tf.random.set_seed` 设置全局 seed 可以获得相同随机序列：
+
+```python
+>>> tf.random.set_seed(5)
+>>> tf.random.uniform(shape=[], maxval=3, dtype=tf.int32, seed=10)
+<tf.Tensor: shape=(), dtype=int32, numpy=2>
+>>> tf.random.uniform(shape=[], maxval=3, dtype=tf.int32, seed=10)
+<tf.Tensor: shape=(), dtype=int32, numpy=0>
+
+>>> tf.random.set_seed(5)
+>>> tf.random.uniform(shape=[], maxval=3, dtype=tf.int32, seed=10)
+<tf.Tensor: shape=(), dtype=int32, numpy=2>
+>>> tf.random.uniform(shape=[], maxval=3, dtype=tf.int32, seed=10)
+<tf.Tensor: shape=(), dtype=int32, numpy=0>
+```
+
+如果不设置 `tf.random.set_seed`，但是指定 `seed` 参数，则计算图或前面操作的更改会影响返回的值。
 
 ## 参考
 
