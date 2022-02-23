@@ -189,7 +189,7 @@
 |is_tensor(...)|Checks whether x is a TF-native type that can be passed to many TF ops.|
 |less(...)|Returns the truth value of (x < y) element-wise.|
 |less_equal(...)|Returns the truth value of (x <= y) element-wise.|
-|[linspace(...)](tf.linspace.md)|Generates evenly-spaced values in an interval along a given axis.|
+|[linspace(...)](linspace.md)|Generates evenly-spaced values in an interval along a given axis.|
 |load_library(...)|Loads a TensorFlow plugin.|
 |load_op_library(...)|Loads a TensorFlow plugin, containing custom ops and kernels.|
 |logical_and(...)|Returns the truth value of x AND y element-wise.|
@@ -219,7 +219,7 @@
 |pow(...)|Computes the power of one value to another.|
 |print(...)|Print the specified inputs.|
 |py_function(...)|Wraps a python function into a TensorFlow op that executes it eagerly.|
-|range(...)|Creates a sequence of numbers.|
+|[range(...)](range.md)|Creates a sequence of numbers.|
 |rank(...)|Returns the rank of a tensor.|
 |realdiv(...)|Returns x / y element-wise for real types.|
 |recompute_grad(...)|An eager-compatible version of recompute_grad.|
@@ -253,7 +253,7 @@
 |sinh(...)|Computes hyperbolic sine of x element-wise.|
 |size(...)|Returns the size of a tensor.|
 |slice(...)|Extracts a slice from a tensor.|
-|sort(...)|Sorts a tensor.|
+|[sort(...)](sort.md)|Sorts a tensor.|
 |space_to_batch(...)|SpaceToBatch for N-D tensors of type T.|
 |space_to_batch_nd(...)|SpaceToBatch for N-D tensors of type T.|
 |split(...)|Splits a tensor value into a list of sub tensors.|
