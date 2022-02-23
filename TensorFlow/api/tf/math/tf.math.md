@@ -1,14 +1,5 @@
 # tf.math
 
-- [tf.math](#tfmath)
-  - [简介](#简介)
-  - [igamma](#igamma)
-  - [imag](#imag)
-  - [log](#log)
-  - [reduce_sum](#reduce_sum)
-  - [zeta](#zeta)
-  - [参考](#参考)
-
 2021-06-03, 20:11
 ***
 
@@ -123,4 +114,4 @@ assert v == 6
 
 ## 参考
 
-- https://tensorflow.google.cn/api_docs/python/tf/math
+- https://www.tensorflow.org/api_docs/python/tf/math
