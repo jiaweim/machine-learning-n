@@ -30,7 +30,8 @@
 
 ### keras
 
-- [序列模型](guide/keras/sequential_model.md)
+- [序列模型 API](guide/keras/sequential_model.md)
+- [函数 API](guide/keras/functional.md)
 - [RNN with keras](guide/keras/keras_rnn.md)
 - [Masking and padding with Keras](guide/keras/masking_and_padding.md)
 

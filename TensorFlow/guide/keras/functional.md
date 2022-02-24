@@ -14,13 +14,13 @@ from tensorflow.keras import layers
 
 ## 简介
 
-Keras 函数式（functional）API 是一种比 [tf.keras.Sequential](sequential_model.md) 更灵活的创建模型的方法。函数式 API 可以处理非线性拓扑结构、共享层，甚至可以处理包含多个输入或多个输出的模型。
+Keras 函数式（functional）API 是一种比 [tf.keras.Sequential](sequential_model.md) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，甚至可以创建包含多个输入或多个输出的模型。
 
-其主要思想是，深度学习模型是由 layer 组成的有向无环图（directed acyclic graph, DAG），函数式 API 是构建这种图的一种方法。
+其主要思想是，深度学习模型是由神经网络层组成的有向无环图（directed acyclic graph, DAG），函数式 API 提供构建这种图的方法。
 
 考虑如下模型：
 
-```py
+```python
 (input: 784-dimensional vectors)
        ↧
 [Dense (64 units, relu activation)]
@@ -32,21 +32,21 @@ Keras 函数式（functional）API 是一种比 [tf.keras.Sequential](sequential
 (output: logits of a probability distribution over 10 classes)
 ```
 
-该模型包含三层，使用函数 API 创建该模型，首先创建输入节点：
+该模型包含三层。使用函数 API 创建该模型，首先创建输入节点：
 
 ```python
 inputs = keras.Input(shape=(784,))
 ```
 
-输入数据是长度为 784 的向量。此处只指定样本 shape，忽略 batch size。
+输入数据向量长度设置为 784。此处只指定样本 shape，忽略 batch size。
 
-假如输入是 shape 为 `(32, 32, 3)` 的图片，此时输入定义为：
+假如输入是 shape 为 `(32, 32, 3)` 的图片。此时输入定义方法为：
 
 ```python
 img_inputs = keras.Input(shape=(32, 32, 3))
 ```
 
-创建的 `inputs` 包含输入数据的 shape 和 `dtype`：
+`keras.Input` 返回的 `inputs` 包含输入数据的 shape 和 `dtype`：
 
 ```python
 >>> inputs.shape
@@ -55,14 +55,14 @@ TensorShape([None, 784])
 tf.float32
 ```
 
-然后创建下一层，并将 `inputs` 对象作为输入：
+然后 DAG 图的下一个节点，将 `inputs` 对象作为输入：
 
 ```python
 dense = layers.Dense(64, activation="relu")
 x = dense(inputs)
 ```
 
-层调用（layer call）就像从 "inputs" 到创建这个 dense 层画了个箭头。将 `inputs` 传入 `dense` 层，获得输出 `x`。
+层调用（layer call）就像从 "inputs" 到这个 dense 层画了个箭头。将 `inputs` 传入 `dense` 层，获得输出 `x`。
 
 继续创建图中余下两层：
 
@@ -77,7 +77,7 @@ outputs = layers.Dense(10)(x)
 model = keras.Model(inputs=inputs, outputs=outputs, name="mnist_model")
 ```
 
-查看模型：
+让我们来看看这个模型：
 
 ```python
 >>> model.summary()
@@ -101,7 +101,7 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-也可以将模型结构输出为图片：
+将模型结构输出为图片：
 
 ```python
 keras.utils.plot_model(model, "my_first_model.png")
@@ -111,11 +111,15 @@ keras.utils.plot_model(model, "my_first_model.png")
 
 ![](images/2022-02-16-12-10-57.png)
 
-并且，可以将每个 layer 的输入和输出 shape 绘制图形中:
+导出图片时可以显示每个 layer 的输入和输出 shape:
+
+```python
+keras.utils.plot_model(model, "my_first_model_with_shape_info.png", show_shapes=True)
+```
 
 ![](images/2022-02-16-12-31-53.png)
 
-该图和代码几乎相同。在代码版本中，连接箭头被方法调用替换。
+这个图和创建该图的代码几乎相同。只是将连接箭头用方法调用替换了。
 
 ## 训练、评估和推断
 
@@ -123,7 +127,7 @@ keras.utils.plot_model(model, "my_first_model.png")
 
 `Model` 类内置有训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的算法，如 GAN。
 
-下面，我们载入 MNIST 图像数据集，将其 reshape 为向量，训练上面创建的模型（同时在 validation split 上监视性能），并使用测试集评估模型：
+下面，我们载入 MNIST 数据集，将其 reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
 
 ```python
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
@@ -158,14 +162,14 @@ Test accuracy: 0.9559999704360962
 
 使用函数式 API 创建的模型的保存与序列化方式与使用 [Sequential](sequential_model.md) 创建的模型相同。
 
-保存函数式 API 模型的标准方法是调用 `model.save()` 方法将整个模型保存为单个文件。以后可以以该文件重新创建相同的模型，即时没有生成该模型的代码。
+保存函数式 API 创建的模型的标准方法是调用 `model.save()` 将整个模型保存为单个文件。随后可以用该文件重新创建完全相同的模型。
 
 该文件包括：
 
 - 模型结构
-- 模型权重值
-- 模型训练参数（传递给 `compile` 的参数）
-- optimizer 及其状态（可以从中断处重新开始训练）
+- 模型权重值（训练时学到的参数）
+- 模型训练配置（传递给 `compile` 的参数）
+- optimizer 及其状态（方便从训练中断的位置重新开始训练）
 
 保存模型：
 
@@ -187,9 +191,12 @@ model = keras.models.load_model(model_path
 
 ## 使用相同的 graph layers 定义多个模型
 
-在函数式 API 中，通过指定 layers 的输入和输出创建模型。这意味着可以使用单个 graph of layers 生成多个模型。
+在函数式 API 中，通过指定图的输入和输出创建模型。这意味着可以使用单个 graph of layers 生成多个模型。
 
-下面我们演示使用相同的 layers 堆栈创建两个模型：一个 `encoder` 模型用于将输入图像转换为 16 维向量，一个用于训练的 end-to-end autoencoder。
+下面我们演示使用相同的 layers 堆栈实例化两个模型：
+
+- 一个将输入图像转换为 16 维向量 `encoder` 模型
+- 一个用于训练的端到端 autoencoder。
 
 ```python
 encoder_input = keras.Input(shape=(28, 28, 1), name='img')
@@ -289,12 +296,19 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-这里解码架构与编码架构严格对称，因此输出形状如输入形状 `(28, 28, 1)` 相同。
+这里解码架构与编码架构严格对称，因此输出形状和输入形状 `(28, 28, 1)` 相同。
 
 `Conv2D` 层反过来是 `Conv2DTranspose` 层，`MaxPooling2D` 层反过来是 `UpSampling2D`层。
 
 ## 模型是可调用的
 
+模型和 layer 一样，都是可调用的。通过调用模型，不仅可以重用模型结构，还可以重用它的权重。
+
+为了演示模型调用的效果，下面用另一个 autoencoder 示例演示：创建一个 encoder 模型，一个 decoder 模型，然后通过两次调用将它们连接起来获得最终的 autoencoder 模型：
+
+```
+
+```
 
 
 ## 参考

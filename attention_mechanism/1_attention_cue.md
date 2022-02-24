@@ -104,13 +104,29 @@ f(x) &= \sum_{i=1}^n \alpha (x,x_i)y_i \\
 
 假设第一个批量数据包含 n 个矩阵 $X_1,...,X_n$,形状为 $a\times b$，第二个小批量包含 n 个矩阵 $Y_1,...,Y_n$，形状为 $b\times c$。它们的矩阵乘法得到 n 个矩阵 $X_1Y_1,...,X_nY_n$，形状为 $a\times c$。因此，假定两个张量的形状分别是 $(n,a,b)$和 $(n,b,c)$，它们的批量矩阵乘法的输出的形状为$(n,a,c)$.
 
-
-
 在注意力机制中，我们可以使用小批量矩阵乘法来计算小批量数据中的加权平均值。
 
 #### 定义模型
 
 基于上面的带参数的注意力汇聚公式，使用小批量矩阵乘法，定义 Nadaraya-Watson 核回归的带参数版本。
+
+```python
+class NWKernelRegression(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.w = tf.Variable(initial_value=tf.random.uniform(shape=(1,)))
+
+    def call(self, queries, keys, values, **kwargs):
+        # 对于训练，“查询”是x_train。“键”是每个点的训练数据的距离。“值”为'y_train'。
+        # queries和attention_weights的形状为(查询个数，“键－值”对个数)
+        queries = tf.repeat(tf.expand_dims(queries, axis=1), repeats=keys.shape[1], axis=1)
+        self.attention_weights = tf.nn.softmax(-((queries - keys) * self.w)**2 /2, axis =1)
+        # values的形状为(查询个数，“键－值”对个数)
+        return tf.squeeze(tf.matmul(tf.expand_dims(self.attention_weights, axis=1), tf.expand_dims(values, axis=-1)))
+```
+
+## 注意力打分函数
+
 
 
 ## 参考
