@@ -304,12 +304,169 @@ _________________________________________________________________
 
 模型和 layer 一样，都是可调用的。通过调用模型，不仅可以重用模型结构，还可以重用它的权重。
 
-为了演示模型调用的效果，下面用另一个 autoencoder 示例演示：创建一个 encoder 模型，一个 decoder 模型，然后通过两次调用将它们连接起来获得最终的 autoencoder 模型：
+为了演示模型调用的效果，下面用另一个 autoencoder 示例演示：创建一个 encoder 模型和一个 decoder 模型，然后通过两次调用将它们连接起来获得最终的 autoencoder 模型：
 
+```python
+encoder_input = keras.Input(shape=(28, 28, 1), name="original_img")
+x = layers.Conv2D(16, 3, activation="relu")(encoder_input)
+x = layers.Conv2D(32, 3, activation="relu")(x)
+x = layers.MaxPooling2D(3)(x)
+x = layers.Conv2D(32, 3, activation="relu")(x)
+x = layers.Conv2D(16, 3, activation="relu")(x)
+encoder_output = layers.GlobalMaxPooling2D()(x)
+
+encoder = keras.Model(encoder_input, encoder_output, name="encoder")
+encoder.summary()
+
+decoder_input = keras.Input(shape=(16,), name="encoded_img")
+x = layers.Reshape((4, 4, 1))(decoder_input)
+x = layers.Conv2DTranspose(16, 3, activation="relu")(x)
+x = layers.Conv2DTranspose(32, 3, activation="relu")(x)
+x = layers.UpSampling2D(3)(x)
+x = layers.Conv2DTranspose(16, 3, activation="relu")(x)
+decoder_output = layers.Conv2DTranspose(1, 3, activation="relu")(x)
+
+decoder = keras.Model(decoder_input, decoder_output, name="decoder")
+decoder.summary()
+
+autoencoder_input = keras.Input(shape=(28, 28, 1), name="img")
+encoded_img = encoder(autoencoder_input)
+decoded_img = decoder(encoded_img)
+autoencoder = keras.Model(autoencoder_input, decoded_img, name="autoencoder")
+autoencoder.summary()
 ```
 
+如上所示，模型可以嵌套，一个模型可以包含子模型。模型嵌套常用于模型集成。例如，下面将一个组模型组合成一个单一模型，来平均它们的预测：
+
+```python
+def get_model():
+    inputs = keras.Input(shape=(128,))
+    outputs = layers.Dense(1)(inputs)
+    return keras.Model(inputs, outputs)
+
+
+model1 = get_model()
+model2 = get_model()
+model3 = get_model()
+
+inputs = keras.Input(shape=(128,))
+y1 = model1(inputs)
+y2 = model2(inputs)
+y3 = model3(inputs)
+outputs = layers.average([y1, y2, y3])
+ensemble_model = keras.Model(inputs=inputs, outputs=outputs)
 ```
 
+## 处理复杂拓扑图形结构
+
+### 多个输入和输出
+
+函数式 API 可以创建包含多个输入和输出的模型，[Sequential](sequential_model.md) API 就不行。
+
+例如，如果你要构建一个系统，用于按优先级对客户的票据进行排序，并将其转到正确的部门，那么该模型至少有三个输入：
+
+- 票据的标题（文本输入）
+- 票据的内容（文本输入）
+- 用户添加的标签（分类输入）
+
+该模型包含两个输出：
+
+- 优先级打分（0 到 1 之间，sigmoid 输出）
+- 处理票据的部门（softmax 输出）
+
+下面使用函数式 API 构建该模型：
+
+```python
+num_tags = 12  # 标签个数
+num_words = 10000  # 处理文本数据时的词汇量大小
+num_departments = 4  # 部门数
+
+title_input = keras.Input(
+    shape=(None,), name="title"
+)  # 变长标题序列
+body_input = keras.Input(shape=(None,), name="body")  # 变长内容序列
+tags_input = keras.Input(
+    shape=(num_tags,), name="tags"
+)  # 长度为 `num_tags` 的二进制向量
+
+# 将标题嵌入到 64 维向量
+title_features = layers.Embedding(num_words, 64)(title_input)
+# 将内容嵌入到 64 维向量
+body_features = layers.Embedding(num_words, 64)(body_input)
+
+# 将标题中嵌入的单词序列简化为 128 维向量
+title_features = layers.LSTM(128)(title_features)
+# 将内容中嵌入的单词序列简化为 32 维向量
+body_features = layers.LSTM(32)(body_features)
+
+# 通过串联将所有特征合并到一个向量
+x = layers.concatenate([title_features, body_features, tags_input])
+
+# 预测优先级的回归层
+priority_pred = layers.Dense(1, name="priority")(x)
+# 部门分类功能
+department_pred = layers.Dense(num_departments, name="department")(x)
+
+# 实例化一个预测优先级和部门的端到端模型
+model = keras.Model(
+    inputs=[title_input, body_input, tags_input],
+    outputs=[priority_pred, department_pred],
+)
+```
+
+模型的图示：
+
+```python
+keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
+```
+
+![](images/2022-02-24-16-05-54.png)
+
+在编译这个模型时，不同输出可以采用不同的损失函数。甚至可以为不同损失分配不同的权重，以调整它们对总训练损失的贡献：
+
+```python
+model.compile(
+    optimizer=keras.optimizers.RMSprop(1e-3),
+    loss=[
+        keras.losses.BinaryCrossentropy(from_logits=True),
+        keras.losses.CategoricalCrossentropy(from_logits=True),
+    ],
+    loss_weights=[1.0, 0.2],
+)
+```
+
+因为两个输出层的名称不同，所以也可以根据名称指定损失函数和权重：
+
+```python
+model.compile(
+    optimizer=keras.optimizers.RMSprop(1e-3),
+    loss={
+        "priority": keras.losses.BinaryCrossentropy(from_logits=True),
+        "department": keras.losses.CategoricalCrossentropy(from_logits=True),
+    },
+    loss_weights={"priority": 1.0, "department": 0.2},
+)
+```
+
+输入数据和目标值通过 NumPy 数组传入：
+
+```python
+# Dummy input data
+title_data = np.random.randint(num_words, size=(1280, 10))
+body_data = np.random.randint(num_words, size=(1280, 100))
+tags_data = np.random.randint(2, size=(1280, num_tags)).astype("float32")
+
+# Dummy target data
+priority_targets = np.random.random(size=(1280, 1))
+dept_targets = np.random.randint(2, size=(1280, num_departments))
+
+model.fit(
+    {"title": title_data, "body": body_data, "tags": tags_data},
+    {"priority": priority_targets, "department": dept_targets},
+    epochs=2,
+    batch_size=32,
+)
+```
 
 ## 参考
 
