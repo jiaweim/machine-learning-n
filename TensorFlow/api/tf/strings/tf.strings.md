@@ -14,7 +14,7 @@
 |as_string(...)|Converts each entry in the given tensor to strings.|
 |bytes_split(...)|Split string elements of input into bytes.|
 |format(...)|Formats a string template using a list of tensors.|
-|join(...)|Perform element-wise concatenation of a list of string tensors.|
+|[join(...)](join.md)|Perform element-wise concatenation of a list of string tensors.|
 |length(...)|String lengths of input.|
 |lower(...)|Converts all uppercase characters into their respective lowercase replacements.|
 |ngrams(...)|Create a tensor of n-grams based on data.|
