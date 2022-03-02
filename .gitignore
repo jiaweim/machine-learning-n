@@ -138,3 +138,6 @@ dmypy.json
 /src/nlp/dataset/addition.txt
 /src/tensorflow_demo/text_demo/aclImdb/
 /src/tensorflow_demo/text_demo/aclImdb_v1.tar.gz
+/src/tensorflow_demo/text_demo/stack_overflow/
+src/tensorflow_demo/tfbook/inception_v3.h5
+src/tensorflow_demo/tfbook/rps.h5

@@ -35,10 +35,10 @@ path_to_downloaded_file = tf.keras.utils.get_file(
 |fname|文件名称。如果是绝对路径，如 `/path/to/file.txt`，则文件会保存到该位置。如果为 `None`，则使用 `origin` 处文件名称|
 |origin|文件的 URL|
 |untar|Deprecated，建议使用 `extract` 参数。boolean, 是否解压缩文件|
-|md5_hash|Deprecated in favor of file_hash argument. md5 hash of the file for verification|
-|file_hash|The expected hash string of the file after download. The sha256 and md5 hash algorithms are both supported.|
-|cache_subdir|Subdirectory under the Keras cache dir where the file is saved. If an absolute path /path/to/folder is specified the file will be saved at that location.|
-|hash_algorithm|Select the hash algorithm to verify the file. options are 'md5', 'sha256', and 'auto'. The default 'auto' detects the hash algorithm in use.|
+|md5_hash|Deprecated，建议使用 `file_hash` 参数。文件的 md5 hash 值|
+|file_hash|下载后文件的预期 hash 字符串。支持 sha256 和 md5 hash 算法|
+|cache_subdir|保存文件的 Keras 缓存目录下的子目录。如果指定的是绝对路径 `/path/to/folder`，则文件将保存到该位置|
+|hash_algorithm|选择验证文件的 hash 算法。选项包括 'md5', 'sha256' 和 'auto'。默认 'auto' 会检测正在使用的 hash 算法|
 |extract|True tries extracting the file as an Archive, like tar or zip.|
 |archive_format|Archive format to try for extracting the file. Options are 'auto', 'tar', 'zip', and None. 'tar' includes tar, tar.gz, and tar.bz files. The default 'auto' corresponds to ['tar', 'zip']. None or an empty list will return no matches found.|
 |cache_dir|Location to store cached files, when None it defaults to the default directory ~/.keras/.|
