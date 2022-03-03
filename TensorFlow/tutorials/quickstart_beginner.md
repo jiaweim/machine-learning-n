@@ -2,8 +2,8 @@
 
 - [TensorFlow 2 快速入门（初学者）](#tensorflow-2-快速入门初学者)
   - [简介](#简介)
-  - [导入 TensorFlow](#导入-tensorflow)
-  - [载入数据集](#载入数据集)
+  - [设置 TensorFlow](#设置-tensorflow)
+  - [加载数据集](#加载数据集)
   - [构建神经网络模型](#构建神经网络模型)
   - [训练和评估模型](#训练和评估模型)
   - [参考](#参考)
@@ -14,14 +14,14 @@
 
 ## 简介
 
-这篇入门教程，介绍如何使用 Keras 执行如下操作：
+这篇入门教程介绍使用 Keras 执行如下操作：
 
-1. 载入数据集；
-2. 建立一个图像分类的神经网络模型；
+1. 加载预构建数据集；
+2. 建立一个图像分类神经网络机器学习模型；
 3. 训练神经网络；
 4. 评估模型的准确性。
 
-## 导入 TensorFlow
+## 设置 TensorFlow
 
 首先导入 TensorFlow：
 
@@ -32,12 +32,12 @@ print("TensorFlow version: ", tf.__version__)
 ```
 
 ```sh
-TensorFlow version:  2.7.0
+TensorFlow version:  2.8.0
 ```
 
-## 载入数据集
+## 加载数据集
 
-载入 MNIST 数据集，并将数据从整型转换为浮点类型：
+加载 MNIST 数据集，并将数据从整型转换为浮点型：
 
 ```python
 mnist = tf.keras.datasets.mnist
@@ -48,7 +48,7 @@ x_train, x_test = x_train / 255.0, x_test / 255.0
 
 ## 构建神经网络模型
 
-通过叠加层建立 `tf.keras.Sequential` 模型：
+使用 `tf.keras.Sequential` 叠加 layers 构建模型：
 
 ```python
 model = tf.keras.models.Sequential([
@@ -59,7 +59,7 @@ model = tf.keras.models.Sequential([
 ])
 ```
 
-对每个示例，该模型都返回一个 logit 向量，每个类别对应一个值。每个 TensorFlow 模型，都可以当做一个可调用函数，接受输入参数，返回预测值。例如：
+对每个样本该模型都返回一个 logit 向量，每个类别对应一个值。TensorFlow 模型是可调用对象，可以当作函数调用，接受输入参数，返回预测值。例如：
 
 ```python
 predictions = model(x_train[:1]).numpy()
@@ -72,7 +72,7 @@ array([[ 0.27800095, -0.18243524, -0.32130682, -0.0138693 , -0.05083328,
       dtype=float32)
 ```
 
-可以使用 `tf.nn.softmax` 函数可以将上面的 logit 值转换为概率值，这样结果更直观：
+然后用 `tf.nn.softmax` 函数将上面的 logit 值转换为概率值，这样结果更直观：
 
 ```python
 tf.nn.softmax(predictions).numpy()
@@ -84,7 +84,7 @@ array([[0.13980936, 0.08822086, 0.07678213, 0.10441878, 0.1006295 ,
       dtype=float32)
 ```
 
-> 注意：虽然可以把 `tf.nn.softmax` 函数作为神经网络最后一层的激活函数，这样模型就可以直接输出便于理解的概率值，但不鼓励使用这种方法，因为 softmax 的输出无法为所有模型提供精确且数值稳定的损失计算。
+> 注意：虽然可以把 `tf.nn.softmax` 函数作为神经网络最后一层的激活函数，这样模型直接输出便于理解的概率值，但不鼓励使用这种方法，因为 softmax 的输出无法为所有模型提供精确且数值稳定的损失值。
 
 使用 `losses.SparseCategoricalCrossentropy` 定义损失函数：
 
@@ -151,7 +151,7 @@ model.evaluate(x_test,  y_test, verbose=2)
 
 可以看出，分类器在这个数据集上的准确率接近 98%。
 
-如果你希望模型返回一个概率值，可以把上面训练好的模型和 softmax 函数组装到一起：
+如果希望模型返回一个概率值，可以把上面训练好的模型和 softmax 函数组装到一起：
 
 ```python
 probability_model = tf.keras.Sequential([
