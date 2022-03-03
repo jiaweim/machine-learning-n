@@ -1,8 +1,5 @@
 # TensorFlow 2 快速入门（专家）
 
-- [TensorFlow 2 快速入门（专家）](#tensorflow-2-快速入门专家)
-  - [参考](#参考)
-
 2021-12-30, 14:04
 @author Jiawei Mao
 ***
@@ -18,10 +15,10 @@ from tensorflow.keras import Model
 ```
 
 ```sh
-TensorFlow version: 2.7.0
+TensorFlow version: 2.8.0
 ```
 
-载入并准备 MNIST 数据集：
+加载并准备 MNIST 数据集：
 
 ```python
 mnist = tf.keras.datasets.mnist
@@ -34,7 +31,7 @@ x_train = x_train[..., tf.newaxis].astype("float32")
 x_test = x_test[..., tf.newaxis].astype("float32")
 ```
 
-使用 `tf.data` 执行 batch （分批） 和 shuffle（打乱）数据集操作：
+使用 `tf.data` 执行 batch（批量） 和 shuffle（打乱）数据集操作：
 
 ```python
 train_ds = tf.data.Dataset.from_tensor_slices(
@@ -64,7 +61,7 @@ class MyModel(Model):
 model = MyModel()
 ```
 
-选择合适的优化器和损失函数：
+选择训练的优化器和损失函数：
 
 ```python
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
