@@ -3,7 +3,7 @@
 - [分类基础：服装图像分类](#分类基础服装图像分类)
   - [简介](#简介)
   - [导入 Fashion MNIST 数据集](#导入-fashion-mnist-数据集)
-  - [数据特点](#数据特点)
+  - [查看数据](#查看数据)
   - [数据预处理](#数据预处理)
   - [构建模型](#构建模型)
     - [配置网络层](#配置网络层)
@@ -18,7 +18,7 @@
 
 2021-12-30, 16:00
 @author Jiawei Mao
-***
+****
 
 ## 简介
 
@@ -36,7 +36,7 @@ print(tf.__version__)
 ```
 
 ```sh
-2.7.0
+2.8.0
 ```
 
 ## 导入 Fashion MNIST 数据集
@@ -47,7 +47,7 @@ Fashion MNIST 数据集包含 10 个类别共 70,000 张灰度图片，均为低
 
 Fashion MNIST 旨在替代经典的 MNIST 数据集。MNIST 经常被用作计算机视觉机器学习程序中的 "Hello, World"。该数据集包含手写数字（0, 1, 2,...,9）图像，格式与 Fashion MNIST 一样。
 
-对 Fashion MNIST 数据集进行分类比 MNIST 更难一点。这两个数据集都相对较小，适合用来验证算法，是测试和调试代码很好的起点。使用 60,000 张图像训练模型，10,000 张图片评估模型。TensorFlow 内嵌有 Fashion MNIST 数据集，可以直接加载：
+对 Fashion MNIST 数据集进行分类比 MNIST 更难一点。这两个数据集都相对较小，适合用来验证算法，是测试和调试代码很好的起点。使用 60,000 张图像训练模型，10,000 张图片评估模型。TensorFlow 内嵌有 [Fashion MNIST](../../api/tf/keras/datasets/fashion_mnist.md) 数据集，可以直接加载：
 
 ```python
 fashion_mnist = tf.keras.datasets.fashion_mnist
@@ -66,7 +66,7 @@ Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-dataset
 4423680/4422102 [==============================] - 0s 0us/step
 ```
 
-载入数据集返回 4 个 NumPy 数组：
+加载数据集返回 4 个 NumPy 数组：
 
 - `train_images` 和 `train_labels` 数组为训练集
 - `test_images` 和 `test_labels` 数组为测试集
@@ -93,9 +93,9 @@ class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
                'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 ```
 
-## 数据特点
+## 查看数据
 
-在训练模型之前，我们先熟悉一下数据集的格式：
+在训练模型之前先熟悉一下数据集的格式：
 
 ```python
 >>> train_images.shape
@@ -118,7 +118,7 @@ class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
 array([9, 0, 0, ..., 3, 0, 5], dtype=uint8)
 ```
 
-测试集包含 10,000 张图像，每个图像也是 28x28 像素：
+测试集包含 10,000 张图像，每个图像同样是 28x28 像素：
 
 ```python
 >>> test_images.shape
@@ -134,7 +134,7 @@ array([9, 0, 0, ..., 3, 0, 5], dtype=uint8)
 
 ## 数据预处理
 
-在训练模型前要对数据预处理。图像的像素值在 0 到 255 之间，下面显示第一张训练图像：
+在训练模型前要对数据进行预处理。图像的像素值在 0 到 255 之间，下面显示第一张训练图像：
 
 ```python
 plt.figure()
@@ -150,7 +150,6 @@ plt.show()
 
 ```python
 train_images = train_images / 255.0
-
 test_images = test_images / 255.0
 ```
 
@@ -176,9 +175,9 @@ plt.show()
 
 ### 配置网络层
 
-神经网络的基本单元是网络层（layer）。layer 从输入到它们的数据中提取表示（representation），并期望这些表示对当前问题是有意义的。
+神经网络的基本单元是 [layer](../../api/tf/keras/layers/tf.keras.layers.md)。layer 从输入数据中提取表示（representation），并期望这些表示对当前问题是有意义的。
 
-大多数神经网络都是将简单的 layer 连在一起。而大多数 layer，如 `tf.keras.layers.Dense` 带有需要在训练过程学习的参数。
+大多数神经网络都是将简单的 layer 连在一起。而大多数 layer，如 [tf.keras.layers.Dense](../../api/tf/keras/layers/Dense.md) 包含需要在训练过程学习的参数。
 
 ```python
 model = tf.keras.Sequential([
@@ -190,15 +189,17 @@ model = tf.keras.Sequential([
 
 网络的第一层 `tf.keras.layers.Flatten` 将图像的格式从二维数组（$28*28$）转换为一维数组（$28*28=784$）。可以将 `Flatten` 的功能想象为将图像的像素一行行的拿下来连成一行。这个 layer 没有需要学习的参数，单纯用于格式化数据。
 
-格式化数据后，下面是两个 `tf.keras.layers.Dense` 层，即全连接层。第一个 `Dense` 层包含 128 个节点（或神经元），第二个 `Dense` 层返回长度为 10 的 logits 数组，每个节点包含一个与图像所属类别相关的打分值。
+格式化数据后，下面是两个 [tf.keras.layers.Dense](../../api/tf/keras/layers/Dense.md) 层，即全连接层。第一个 `Dense` 层包含 128 个节点（或神经元），第二个 `Dense` 层返回长度为 10 的 logits 数组，每个节点包含一个与图像所属类别相关的打分值。
+
+> logit 指神经网络的原始预测值，用 argmax 函数处理可以获得预测的类别，用 softmax 处理则获得概率值。
 
 ### 编译模型
 
 在训练模型之前，还需要进行一些设置。在编译步骤执行如下配置：
 
-- [损失函数（loss function）](../../api/tf.keras/losses/tf.keras.losses.md)，用于衡量训练过程中模型的准确程度。通过最小化该函数的值引导模型往正确的方向演化；
-- [优化器（optimizer）](../../api/tf.keras/optimizers/tf.keras.optimizers.md)，模型根据数据和损失函数进行更新的方式；
-- [评价指标（metrics）](../../api/tf.keras/metrics/tf.keras.metrics.md)，用来监控训练和测试步骤的评价指标。例如，下面使用 `accuracy`，即正确分类图片的比例作为评价指标。
+- [损失函数（loss function）](../../api/tf/keras/losses/tf.keras.losses.md)，用于衡量训练过程中模型的准确程度。通过最小化该函数的值引导模型往正确的方向演化；
+- [优化器（optimizer）](../../api/tf/keras/optimizers/tf.keras.optimizers.md)，模型根据数据和损失函数进行更新的方式；
+- [评价指标（metrics）](../../api/tf/keras/metrics/tf.keras.metrics.md)，用来监控训练和测试步骤的评价指标。例如，下面使用 `accuracy`，即正确分类图片的比例作为评价指标。
 
 ```python
 model.compile(optimizer='adam',
@@ -211,7 +212,7 @@ model.compile(optimizer='adam',
 按如下步骤训练神经网络模型：
 
 1. 将训练数据导入模型。在本例中，训练数据在 `train_images` 和 `train_labels` 数组中；
-2. 模型学习将图像和标签的关联起来；
+2. 模型学习将图像和标签关联起来；
 3. 让模型预测一个测试集，在本例中为 `test_images` 数组；
 4. 验证预测结果是否和标签 `test_labels` 匹配。
 
@@ -269,7 +270,7 @@ Test accuracy: 0.8858000040054321
 
 ### 预测
 
-训练好模型之后，可以使用它对新的图像进行预测。对模型的线性输出 logits 添加 `softmax` 层，可以将 logits 转换为易于理解的概率值：
+训练好模型之后，可以使用它对新的图像进行预测。在模型的线性输出 logits 后添加 `softmax` 层，可以将 logits 转换为易于理解的概率值：
 
 ```python
 probability_model = tf.keras.Sequential([model, 
@@ -292,7 +293,7 @@ array([3.3191598e-06, 2.0171269e-10, 1.8867622e-07, 8.0915434e-09,
        1.4048818e-06, 9.7801697e-01], dtype=float32)
 ```
 
-单个预测结果是由 10 个数字组成的数组，每个数字代表了图像属于该类别的概率。可以查看哪个标签对应的概率值最大：
+单个预测结果是包含 10 个数字的数组，每个数字代表了图像属于该类别的概率。可以查看哪个标签对应的概率值最大：
 
 ```python
 np.argmax(predictions[0])

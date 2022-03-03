@@ -5,10 +5,9 @@
 - [TensorFlow 2 快速入门（初学者）](tutorials/quickstart_beginner.md)
 - [TensorFlow 2 快速入门（专家）](tutorials/quickstart_experts.md)
 
+**Keras 基础**
 
-### Keras 基础
-
-- [基本图像分类：Fashion MNIST 分类](tutorials/keras_begin/basic_image_classification.md)
+- [图像分类：Fashion MNIST 分类](tutorials/keras_begin/image_classification.md)
 - [基本文本分类](tutorials/keras_begin/basic_text_classification.md)
 - [过拟合和欠拟合](tutorials/keras_begin/overfit_underfit.md)
 
