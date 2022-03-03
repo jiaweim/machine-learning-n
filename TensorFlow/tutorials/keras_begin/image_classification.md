@@ -22,15 +22,13 @@
 
 ## 简介
 
-下面训练神经网络模型对衣服的图像进行分类，包括运动鞋（sneaker）和衬衫（shirt）等。如果部分细节无法理解也没关系，主要是为了建立对 TensorFlow 的完整流程的感性认识。
+下面训练神经网络模型来分类服装图像，包括运动鞋（sneaker）和衬衫（shirt）等。如果部分细节无法理解也没关系，主要是为了建立对 TensorFlow 的完整流程的感性认识。
 
 这个模型使用 `tf.keras` API 构建。
 
 ```python
-# TensorFlow and tf.keras
 import tensorflow as tf
 
-# Helper libraries
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -43,11 +41,11 @@ print(tf.__version__)
 
 ## 导入 Fashion MNIST 数据集
 
-Fashion MNIST 数据集包含 10 个类别共 70,000 张灰度图片，均为低分辨率（28*28 pixels）的衣服，如下图所示：
+Fashion MNIST 数据集包含 10 个类别共 70,000 张灰度图片，均为低分辨率（28*28 pixels）的服装图片，如下图所示：
 
 ![](images/2021-12-30-16-03-49.png)
 
-Fashion MNIST 旨在替代经典的 MNIST 数据集，MNIST 经常被用作计算机视觉机器学习程序中的 "Hello, World"。该数据集包含手写数字（0, 1, 2,...,9）图像，格式与 Fashion MNIST 一样。
+Fashion MNIST 旨在替代经典的 MNIST 数据集。MNIST 经常被用作计算机视觉机器学习程序中的 "Hello, World"。该数据集包含手写数字（0, 1, 2,...,9）图像，格式与 Fashion MNIST 一样。
 
 对 Fashion MNIST 数据集进行分类比 MNIST 更难一点。这两个数据集都相对较小，适合用来验证算法，是测试和调试代码很好的起点。使用 60,000 张图像训练模型，10,000 张图片评估模型。TensorFlow 内嵌有 Fashion MNIST 数据集，可以直接加载：
 
