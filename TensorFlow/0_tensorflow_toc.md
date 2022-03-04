@@ -11,7 +11,7 @@
 - [基本文本分类](tutorials/keras_begin/basic_text_classification.md)
 - [过拟合和欠拟合](tutorials/keras_begin/overfit_underfit.md)
 
-### Text
+## Text
 
 - [使用 RNN 生成文本](tutorials/text/text_generation.md)
 
@@ -42,7 +42,7 @@
 
 ## 文本
 
-
+- [词嵌入](text/word_embeddings.md)
 
 ## 保存模型
 
