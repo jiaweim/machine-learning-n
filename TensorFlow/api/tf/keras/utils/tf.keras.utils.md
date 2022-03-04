@@ -38,7 +38,7 @@
 |save_img(...)|Saves an image stored as a Numpy array to a path or file object.|
 |serialize_keras_object(...)|Serialize a Keras object into a JSON-compatible representation.|
 |set_random_seed(...)|Sets all random seeds for the program (Python, NumPy, and TensorFlow).|
-|text_dataset_from_directory(...)|Generates a tf.data.Dataset from text files in a directory.|
+|[text_dataset_from_directory(...)](text_dataset_from_directory.md)|Generates a tf.data.Dataset from text files in a directory.|
 |timeseries_dataset_from_array(...)|Creates a dataset of sliding windows over a timeseries provided as array.|
 |to_categorical(...)|Converts a class vector (integers) to binary class matrix.|
 |unpack_x_y_sample_weight(...)|Unpacks user-provided data tuple.|
