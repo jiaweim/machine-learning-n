@@ -1,6 +1,7 @@
 # tf.data.Dataset
 
 - [tf.data.Dataset](#tfdatadataset)
+  - [简介](#简介)
   - [方法](#方法)
     - [batch](#batch)
     - [cache](#cache)
@@ -14,6 +15,19 @@
 2022-01-18, 16:40
 ***
 
+## 简介
+
+```python
+tf.data.Dataset(
+    variant_tensor
+)
+```
+
+表示元素集合。
+
+
+
+
 ## 方法
 
 ### batch
@@ -24,6 +38,35 @@ batch(
     name=None
 )
 ```
+
+将此数据集的元素组合成批量。例如：
+
+```python
+>>> dataset = tf.data.Dataset.range(8)
+>>> dataset = dataset.batch(3)
+>>> list(dataset.as_numpy_iterator())
+[array([0, 1, 2], dtype=int64),
+ array([3, 4, 5], dtype=int64),
+ array([6, 7], dtype=int64)]
+```
+
+```python
+>>> dataset = tf.data.Dataset.range(8)
+>>> dataset = dataset.batch(3, drop_remainder=True)
+>>> list(dataset.as_numpy_iterator())
+[array([0, 1, 2], dtype=int64), array([3, 4, 5], dtype=int64)]
+```
+
+生成的元素多了一个大小为 `batch_size` 的维度（如果无法整除，最后一个元素为 `N % batch_size`）。如果你的程序依赖于具有相同外部维度的批处理，则应该将 `drop_remainder` 设置为 `True`，以避免产生较小的 batch。
+
+|参数|说明|
+|---|---|
+|batch_size|[tf.int64](../tf.md) 标量 [tf.Tensor](../Tensor.md)，合并成单个 batch 的连续元素数目|
+|drop_remainder|(Optional.) [tf.bool](../tf.md) 标量 [tf.Tensor](../Tensor.md)，当最后一个 batch 的元素个数小于 `batch_size` 时是否删除该 batch，默认不删除|
+|num_parallel_calls|(Optional.) [tf.int64](../tf.md) 标量 [tf.Tensor](../Tensor.md)，并行异步计算的 batch 数。如果未指定，则按顺序计算。如果使用 [tf.data.AUTOTUNE](tf.data.md)，则根据可用资源动态设置|
+|deterministic|(Optional.)当指定 `num_parallel_calls`，该 boolean 用于指定转换生成元素的顺序。如果为 `False`，则允许生成无序元素，牺牲确定性换区性能。默认为 True。|
+|name|(Optional.) A name for the tf.data operation.|
+
 
 ### cache
 

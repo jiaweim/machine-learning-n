@@ -296,7 +296,7 @@
 
 |成员|说明|其它|
 |---|---|---|
-|version|'2.7.0'||
+|version|'2.8.0'||
 |bfloat16|Instance of tf.dtypes.DType|16-bit bfloat (brain floating point)|
 |bool|Instance of tf.dtypes.DType|Boolean|
 |complex128|Instance of tf.dtypes.DType|128-bit complex.|
