@@ -11,9 +11,13 @@
 - [基本文本分类](tutorials/keras_begin/basic_text_classification.md)
 - [过拟合和欠拟合](tutorials/keras_begin/overfit_underfit.md)
 
-## Text
+## Keras
 
-- [使用 RNN 生成文本](tutorials/text/text_generation.md)
+- [序列模型 API](guide/keras/sequential_model.md)
+- [函数 API](guide/keras/functional.md)
+- [RNN with keras](guide/keras/keras_rnn.md)
+- [Masking and padding with Keras](guide/keras/masking_and_padding.md)
+- [自定义 Layer 和 Model](guide/keras/custom_layers_and_models.md)
 
 ## 指南
 
@@ -27,13 +31,6 @@
 - [模块、模型和层](guide/basic/basic_module.md)
 - [训练循环基础](guide/basic/basic_training_loop.md)
 
-### keras
-
-- [序列模型 API](guide/keras/sequential_model.md)
-- [函数 API](guide/keras/functional.md)
-- [RNN with keras](guide/keras/keras_rnn.md)
-- [Masking and padding with Keras](guide/keras/masking_and_padding.md)
-
 ### 数据输入管道
 
 - [构建 TensorFlow 数据输入管道](guide/data/tf.data.md)
@@ -42,6 +39,7 @@
 
 ## 文本
 
+- [使用 RNN 生成文本](tutorials/text/text_generation.md)
 - [词嵌入](text/word_embeddings.md)
 
 ## 保存模型

@@ -11,6 +11,7 @@
     - [预测任务](#预测任务)
     - [创建训练样本和目标值](#创建训练样本和目标值)
     - [创建训练 batches](#创建训练-batches)
+  - [构建模型](#构建模型)
   - [参考](#参考)
 
 2022-02-11, 17:15
@@ -327,7 +328,34 @@ Target: b'irst Citizen:\nBefore we proceed any further, hear me speak.\n\nAll:\n
 
 ### 创建训练 batches
 
-使用 [tf.data](../api/tf/data/tf.data.md)
+前面使用 [tf.data](../api/tf/data/tf.data.md) 将文本拆分为序列集合。将输入输入模型之前，还需要将数据打乱，并打包成 batches。
+
+```python
+# Batch size
+BATCH_SIZE = 64
+
+# Buffer size to shuffle the dataset
+# (TF data is designed to work with possibly infinite sequences,
+# so it doesn't attempt to shuffle the entire sequence in memory. Instead,
+# it maintains a buffer in which it shuffles elements).
+BUFFER_SIZE = 10000
+
+dataset = (
+    dataset
+    .shuffle(BUFFER_SIZE)
+    .batch(BATCH_SIZE, drop_remainder=True)
+    .prefetch(tf.data.experimental.AUTOTUNE))
+
+dataset
+```
+
+```sh
+<PrefetchDataset element_spec=(TensorSpec(shape=(64, 100), dtype=tf.int64, name=None), TensorSpec(shape=(64, 100), dtype=tf.int64, name=None))>
+```
+
+## 构建模型
+
+下面通过扩展 ``
 
 ## 参考
 
