@@ -39,7 +39,7 @@ batch(
 )
 ```
 
-将此数据集的元素组合成批量。例如：
+将此数据集的元素进行组合成批量，返回新的 `Dataset`。例如：
 
 ```python
 >>> dataset = tf.data.Dataset.range(8)
@@ -186,6 +186,24 @@ prefetch(
 )
 ```
 
+从该数据集预先取一部分元素创建 `Dataset`，返回 `Dataset`。
+
+大部分数据集输入管道应该以调用 `prefetch` 结尾。这样在处理当前元素时同时在准备后面的元素，从而提高吞吐量，降低延迟，但单价是使用额外的内存来存储预取的元素。
+
+> ⭐：和其它 `Dataset` 方法一样，`prefetch` 对输入数据集的元素进行操作，没有样本和批量的概念。`examples.prefetch(2)` 将预取 2 个元素（即 2 个样本），而 `examples.batch(20).prefetch(2)` 虽然也是预取 2 个元素，但每个元素为 1 个批量，每个批量包含 20 个元素。
+
+```python
+>>> dataset = tf.data.Dataset.range(3)
+>>> dataset = dataset.prefetch(2)
+>>> list(dataset.as_numpy_iterator())
+[0, 1, 2]
+```
+
+|参数|说明|
+|---|---|
+|buffer_size|`tf.int64` 类型的标量 `tf.Tensor`, 表示预取时缓冲元素的最大个数。如果使用 `tf.data.AUTOTUNE`，则动态调整缓冲区大小|
+|name|Optional. A name for the tf.data transformation.|
+
 ### shuffle
 
 ```python
@@ -194,15 +212,46 @@ shuffle(
 )
 ```
 
+对数据集的元素随机打乱。
+
+该数据集用 `buffer_size` 个元素填充缓冲区，然后从这个缓冲区中随机取样，再从数据集中取新的数据替换选中的元素。要实现完美洗牌，缓冲区大小不能小于数据集大小。
+
+例如，如果数据集包含 10,000 个 元素，但是 `buffer_size` 设置为 1,000，则 `shuffle` 首先从缓冲区的 1000 个元素中随机选择一个元素，缓冲区空出来的一个位置由第 1001 元素替换，从而保持缓冲区大小 1,000 不变。
+
+`reshuffle_each_iteration` 控制不同 epoch 的洗牌顺序是否不同。由于在 TF 2.0 中 `tf.data.Dataset` 对象是 Python 可迭代对象，所以可以通过 Python 迭代创建 epoch：
+
+```python
+dataset = tf.data.Dataset.range(3)
+dataset = dataset.shuffle(3, reshuffle_each_iteration=True)
+list(dataset.as_numpy_iterator())
+# [1, 0, 2]
+list(dataset.as_numpy_iterator())
+# [1, 2, 0]
+```
+
+```python
+dataset = tf.data.Dataset.range(3)
+dataset = dataset.shuffle(3, reshuffle_each_iteration=False)
+list(dataset.as_numpy_iterator())
+# [1, 0, 2]
+list(dataset.as_numpy_iterator())
+# [1, 0, 2]
+```
+
+|参数|说明|
+|---|---|
+|buffer_size|[tf.int64](../tf.md) 类型 [tf.Tensor](../Tensor.md) 标量，缓冲区大小。|
+|seed|(Optional.)[tf.int64](../tf.md) 类型 [tf.Tensor](../Tensor.md) 标量，表示随机 seed|
+|reshuffle_each_iteration|(Optional.) boolean 值，表示每次迭代数据集时是否重新洗牌(Defaults to True.)|
+|name|(Optional.) A name for the tf.data operation.|
+
 ### take
 
 ```python
-take(
-    count, name=None
-)
+take(count, name=None)
 ```
 
-使用数据集最多 `count` 个元素创建一个 `Dataset`。
+使用数据集至多 `count` 个元素创建一个 `Dataset`。即如果数据集包含的元素个数少于 `count`，则有多少用多少。
 
 ```python
 >>> dataset = tf.data.Dataset.range(10)
@@ -211,9 +260,10 @@ take(
 [0, 1, 2]
 ```
 
-- `count`
-
-`tf.int64` 类型的标量 `tf.Tensor`，表示从该数据集中取出 `count` 个元素用来创建新数据集。如果 `count` 为 -1，或者 `count` 大于该数据集的 size，则新数据包含该数据集全部元素。
+|参数|说明|
+|---|---|
+|count|`tf.int64` 类型的标量 `tf.Tensor`，表示从该数据集中取出 `count` 个元素创建新数据集。如果 `count` 为 -1，或者 `count` 大于该数据集的 size，则新数据包含该数据集全部元素。|
+|name|(Optional.) A name for the tf.data operation.|
 
 ## 参考
 

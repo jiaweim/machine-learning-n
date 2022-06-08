@@ -12,6 +12,13 @@
     - [创建训练样本和目标值](#创建训练样本和目标值)
     - [创建训练 batches](#创建训练-batches)
   - [构建模型](#构建模型)
+  - [试用模型](#试用模型)
+  - [训练模型](#训练模型)
+    - [设置 optimizer 和 loss function](#设置-optimizer-和-loss-function)
+    - [设置 checkpoints](#设置-checkpoints)
+    - [开始训练](#开始训练)
+  - [生成文本](#生成文本)
+  - [自定义训练](#自定义训练)
   - [参考](#参考)
 
 2022-02-11, 17:15
@@ -355,7 +362,262 @@ dataset
 
 ## 构建模型
 
-下面通过扩展 ``
+下面通过扩展 [keras.Model](../api/tf/keras/Model.md) 类定义模型。
+
+该模型包含三层：
+
+- [tf.keras.layers.Embedding](../api/tf/keras/layers/Embedding.md)：输入层。可训练的查找表，将字符 ID 映射到维度为 `embedding_dim` 的向量；
+- [tf.keras.layers.GRU](../api/tf/keras/layers/GRU.md)：一种 RNN，大小为 `units=rnn_units`，这里也可以使用 LSTM。
+- [tf.keras.layers.Dense](../api/tf/keras/layers/Dense.md)：输出层，输出 `vocab_size`。它为词汇表的每个字符输出一个 logit。
+
+```python
+# 以字符表示的词汇表长度
+vocab_size = len(vocab)
+
+# 嵌入维度
+embedding_dim = 256
+
+# RNN 单元数
+rnn_units = 1024
+```
+
+```python
+class MyModel(tf.keras.Model):
+  def __init__(self, vocab_size, embedding_dim, rnn_units):
+    super().__init__(self)
+    self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
+    self.gru = tf.keras.layers.GRU(rnn_units,
+                                   return_sequences=True,
+                                   return_state=True)
+    self.dense = tf.keras.layers.Dense(vocab_size)
+
+  def call(self, inputs, states=None, return_state=False, training=False):
+    x = inputs
+    x = self.embedding(x, training=training)
+    if states is None:
+      states = self.gru.get_initial_state(x)
+    x, states = self.gru(x, initial_state=states, training=training)
+    x = self.dense(x, training=training)
+
+    if return_state:
+      return x, states
+    else:
+      return x
+```
+
+```python
+model = MyModel(
+    # Be sure the vocabulary size matches the `StringLookup` layers.
+    vocab_size=len(ids_from_chars.get_vocabulary()),
+    embedding_dim=embedding_dim,
+    rnn_units=rnn_units)
+```
+
+对每个字符，模型查找嵌入，将嵌入输入 GRU 运行一个时间步，再输入 Dense 层生成 logits 来预测下一个字符：
+
+![](images/2022-03-09-23-21-45.png)
+
+> 😊:这里也可以使用 [keras.Sequential](../api/tf/keras/Sequential.md) 模型。为了稍后能生成文本，需要管理 RNN 内部状态。提前包含状态的输入和输出选项比稍后重整模型要简单得多。
+
+## 试用模型
+
+运行模型，看看它的行为是否符合预期。
+
+首先检查输出 shape：
+
+```python
+for input_example_batch, target_example_batch in dataset.take(1):
+    example_batch_predictions = model(input_example_batch)
+    print(example_batch_predictions.shape, "# (batch_size, sequence_length, vocab_size)")
+```
+
+```sh
+(64, 100, 66) # (batch_size, sequence_length, vocab_size)
+```
+
+在上例中，输出序列长度为 100，但模型可以处理任意长度的输入：
+
+```python
+model.summary()
+```
+
+```sh
+Model: "my_model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ embedding (Embedding)       multiple                  16896     
+                                                                 
+ gru (GRU)                   multiple                  3938304   
+                                                                 
+ dense (Dense)               multiple                  67650     
+                                                                 
+=================================================================
+Total params: 4,022,850
+Trainable params: 4,022,850
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+为了从模型获得实际的预测，需要从输出分布中取样，以获得实际字符索引。该分布由词汇表上的 logit 定义。
+
+> 从输出分布中取样很重要，
+
+试一下这批数据的第一个样本：
+
+```python
+sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+```
+
+在每个时间步预测下一个字符索引：
+
+```python
+sampled_indices
+```
+
+```sh
+array([29, 23, 11, 14, 42, 27, 56, 29, 14,  6,  9, 65, 22, 15, 34, 64, 44,
+       41, 11, 51, 10, 44, 42, 56, 13, 50,  1, 33, 45, 23, 28, 43, 12, 62,
+       45, 60, 43, 62, 38, 19, 50, 35, 19, 14, 60, 56, 10, 64, 39, 56,  2,
+       51, 63, 42, 39, 64, 43, 20, 20, 17, 40, 15, 52, 46,  7, 25, 34, 43,
+       11, 11, 31, 34, 38, 44, 22, 49, 23,  4, 27,  0, 31, 39,  5,  9, 43,
+       58, 33, 30, 49,  6, 63,  5, 50,  4,  6, 14, 62,  3,  7, 35])
+```
+
+解码，看看这个未经训练的模型预测的文本：
+
+```python
+print("Input:\n", text_from_ids(input_example_batch[0]).numpy())
+print()
+print("Next Char Predictions:\n", text_from_ids(sampled_indices).numpy())
+```
+
+```sh
+Input:
+ b":\nWherein the king stands generally condemn'd.\n\nBAGOT:\nIf judgement lie in them, then so do we,\nBeca"
+
+Next Char Predictions:
+ b"PJ:AcNqPA'.zIBUyeb:l3ecq?k\nTfJOd;wfudwYFkVFAuq3yZq lxcZydGGDaBmg,LUd::RUYeIjJ\\(N[UNK]RZ&.dsTQj'x&k\\)'Aw!,V"
+```
+
+## 训练模型
+
+此时，问题可以视为一个标准的分类模型。给定前面的 RNN 状态和当前时间步的输入，预测下一个字符的类别。
+
+### 设置 optimizer 和 loss function
+
+标准 [tf.keras.losses.sparse_categorical_crossentropy](../api/tf/keras/metrics/sparse_categorical_crossentropy.md) 损失函数适合该情况，它应用于预测的最后一个维度。
+
+由于模型返回 logit，所以要添加 `from_logits` 标签：
+
+```python
+loss = tf.losses.SparseCategoricalCrossentropy(from_logits=True)
+```
+
+```python
+example_batch_mean_loss = loss(target_example_batch, example_batch_predictions)
+print("Prediction shape: ", example_batch_predictions.shape, " # (batch_size, sequence_length, vocab_size)")
+print("Mean loss:        ", example_batch_mean_loss)
+```
+
+```sh
+Prediction shape:  (64, 100, 66)  # (batch_size, sequence_length, vocab_size)
+Mean loss:         tf.Tensor(4.1895466, shape=(), dtype=float32)
+```
+
+刚初始化的模型输出 logit 接近随机分布。为了证实这一点，可以检查平均损失的指数应该接近词汇表的大小。更高的损失均值意味着模型确定其答案是错误的，说明没初始化好：
+
+```python
+tf.exp(example_batch_mean_loss).numpy()
+```
+
+```sh
+65.99286
+```
+
+使用 [tf.keras.Model.compile](../api/tf/keras/Model.md) 配置训练过程。使用 [tf.keras.optimizers.Adam](../api/tf/keras/optimizers/Adam.md)和上面的损失函数：
+
+```python
+model.compile(optimizer='adam', loss=loss)
+```
+
+### 设置 checkpoints
+
+使用 [tf.keras.callbacks.ModelCheckpoint](../api/tf/keras/callbacks/ModelCheckpoint.md) 来保证训练期间保存检查点：
+
+```python
+# Directory where the checkpoints will be saved
+checkpoint_dir = './training_checkpoints'
+# Name of the checkpoint files
+checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}")
+
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_prefix,
+    save_weights_only=True)
+```
+
+### 开始训练
+
+## 生成文本
+
+使用该模型生成文本的最简单方法是在训练中运行，并在执行时跟踪模型内部状态。
+
+![](images/2022-03-10-23-32-56.png)
+
+每次调用模型，传入一个文本和内部状态，模型返回下一个字符的预测及新状态，将预测和状态传回模型继续生成文本。
+
+以下是单步预测：
+
+```python
+class OneStep(tf.keras.Model):
+  def __init__(self, model, chars_from_ids, ids_from_chars, temperature=1.0):
+    super().__init__()
+    self.temperature = temperature
+    self.model = model
+    self.chars_from_ids = chars_from_ids
+    self.ids_from_chars = ids_from_chars
+
+    # 创建 mask 以避免生成 "[UNK]"
+    skip_ids = self.ids_from_chars(['[UNK]'])[:, None]
+    sparse_mask = tf.SparseTensor(
+        # Put a -inf at each bad index.
+        values=[-float('inf')]*len(skip_ids),
+        indices=skip_ids,
+        # Match the shape to the vocabulary
+        dense_shape=[len(ids_from_chars.get_vocabulary())])
+    self.prediction_mask = tf.sparse.to_dense(sparse_mask)
+
+  @tf.function
+  def generate_one_step(self, inputs, states=None):
+    # Convert strings to token IDs.
+    input_chars = tf.strings.unicode_split(inputs, 'UTF-8')
+    input_ids = self.ids_from_chars(input_chars).to_tensor()
+
+    # Run the model.
+    # predicted_logits.shape is [batch, char, next_char_logits]
+    predicted_logits, states = self.model(inputs=input_ids, states=states,
+                                          return_state=True)
+    # Only use the last prediction.
+    predicted_logits = predicted_logits[:, -1, :]
+    predicted_logits = predicted_logits/self.temperature
+    # Apply the prediction mask: prevent "[UNK]" from being generated.
+    predicted_logits = predicted_logits + self.prediction_mask
+
+    # Sample the output logits to generate token IDs.
+    predicted_ids = tf.random.categorical(predicted_logits, num_samples=1)
+    predicted_ids = tf.squeeze(predicted_ids, axis=-1)
+
+    # Convert from token ids to characters
+    predicted_chars = self.chars_from_ids(predicted_ids)
+
+    # Return the characters and model state.
+    return predicted_chars, states
+```
+
+## 自定义训练
+
+
 
 ## 参考
 

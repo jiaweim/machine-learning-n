@@ -1,12 +1,19 @@
 # tf.keras.metrics
 
 - [tf.keras.metrics](#tfkerasmetrics)
+  - [简介](#简介)
   - [类](#类)
   - [函数](#函数)
   - [参考](#参考)
 
 2022-01-01, 14:20
-***
+****
+
+## 简介
+
+指标（Metric）是用来判断模型性能的函数。
+
+指标函数与损失函数相似，不同的是，在训练模型时不使用指标函数的计算结果。任何损失函数都可以作为指标函数使用。
 
 ## 类
 
@@ -62,7 +69,7 @@
 |MSE(...)|Computes the mean squared error between labels and predictions.|
 |MSLE(...)|Computes the mean squared logarithmic error between y_true and y_pred.|
 |binary_accuracy(...)|Calculates how often predictions match binary labels.|
-|binary_crossentropy(...)|Computes the binary crossentropy loss.|
+|[binary_crossentropy(...)](binary_crossentropy.md)|Computes the binary crossentropy loss.|
 |categorical_accuracy(...)|Calculates how often predictions match one-hot labels.|
 |categorical_crossentropy(...)|Computes the categorical crossentropy loss.|
 |deserialize(...)|Deserializes a serialized metric class/function instance.|

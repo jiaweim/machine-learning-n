@@ -33,6 +33,7 @@
 |model_to_dot(...)|Convert a Keras model to dot format.|
 |normalize(...)|Normalizes a Numpy array.|
 |pack_x_y_sample_weight(...)|Packs user-provided data into a tuple.|
+|[pad_sequences(...)](pad_sequences.md)|将序列填充到相同长度|
 |plot_model(...)|Converts a Keras model to dot format and save to a file.|
 |register_keras_serializable(...)|Registers an object with the Keras serialization framework.|
 |save_img(...)|Saves an image stored as a Numpy array to a path or file object.|

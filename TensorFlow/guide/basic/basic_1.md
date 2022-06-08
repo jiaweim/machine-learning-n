@@ -2,8 +2,8 @@
 
 - [TensorFlow 基础](#tensorflow-基础)
   - [简介](#简介)
-  - [Tensor](#tensor)
-  - [Variable](#variable)
+  - [张量](#张量)
+  - [变量](#变量)
   - [自动微分](#自动微分)
   - [Graph 和 tf.function](#graph-和-tffunction)
   - [Module, layer, model](#module-layer-model)
@@ -15,18 +15,19 @@
 
 ## 简介
 
-这部分对 TensorFlow 的基础知识进行一个简单概述。下面的每一部分，都对应一个更详细的指南。
+这部分对 TensorFlow 的基础知识进行一个简单概述。
 
 TensorFlow 是一个端到端的机器学习平台，支持：
 
 - 基于多维数组的数值计算（类似 NumPy）；
 - GPU 和分布式处理；
 - 自动微分；
-- 模型的构建、训练和导出。
+- 模型的构建、训练和导出；
+- ...
 
-## Tensor
+## 张量
 
-TensorFlow 将高维数组称为张量（tensor），以 `tf.Tensor` 对象表示。下面是一个二维（2D）tensor：
+TensorFlow 将高维数组称为张量（tensor），以 `tf.Tensor` 对象表示。下面是一个二维张量：
 
 ```python
 >>> import tensorflow as tf
@@ -42,7 +43,7 @@ TensorShape([2, 3])
 tf.float32
 ```
 
-`shape` 和 `dtype` 是 `tf.Tensor` 最重要的属性：
+`shape` 和 `dtype` 是 `tf.Tensor` 两个最重要的属性：
 
 - `Tensor.shape`，张量在各个轴上的大小；
 - `Tensor.dtype`，张量包含的元素的类型。
@@ -50,6 +51,8 @@ tf.float32
 TensorFlow 实现了张量的标准数学运算，以及许多用于机器学习的运算。例如：
 
 ```python
+>>> x = tf.constant([[1., 2., 3.],
+                     [4., 5., 6.]])
 >>> x + x
 <tf.Tensor: shape=(2, 3), dtype=float32, numpy=
 array([[ 2.,  4.,  6.],
@@ -78,7 +81,7 @@ array([[0.09003057, 0.24472848, 0.6652409 ],
 <tf.Tensor: shape=(), dtype=float32, numpy=21.0>
 ```
 
-在 CPU 上运行大量运算可能会很慢。通过合理配置，TensorFlow 可以使用加速硬件（如 GPU）快速执行操作。
+在 CPU 上运行大型运算可能会很慢。通过配置，TensorFlow 可以使用加速硬件（如 GPU）快速执行操作。
 
 ```python
 if tf.config.list_physical_devices('GPU'):
@@ -87,11 +90,11 @@ else:
   print("TensorFlow **IS NOT** using the GPU")
 ```
 
-Tensor 的详细信息可以参考 [Tensor 指南](basic_tensor.md)
+详情可以参考 [Tensor 指南](basic_tensor.md)
 
-## Variable
+## 变量
 
-常规的 `tf.Tensor` 对象时不可变的（immutable）。要在 TensorFlow 中存储类似模型权重等状态可变的值，使用 `tf.Variable`。
+常规 `tf.Tensor` 对象不可变（immutable）。要在 TensorFlow 中存储类似模型权重状态可变的值，使用 `tf.Variable`。
 
 ```python
 >>> var = tf.Variable([0.0, 0.0, 0.0])
@@ -103,13 +106,11 @@ Tensor 的详细信息可以参考 [Tensor 指南](basic_tensor.md)
 <tf.Variable 'UnreadVariable' shape=(3,) dtype=float32, numpy=array([2., 3., 4.], dtype=float32)>
 ```
 
-详细可参考 [Variable 指南](basic_variable.md)。
+详情可参考 [Variable 指南](basic_variable.md)。
 
 ## 自动微分
 
-梯度下降等算法是现代机器学习的基石。为了实现这些算法，TensorFlow 实现了自动微分（autodiff），即使用微积分计算梯度。
-
-我们通常会使用自动微分计算模型的误差（error）或损失（loss）相对权重（weight）的梯度。例如：
+梯度下降及其相关算法是现代机器学习的基石。为了实现梯度下降，TensorFlow 实现了自动微分（autodiff），即使用微积分计算梯度。我们通常会使用自动微分计算模型的误差（error）或损失（loss）相对权重（weight）的梯度。例如：
 
 ```python
 >>> x = tf.Variable(1.0)
