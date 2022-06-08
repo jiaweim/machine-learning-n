@@ -31,6 +31,11 @@
 - [模块、模型和层](guide/basic/basic_module.md)
 - [训练循环基础](guide/basic/basic_training_loop.md)
 
+## Keras 使用指南
+
+- [用 Keras 屏蔽和填充序列](guide/keras/masking_and_padding.md)
+
+
 ### 数据输入管道
 
 - [构建 TensorFlow 数据输入管道](guide/data/tf.data.md)
