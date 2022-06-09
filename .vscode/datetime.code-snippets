@@ -8,7 +8,7 @@
 	// Example:
 	"datetime": {
 		"scope": "",
-		"prefix": ["date", "date-time"],
+		"prefix": ["date-time"],
 		"body": [
 			"$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE, $CURRENT_HOUR:$CURRENT_MINUTE",
 		],

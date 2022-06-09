@@ -17,24 +17,31 @@
   - [参考](#参考)
 
 2021-12-20, 17:36
+@author Jiawei Mao
 ***
 
 ## 简介
 
-张量（Tensor）是具有统一类型（`dtype`）的多维数组，功能和 NumPy 的 `np.arrays` 类似。
+张量（Tensor）是具有统一类型（`dtype`）的多维数组，功能和 NumPy 的 `np.arrays` 类似。在 [tf.dtypes.DType](../../api/tf/dtypes/DType.md) 可以查看 TensorFlow 支持的所有 `dtypes`。
 
-所有的张量都是不可变的（immutable），因此不能更新张量内容，只能创建新的张量。
+所有的张量都是不可变的（immutable），因此不能修改张量内容，只能创建新的张量。
 
 ## 基础
 
 下面创建一些基本张量。
 
-首先创建一个标量，或 0-阶（rank-0）张量。0-阶张量只包含一个值，没有轴（axes）：
+首先创建一个标量，即 0-阶（rank-0）张量。0-阶张量只包含一个值，没有轴（axes）：
 
 ```python
->>> rank_0_tensor = tf.constant(0)
->>> print(rank_0_tensor)
-tf.Tensor(0, shape=(), dtype=int32)
+import tensorflow as tf
+import numpy as np
+
+rank_0_tensor = tf.constant(4) # 从输出可以看出，这是个 int32 类型张量
+print(rank_0_tensor)
+```
+
+```sh
+tf.Tensor(4, shape=(), dtype=int32)
 ```
 
 向量或1-阶（rank-1）张量类似列表，包含一个轴：

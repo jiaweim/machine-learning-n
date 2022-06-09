@@ -1,5 +1,31 @@
 # TensorFlow
 
+- [TensorFlow](#tensorflow)
+  - [TensorFlow 基础](#tensorflow-基础)
+  - [教程](#教程)
+  - [Keras](#keras)
+  - [Keras 使用指南](#keras-使用指南)
+    - [数据输入管道](#数据输入管道)
+  - [文本](#文本)
+  - [保存模型](#保存模型)
+  - [性能](#性能)
+  - [学习笔记](#学习笔记)
+  - [API](#api)
+    - [tf](#tf)
+  - [参考](#参考)
+
+***
+
+## TensorFlow 基础
+
+- [概述](guide/basic/basic.md)
+- [Tensor](guide/basic/basic_tensor.md)
+- [Variable](guide/basic/basic_variable.md)
+- [自动微分和梯度](guide/basic/basic_autodiff.md)
+- [graph 执行](guide/basic/basic_graph.md)
+- [模块、模型和层](guide/basic/basic_module.md)
+- [训练循环基础](guide/basic/basic_training_loop.md)
+
 ## 教程
 
 - [TensorFlow 2 快速入门（初学者）](tutorials/quickstart_beginner.md)
@@ -19,17 +45,6 @@
 - [Masking and padding with Keras](guide/keras/masking_and_padding.md)
 - [自定义 Layer 和 Model](guide/keras/custom_layers_and_models.md)
 
-## 指南
-
-### TensorFlow 基础
-
-- [概述](guide/basic/basic_1.md)
-- [Tensor](guide/basic/basic_tensor.md)
-- [Variable](guide/basic/basic_variable.md)
-- [自动微分和梯度](guide/basic/basic_autodiff.md)
-- [graph 执行](guide/basic/basic_graph.md)
-- [模块、模型和层](guide/basic/basic_module.md)
-- [训练循环基础](guide/basic/basic_training_loop.md)
 
 ## Keras 使用指南
 

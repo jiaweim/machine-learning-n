@@ -6,16 +6,17 @@
   - [变量](#变量)
   - [自动微分](#自动微分)
   - [Graph 和 tf.function](#graph-和-tffunction)
-  - [Module, layer, model](#module-layer-model)
-  - [Training loop](#training-loop)
+  - [Module, layer 和 model](#module-layer-和-model)
+  - [训练循环](#训练循环)
   - [参考](#参考)
 
-2021-12-20, 17:01
-***
+最后更新：2022-06-09, 15:50
+@author Jiawei Mao
+****
 
 ## 简介
 
-这部分对 TensorFlow 的基础知识进行一个简单概述。
+下面对 TensorFlow 的基础知识进行一个简要概述。
 
 TensorFlow 是一个端到端的机器学习平台，支持：
 
@@ -27,23 +28,27 @@ TensorFlow 是一个端到端的机器学习平台，支持：
 
 ## 张量
 
-TensorFlow 将高维数组称为张量（tensor），以 `tf.Tensor` 对象表示。下面是一个二维张量：
+TensorFlow 将高维数组称为张量（tensor），以 [tf.Tensor](../../api/tf/Tensor.md) 对象表示。下面是一个二维张量：
 
 ```python
->>> import tensorflow as tf
->>> x = tf.constant([[1., 2., 3.],
-                     [4., 5., 6.]])
->>> x
-<tf.Tensor: shape=(2, 3), dtype=float32, numpy=
-array([[1., 2., 3.],
-       [4., 5., 6.]], dtype=float32)>
->>> x.shape
-TensorShape([2, 3])
->>> x.dtype
-tf.float32
+import tensorflow as tf
+
+x = tf.constant([[1., 2., 3.],
+                 [4., 5., 6.]])
+print(x)
+print(x.shape)
+print(x.dtype)
 ```
 
-`shape` 和 `dtype` 是 `tf.Tensor` 两个最重要的属性：
+```sh
+tf.Tensor(
+[[1. 2. 3.]
+ [4. 5. 6.]], shape=(2, 3), dtype=float32)
+(2, 3)
+<dtype: 'float32'>
+```
+
+`shape` 和 `dtype` 是 `tf.Tensor` 最重要的两个属性：
 
 - `Tensor.shape`，张量在各个轴上的大小；
 - `Tensor.dtype`，张量包含的元素的类型。
@@ -81,7 +86,7 @@ array([[0.09003057, 0.24472848, 0.6652409 ],
 <tf.Tensor: shape=(), dtype=float32, numpy=21.0>
 ```
 
-在 CPU 上运行大型运算可能会很慢。通过配置，TensorFlow 可以使用加速硬件（如 GPU）快速执行操作。
+在 CPU 上运行大型运算可能会很慢，TensorFlow 支持使用 GPU 等加速硬件快速执行操作。查看配置环境是否支持 GPU：
 
 ```python
 if tf.config.list_physical_devices('GPU'):
@@ -90,11 +95,11 @@ else:
   print("TensorFlow **IS NOT** using the GPU")
 ```
 
-详情可以参考 [Tensor 指南](basic_tensor.md)
+详情请参考 [Tensor 指南](tensor.md)。
 
 ## 变量
 
-常规 `tf.Tensor` 对象不可变（immutable）。要在 TensorFlow 中存储类似模型权重状态可变的值，使用 `tf.Variable`。
+常规 [tf.Tensor](../../api/tf/Tensor.md) 对象不可变（immutable），在 TensorFlow 中使用 `tf.Variable` 存储可变张量（如模型的权重必须可变）。
 
 ```python
 >>> var = tf.Variable([0.0, 0.0, 0.0])
@@ -106,11 +111,13 @@ else:
 <tf.Variable 'UnreadVariable' shape=(3,) dtype=float32, numpy=array([2., 3., 4.], dtype=float32)>
 ```
 
-详情可参考 [Variable 指南](basic_variable.md)。
+详情请参考 [Variable 指南](variable.md)。
 
 ## 自动微分
 
-梯度下降及其相关算法是现代机器学习的基石。为了实现梯度下降，TensorFlow 实现了自动微分（autodiff），即使用微积分计算梯度。我们通常会使用自动微分计算模型的误差（error）或损失（loss）相对权重（weight）的梯度。例如：
+[梯度下降](https://en.wikipedia.org/wiki/Gradient_descent) 及其相关算法是现代机器学习的基石。
+
+为了实现梯度下降，TensorFlow 实现了自动微分（autodiff），即使用微积分计算梯度。一般用来计算模型的误差（error）或损失（loss）相对权重（weight）的梯度。例如：
 
 ```python
 >>> x = tf.Variable(1.0)
@@ -121,9 +128,9 @@ else:
 <tf.Tensor: shape=(), dtype=float32, numpy=-2.0>
 ```
 
-上面的计算，表示在 $x=1.0$ 时，计算 $y=f(x)=(1^2+2\times 1-5)=-2$。
+在 $x=1.0$ 时，$y=f(x)=(1^2+2\times 1-5)=-2$。
 
-$y$ 的导数为 $y'=f'(x)=(2\times x+2)=4$。TensorFlow 可以自动计算：
+$y$ 的导数 $y'=f'(x)=(2\times x+2)=4$。TensorFlow 可以自动完成该计算过程：
 
 ```python
 >>> with tf.GradientTape() as tape:
@@ -133,18 +140,18 @@ $y$ 的导数为 $y'=f'(x)=(2\times x+2)=4$。TensorFlow 可以自动计算：
 <tf.Tensor: shape=(), dtype=float32, numpy=4.0>
 ```
 
-这个简单的例子只是对单个标量 `x` 求导，TensorFlow 还可以同时对任意数量的张量计算梯度。
+这个例子只是对单个标量 `x` 求导，TensorFlow 可以同时对任意数量的张量计算梯度。
 
-详细可以参考 [梯度和自动微分指南](basic_autodiff.md)。
+详情请参考 [梯度和自动微分指南](autodiff.md)。
 
 ## Graph 和 tf.function
 
-虽然可以像使用 Python 库一样交互式地使用 TensorFlow，TensorFlow 还提供了如下工具：
+除了像使用 Python 库一样交互式地使用 TensorFlow，TensorFlow 还支持：
 
 - **性能优化**，加快训练和推断；
-- **导出模型**，这样在训练完后可以保存模型。
+- **导出模型**，在训练完后保存模型。
 
-要利用这些工具，需要使用 `tf.function` 将纯 TensorFlow 代码和常规 Python 代码区分开：
+要使用这些功能，需要使用 `tf.function` 区分纯 TensorFlow 代码和常规 Python 代码：
 
 ```python
 @tf.function
@@ -153,7 +160,7 @@ def my_func(x):
   return tf.reduce_sum(x)
 ```
 
-在**第一次**运行 `tf.function` 时，虽然是在 Python 中执行，但 TensorFlow 会捕获一个完整的、优化过的计算图（graph），表示函数中 TensorFlow 执行的计算。
+**第一次**运行 [tf.function](../../api/tf/function.md) 在 Python 中执行，TensorFlow 会捕获一个完整的、优化过的计算图（graph），用来表示函数中 TensorFlow 执行的计算。
 
 ```python
 >>> x = tf.constant([1, 2, 3])
@@ -162,7 +169,7 @@ Tracing.
 <tf.Tensor: shape=(), dtype=int32, numpy=6>
 ```
 
-在**下次**继续调用 `my_func`，TensorFlow 只执行优化后的 graph，跳过任何非 TensorFlow 的步骤。如下，调用`my_func` 不再打印 "Tracing"，因为 `print` 是 Python 函数，不是 TensorFlow 函数。
+**再次**调用 `my_func`，TensorFlow 只执行优化后的 graph，跳过非 TensorFlow 步骤。如下所示，再次调用`my_func` 不打印 "Tracing"，因为 `print` 是 Python 函数，而非 TensorFlow 函数。
 
 ```python
 >>> x = tf.constant([10, 9, 8])
@@ -170,23 +177,23 @@ Tracing.
 <tf.Tensor: shape=(), dtype=int32, numpy=27>
 ```
 
-这些捕获的计算图提供两个好处：
+捕获计算图有两个好处：
 
 - 在大多情况下，执行速度显著提高；
 - 可以使用 `tf.saved_model` 保存计算图。
 
-详情参考 [Graph 指南](basic_graph.md)。
+详情请参考 [Graph 指南](graph.md)。
 
-## Module, layer, model
+## Module, layer 和 model
 
-`tf.Module` 是用于管理 `tf.Variable` 对象以及对齐进行操作的 `tf.function` 对象的类。
+[tf.Module](../../api/tf/Module.md) 类用于管理 [tf.Variable](../../api/tf/Variable.md) 对象以及对变量进行操作的 [tf.function](../../api/tf/function.md) 对象。
 
-`tf.Module` 类对于支持两个重要特性是必须的：
+[tf.Module](../../api/tf/Module.md) 类支持两个重要特性：
 
-1. 可以使用 `tf.train.Checkpoint` 保存和恢复变量值。这在训练模型期间内十分有用，因为它可以快速保存和恢复模型状态；
-2. 可以使用 `tf.saved_model` 导入和导出 `tf.Variable` 值和 `tf.function` 计算图。
+1. 支持使用 [tf.train.Checkpoint](../../api/tf/train/Checkpoint.md) 保存和恢复变量值。该功能在训练模型期间十分有用，可用来快速保存和恢复模型状态；
+2. 支持使用 [tf.saved_model](../../api/tf/saved_model/tf.saved_model.md) 导入和导出 `tf.Variable` 值和 `tf.function` 计算图。
 
-下面是一个导出 `tf.Module` 对象的完整示例：
+下面演示导出 [tf.Module](../../api/tf/Module.md) 对象：
 
 ```python
 class MyModule(tf.Module):
@@ -212,7 +219,7 @@ class MyModule(tf.Module):
 INFO:tensorflow:Assets written to: .saved\assets
 ```
 
-保存的模型独立于创建它的代码。保存后可以从 Python，其它语言绑定或 TensorFlow Serving 中重新加载该模型。也可以转到 TensorFlow Lite 或 TensorFlow JS 中运行。
+保存的模型独立于创建它的代码，保存后可以从 Python、其它绑定语言或 [TensorFlow Serving](https://www.tensorflow.org/tfx/serving/docker) 中重新加载该模型。也可以在 TensorFlow Lite 或 TensorFlow JS 中运行。
 
 ```python
 >>> reloaded = tf.saved_model.load(save_path)
@@ -220,15 +227,15 @@ INFO:tensorflow:Assets written to: .saved\assets
 <tf.Tensor: shape=(3,), dtype=int32, numpy=array([3, 6, 9])>
 ```
 
-`tf.keras.layers.Layer` 和 `tf.keras.Model` 类都是在 `tf.Module` 的基础上构建，并提供了便于构建、训练和保存模型的额外方法。
+[tf.keras.layers.Layer](../../api/tf/keras/layers/Layer.md) 和 [tf.keras.Model](../../api/tf/keras/Model.md) 类都是在 [tf.Module](../../api/tf/Module.md) 的基础上构建，只是额外提供了便于构建、训练和保存模型的方法。
 
-详细参考 [模块、层和模型指南](basic_module.md)。
+详情请参考 [模块、层和模型指南](module.md)。
 
-## Training loop
+## 训练循环
 
-现在把上面的功能组合在一起，建立一个基本的模型。
+现在把上面的功能组合在一起，创建一个简单的模型。
 
-首先，创建一些样本数据。生成一组数据点，大致遵循一条二次曲线：
+首先，生成一些样本数据，下面生成一组大致遵循二次曲线的数据点：
 
 ```python
 import matplotlib
@@ -336,7 +343,7 @@ plt.legend()
 
 ![](images/2021-12-20-17-13-53.png)
 
-可以看到，效果还不错。不过在 `tf.keras` 模型中提供了通用的训练工具。不需要自己写 for 循环进行训练。例如：
+可以看到效果还不错。不过 [tf.keras](../../api/tf/keras/tf.keras.md) 模块提供了通用训练工具，不需要自己写 for 循环进行训练。例如，使用 [Model.compile](../../api/tf/keras/Model.md) 和 [Model.fit](../../api/tf/keras/Model.md) 方法实现训练循环：
 
 ```python
 new_model = Model(64)
@@ -365,8 +372,8 @@ plt.title('Keras training progress');
 
 ![](images/2021-12-20-17-20-44.png)
 
-详情可参考 [训练循环指南](basic_training_loop.md)。
+详情请参考 [训练循环指南](basic_training_loop.md)。
 
 ## 参考
 
-- https://tensorflow.google.cn/guide/basics
+- https://www.tensorflow.org/guide/basics
