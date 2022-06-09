@@ -35,7 +35,6 @@
 
 - [用 Keras 屏蔽和填充序列](guide/keras/masking_and_padding.md)
 
-
 ### 数据输入管道
 
 - [构建 TensorFlow 数据输入管道](guide/data/tf.data.md)
@@ -44,8 +43,10 @@
 
 ## 文本
 
-- [使用 RNN 生成文本](tutorials/text/text_generation.md)
+**教程**
+
 - [词嵌入](text/word_embeddings.md)
+- [使用 RNN 生成文本](tutorials/text/text_generation.md)
 
 ## 保存模型
 

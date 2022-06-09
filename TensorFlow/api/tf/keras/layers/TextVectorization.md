@@ -1,4 +1,4 @@
-# tf.keras.layers.TextVectorization
+# TextVectorization
 
 2022-03-04, 22:11
 ***

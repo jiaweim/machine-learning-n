@@ -82,7 +82,7 @@
 |LeakyReLU|Leaky version of a Rectified Linear Unit.|
 |LocallyConnected1D|Locally-connected layer for 1D inputs.|
 |LocallyConnected2D|Locally-connected layer for 2D inputs.|
-|Masking|Masks a sequence by using a mask value to skip timesteps.|
+|[Masking](Masking.md)|Masks a sequence by using a mask value to skip timesteps.|
 |MaxPool1D|Max pooling operation for 1D temporal data.|
 |MaxPool2D|Max pooling operation for 2D spatial data.|
 |MaxPool3D|Max pooling operation for 3D data (spatial or spatio-temporal).|

@@ -6,6 +6,7 @@
   - [输入](#输入)
   - [输出](#输出)
   - [变量位置](#变量位置)
+  - [示例](#示例)
   - [参考](#参考)
 
 2021-12-03, 13:32
@@ -13,13 +14,13 @@
 
 ## 简介
 
-嵌入层 `Embedding` 类如下：
+嵌入层 `Embedding` ：
 
 ```python
 tf.keras.layers.Embedding(
     input_dim,
     output_dim,
-    embeddings_initializer="uniform",
+    embeddings_initializer='uniform',
     embeddings_regularizer=None,
     activity_regularizer=None,
     embeddings_constraint=None,
@@ -29,49 +30,22 @@ tf.keras.layers.Embedding(
 )
 ```
 
-将正整数（索引）转换为固定大小的密集向量（dense vector）。例如：`[[4], [20]] -> [[0.25, 0.1], [0.6, -0.2]]`。
+将正整数（索引）转换为固定大小的密集向量。例如：`[[4], [20]] -> [[0.25, 0.1], [0.6, -0.2]]`。
 
-该 layer 只能用于固定范围的正整数输入。``
+该 layer 只能用于固定范围的正整数输入。[tf.keras.layers.TextVectorization](TextVectorization.md), [tf.keras.layers.StringLookup](StringLookup.md) 和 [tf.keras.layers.IntegerLookup](IntegerLookup.md) 预处理层可以辅助准备 `Embedding` 的输入。
 
-该层必须为模型的第一层。例如：
-
-```python
->>> model = tf.keras.Sequential()
->>> model.add(tf.keras.layers.Embedding(1000, 64, input_length=10))
->>> # 该模型以(batch, input_length)大小的整数矩阵为输入，最大整数不超过 999 （词汇大小）
->>> # 此时 model.output_shape 为 (None, 10, 64), 其中 `None` 是 batch 维度
->>> input_array = np.random.randint(1000, size=(32, 10))
->>> model.compile('rmsprop', 'mse')
->>> output_array = model.predict(input_array)
->>> print(output_array.shape)
-(32, 10, 64)
-```
+该层接受 [tf.Tensor](../../Tensor.md) 和 [tf.RaggedTensor](../../RaggedTensor.md) 输入，不支持 [tf.SparseTensor](../../sparse/SparseTensor.md)。
 
 ## 参数说明
 
-- `input_dim`
-
-整数，词汇大小，即最大整数索引+1.
-
-- `output_dim`
-
-整数，密集嵌入层维度。
-
-- `embeddings_initializer`
-
-`embeddings` 矩阵的初始化程序。
-
-- `embeddings_regularizer`
-
-应用于 `embeddings` 矩阵的正则化函数。
-
-- `embeddings_constraint`
-
-应用于 `embeddings` 矩阵的约束函数。
-
-- `mask_zero`
-
-boolean 值，是否将输入中的 0 作为特殊的填充值屏蔽掉。在使用接受可变长度输入的循环层时十分有用。
+|参数|说明|
+|---|---|
+|`input_dim`|Integer，词汇大小，即最大整数索引+1|
+|`output_dim`|Integer，密集嵌入层维度|
+|`embeddings_initializer`|`embeddings` 矩阵的初始化程序|
+|`embeddings_regularizer`|应用于 `embeddings` 矩阵的正则化函数|
+|`embeddings_constraint`|应用于 `embeddings` 矩阵的约束函数|
+|`mask_zero`|boolean，是否将输入中的 0 作为特殊的填充值屏蔽掉。在使用接受可变长度输入的循环层时十分有用|
 
 如果为 `True`，则模型中后面的 layers 需要支持屏蔽，否则抛出异常；并且索引 0 不能用于在词汇表中，此时 input_dim 大小为 vocabulary+1.
 
@@ -100,6 +74,22 @@ boolean 值，是否将输入中的 0 作为特殊的填充值屏蔽掉。在使
 with tf.device('cpu:0'):
   embedding_layer = Embedding(...)
   embedding_layer.build()
+```
+
+## 示例
+
+该层必须为模型的第一层。例如：
+
+```python
+>>> model = tf.keras.Sequential()
+>>> model.add(tf.keras.layers.Embedding(1000, 64, input_length=10))
+>>> # 该模型以(batch, input_length)大小的整数矩阵为输入，最大整数不超过 999 （词汇大小）
+>>> # 此时 model.output_shape 为 (None, 10, 64), 其中 `None` 是 batch 维度
+>>> input_array = np.random.randint(1000, size=(32, 10))
+>>> model.compile('rmsprop', 'mse')
+>>> output_array = model.predict(input_array)
+>>> print(output_array.shape)
+(32, 10, 64)
 ```
 
 ## 参考

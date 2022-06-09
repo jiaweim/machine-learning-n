@@ -23,7 +23,7 @@
 |array_to_img(...)|Converts a 3D Numpy array to a PIL Image instance.|
 |deserialize_keras_object(...)|Turns the serialized form of a Keras object back into an actual object.|
 |get_custom_objects(...)|Retrieves a live reference to the global dictionary of custom objects.|
-|get_file(...)|Downloads a file from a URL if it not already in the cache.|
+|[get_file(...)](get_file.md)|从 URL 下载文件（如果缓存中没有）|
 |get_registered_name(...)|Returns the name registered to an object within the Keras framework.|
 |get_registered_object(...)|Returns the class associated with name if it is registered with Keras.|
 |get_source_inputs(...)|Returns the list of input tensors necessary to compute tensor.|

@@ -28,13 +28,13 @@ from tensorflow.keras import layers
 
 ## 简介
 
-**屏蔽**（Masking）是告诉序列处理层输入中缺少某些时间步，在处理数据时应该跳过这些时间步。
+**屏蔽**（Masking）是告诉序列处理层输入数据缺少某些时间步，在处理时应该跳过这些时间步。
 
-**填充**（Padding）是一种特殊的屏蔽，其屏蔽的时间步位于序列的开头或结尾。填充是为了支持批处理，为了使同一批次的所有序列长度相同，需要填充或截断部分序列。
+**填充**（Padding）是一种特殊的屏蔽，其屏蔽的时间步位于序列的开头或结尾。填充是为了支持批处理，为了使同一批次的所有序列长度相同，需要填充或裁剪部分序列。
 
 ## 填充序列数据
 
-在处理序列数据时，样本序列的长度不同很常见。例如（文本按单词标记化）：
+在处理序列数据时，样本序列的长度不同很常见。例如，下面是按单词标记化后的文本：
 
 ```python
 [
@@ -44,7 +44,7 @@ from tensorflow.keras import layers
 ]
 ```
 
-经过词汇表转换为整数向量：
+使用词汇表转换为整数向量：
 
 ```py
 [
@@ -54,9 +54,9 @@ from tensorflow.keras import layers
 ]
 ```
 
-此时数据是一个嵌套列表，样本长度分别为 3, 5 和 6。由于深度学习模型要求输入数据必须是单个张量（在本例中 shape 为 `(batch_size, 6, vocab_size)`），对长度小于最长样本的样本，需要填充占位符（也可以在填充短样本前截断长样本）。
+此时数据是一个嵌套列表，样本长度分别为 3, 5 和 6。由于深度学习模型要求输入数据为单个张量（本例中 shape 为 `(batch_size, 6, vocab_size)`），对长度小于最长样本的样本，需要填充占位符（也可以在填充短样本前截断长样本）。
 
-Keras 使用 [tf.keras.utils.pad_sequences](../../api/tf/keras/utils/pad_sequences.md) 截断和填充 Python 列表到一个指定长度。例如：
+Keras 使用 [tf.keras.utils.pad_sequences](../../api/tf/keras/utils/pad_sequences.md) 裁剪和填充 Python 列表到指定长度。例如：
 
 ```py
 raw_inputs = [
@@ -82,20 +82,17 @@ print(padded_inputs)
 
 ## 屏蔽
 
-统一所有样本的长度后，需要告诉模型部分数据是填充值，不是真实数据，应该忽略，该机制就是**屏蔽**（masking）。
+统一样本长度后，需要告诉模型部分数据是填充值，不是真实数据，应该忽略，该机制就是**屏蔽**（masking）。
 
 在 Keras 模型中设置屏蔽的方法有三种：
 
 1. 添加 [keras.layers.Masking](../../api/tf/keras/layers/Masking.md) layer
-2. 设置 [keras.layers.Embedding](../../api/tf/keras/layers/Embedding.md) layer `mask_zero=True`
+2. 为 [keras.layers.Embedding](../../api/tf/keras/layers/Embedding.md) layer 添加设置 `mask_zero=True`
 3. 对支持 `mask` 参数的 layer 手动传入该参数，例如 RNN layer
 
 ## 屏蔽生成层：Embedding 和 Masking
 
-`Embedding` 和 `Masking` 通过将一个 shape 为 `(batch, sequence_length)` 的 2D 张量放在 `Masking` 或 `Embedding` layer 输出的后面实现屏蔽：
-
-- `Embedding` 的屏蔽张量为 `Embedding._keras_mask`
-- `Masking` 的屏蔽张量为 `Masking._keras_mask`
+`Embedding` 和 `Masking` 通过将一个 shape 为 `(batch, sequence_length)` 的 2D 张量放在 layer 的输出后面实现屏蔽，两者的屏蔽张量均保存在 `_keras_mask` 字段中。
 
 ```py
 embedding = layers.Embedding(input_dim=5000, output_dim=16, mask_zero=True)
@@ -104,7 +101,7 @@ masked_output = embedding(padded_inputs)
 print(masked_output._keras_mask) # 查看屏蔽张量
 
 masking_layer = layers.Masking()
-# 通过将 2D 扩展为 3D 模拟嵌入层的 lookup，嵌入维度为 10
+# 将 2D 扩展为 3D 模拟嵌入层的 lookup，嵌入维度为 10
 unmasked_embedding = tf.cast(
     tf.tile(tf.expand_dims(padded_inputs, axis=-1), [1, 1, 10]), tf.float32
 )
@@ -124,7 +121,7 @@ tf.Tensor(
  [ True  True  True  True  True  True]], shape=(3, 6), dtype=bool)
 ```
 
-从输出结果可以看出，屏蔽张量是一个 `(batch_size, sequence_length)` 2D boolean 张量，值为 `False` 的项表示在处理时忽略对应的时间步。
+从输出结果可以看出，屏蔽张量是一个 `(batch_size, sequence_length)` 2D boolean 张量，值为 `False` 表示在处理时忽略对应的时间步。
 
 > 下面屏蔽张量简称屏蔽，以 mask 表示。
 
