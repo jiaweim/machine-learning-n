@@ -16,7 +16,8 @@
   - [稀疏张量](#稀疏张量)
   - [参考](#参考)
 
-Last updated: 2022-06-10, 11:08
+Last updated:
+2022-06-13, 10:35
 @author Jiawei Mao
 ****
 
@@ -195,6 +196,10 @@ tf.Tensor(
 - **轴**（axis）或**维度**（dimension）：张量的特定维度。
 - **尺寸**（size）：张量包含元素个数，shape 向量的元素乘积。
 
+![](images/2022-06-13-10-32-32.png)
+
+> 不同 rank 张量的可视化表示
+
 Tensor 和 [tf.TensorShape](../../api/tf/TensorShape.md) 对象包含访问这些属性的方法。
 
 ```python
@@ -348,7 +353,11 @@ tf.Tensor(
 
 ## shape 操作
 
-张量的 reshape 操作非常有用。
+张量的 reshape 操作非常有用。只要总元素个数保持一致，就可以转换 shape，如下图所示：
+
+![](images/2022-06-13-10-40-40.png)
+
+> 将 (3x2) 张量 reshape 为其它 shape 的张量。
 
 ```python
 >>> x = tf.constant([[1], [2], [3]])
@@ -777,3 +786,4 @@ tf.Tensor(
 ## 参考
 
 - https://www.tensorflow.org/guide/tensor
+- The TensorFlow Workshop, Mattew Moocarme & Anthony So & Anthony Maddalone
