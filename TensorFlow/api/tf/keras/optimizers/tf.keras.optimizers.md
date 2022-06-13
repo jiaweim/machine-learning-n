@@ -1,12 +1,19 @@
 # tf.keras.optimizers
 
 - [tf.keras.optimizers](#tfkerasoptimizers)
+  - [简介](#简介)
   - [类](#类)
   - [函数](#函数)
   - [参考](#参考)
 
 2022-01-01, 14:04
 ***
+
+## 简介
+
+内置的优化器类。
+
+有关示例，请参考优化器的基类 [tf.keras.optimizers.Optimizer](Optimizer.md)。
 
 ## 类
 
