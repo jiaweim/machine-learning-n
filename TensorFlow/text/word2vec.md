@@ -16,6 +16,7 @@ word2vec 不是单个算法，而是从大型数据集中学习单词嵌入的�
 
 - **连续词袋模型**（continuous bag-of-words model, CBOW）：根据周围
 
+
 ## 参考
 
 - https://www.tensorflow.org/tutorials/text/word2vec
