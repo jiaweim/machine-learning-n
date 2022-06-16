@@ -4,7 +4,7 @@
   - [简介](#简介)
   - [用数字表示文本](#用数字表示文本)
     - [独热编码](#独热编码)
-    - [每个单词一个数字](#每个单词一个数字)
+    - [一个单词一个数字](#一个单词一个数字)
     - [词嵌入](#词嵌入)
   - [配置](#配置)
     - [下载 IMDb 数据集](#下载-imdb-数据集)
@@ -13,12 +13,12 @@
   - [文本预处理](#文本预处理)
   - [创建分类模型](#创建分类模型)
   - [编译和训练模型](#编译和训练模型)
-  - [检索训练后的词嵌入并保存](#检索训练后的词嵌入并保存)
+  - [导出训练后的词嵌入](#导出训练后的词嵌入)
   - [可视化嵌入](#可视化嵌入)
   - [下一步](#下一步)
   - [参考](#参考)
 
-2021-12-29, 17:35
+Last updated: 2022-06-16, 10:46
 @author Jiawei Mao
 *****
 
@@ -30,34 +30,34 @@
 
 ## 用数字表示文本
 
-机器学习模型以数字向量作为输入，处理文本时，首要任务就是将文本转换为数字。下面介绍实现这一目标的三种策略。
+机器学习模型以数字向量作为输入，因此在处理文本时，首先要将文本转换为数字。下面介绍实现这一目标的三种策略。
 
 ### 独热编码
 
-首先想到的，可能就是独热编码（one-hot）。考虑句子 "The cat sat on the mat"，其词汇（vocabulary，即 unique 单词）为 (cat, mat, on, sat, the)。要表示这些单词，可以创建一个长度等于词汇表的零向量，然后将单词对应的位置设置为 1。如下图所示：
+独热编码（one-hot）是最直观的方法。考虑句子 "The cat sat on the mat"，其词汇（vocabulary，即 unique 单词）为 (cat, mat, on, sat, the)。可以创建一个长度等于词汇表的零向量表示这些单词，然后将单词对应的位置设为 1。如图所示：
 
 ![](images/2022-06-09-09-13-13.png)
 
-要将句子转换为向量，可以将其所有单词的 one-hot 向量串在一起。
+编号好单词，对句子只需将其单词的 one-hot 向量串在一起，就转换成了向量。
 
-> **要点**：one-hot 编码效率低，其编码向量是稀疏的（即一个 1，其它都是 0）。如果词汇表长度为 10,000，那每个单词的 one-hot 编码 99.99% 的值都是 0.
+> **要点**：one-hot 编码效率低，其编码向量是稀疏的（一个 1，其它都是 0）。如果词汇表长度为 10,000，那每个单词的 one-hot 编码 99.99% 的值都是 0.
 
-### 每个单词一个数字
+### 一个单词一个数字
 
-第二种方法是给每个单词分配一个唯一数字。对上面的句子，可以将 1 分配给 "cat"，2 分配给 "mat" 等等，然后可以将 "The cat sat on the mat" 编码为一个密集向量 [5, 1, 4, 3, 5, 2]。这个方法比较高效，获得的向量不再稀疏，所有元素非零。
+第二种方法是给每个单词单独分配一个数字。对句子 "The cat sat on the mat"，可以将 1 分配给 "cat"，2 分配给 "mat" 等等，然后可以将其编码为一个密集向量 [5, 1, 4, 3, 5, 2]。该方法比较高效，获得的向量不再稀疏，所有元素非零。
 
 然而，这个方法有两个缺点：
 
 - 整数编码是任意的，不能捕获单词之间的关系；
-- 对模型来说，整数编码很难获得好模型。例如，一个线性分类器，为每个特征学习一个权重，但是单词的相似度与它们的编码没有任何关系，这种 feature-weight 的组合没有任何意义。
+- 对模型来说，整数编码很难获得好模型。例如，一个线性分类器，为每个特征学习一个权重，但是单词的相似度与它们的编码之间没有任何关系，这种 feature-weight 的组合没有任何意义。
 
 ### 词嵌入
 
-词嵌入（word embeddings）提供了一种有效表示，该方法使用密集向量表示单词，而且相似的单词具有相似的编码。最重要的是，不需要手动指定编码。嵌入（embedding）是一个浮点数密集向量，向量长度是一个可设置参数。Embedding 的值不是手动指定，而是训练获得。对小型数据集，词嵌入的尺寸通常只需要 8 维，对大型数据集则可达 1024 维。高维嵌入可以捕获单词之间的细粒度关系，但需要更多的学习数据。
+词嵌入（word embeddings）是一种有效且推荐的方式。该方法使用密集向量表示单词，而且相似的单词具有相似的编码。最重要的是，不需要手动指定编码。嵌入（embedding）是一个浮点数类型的密集向量，向量长度是一个可设置参数。Embedding 的值不是手动指定，而是训练获得。对小型数据集，词嵌入的尺寸通常只需要 8 维，对大型数据集则可达 1024 维。高维嵌入可以捕获单词之间的细粒度关系，但需要更多的学习数据。
 
 ![](images/2022-03-01-15-06-58.png)
 
-上图是一个词嵌入示意图。每个单词由一个 4 维浮点数向量表示。可以将嵌入当作查询表来理解，在学习这些权重之后，可以通过查找表中对应的密集向量来对每个单词进行编码。
+上图是一个词嵌入示意图。每个单词由一个 4 维浮点数向量表示。可以将嵌入当作查询表来理解，在学习这些权重之后，通过查找表中对应的密集向量就能对每个单词进行编码。
 
 ## 配置
 
@@ -80,7 +80,7 @@ from tensorflow.keras.layers import TextVectorization
 
 下面使用 IMDB 数据集训练一个情感分类模型，并在此过程中从头学习词嵌入。对如何加载数据集可以参考[载入文本教程](../tutorials/load_data/load_text.md)。
 
-使用 Keras 工具下载数据集，并查看目录结构：
+- 使用 Keras 工具下载数据集，并查看目录结构
 
 ```python
 url = "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz"
@@ -99,7 +99,9 @@ Downloading data from https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.t
 ['imdb.vocab', 'imdbEr.txt', 'README', 'test', 'train']
 ```
 
-`train/` 目录包含 `pos` 和 `neg` 子目录，分别包含电影的好评和差评。下面使用这两个文件夹中的评论来训练一个二元分类模型。先查看一下 `train/` 目录：
+`train/` 目录包含 `pos` 和 `neg` 子目录，分别包含电影的好评和差评。下面使用这两个文件夹中的评论来训练一个二元分类模型。
+
+- 查看 `train/` 目录内容
 
 ```python
 train_dir = os.path.join(dataset_dir, 'train')
@@ -117,7 +119,7 @@ os.listdir(train_dir)
  'urls_unsup.txt']
 ```
 
-在创建训练集前删除 `train` 目录下还有`unsup` 目录：
+- 在创建训练集前删除 `train` 目录中的 `unsup` 目录
 
 ```python
 remove_dir = os.path.join(train_dir, 'unsup')
@@ -126,7 +128,7 @@ shutil.rmtree(remove_dir)
 
 然后使用 [tf.keras.utils.text_dataset_from_directory](../api/tf/keras/utils/text_dataset_from_directory.md) 创建 [tf.data.Dataset](../api/tf/data/Dataset.md)。
 
-使用 `train` 目录创建训练集和验证集，其中 20% 用于验证：
+- 使用 `train` 目录创建训练集和验证集，其中 20% 用于验证：
 
 ```python
 batch_size = 1024
@@ -146,7 +148,7 @@ Found 25000 files belonging to 2 classes.
 Using 5000 files for validation.
 ```
 
-看一下训练集中的影评和标签（`1: positive, 0: negative`）。
+- 查看训练集中的影评和标签（`1: positive, 0: negative`）
 
 ```python
 for text_batch, label_batch in train_ds.take(1):
@@ -166,9 +168,8 @@ for text_batch, label_batch in train_ds.take(1):
 
 在加载数据集时，应该使用下面这两个方法以避免 I/O 阻塞。
 
-`.cache()` 将从磁盘加载的数据保存在内存中。这能确保在训练模型时数据集不会成为瓶颈。如果数据集太大而无法放入内存，则可以使用该方法创建高性能的磁盘缓存，这比读取许多小文件更有效。
-
-`.prefetch()` 在训练时同时执行数据预处理和模型训练。
+- `.cache()` 将从磁盘加载的数据保存到内存。以确保在训练模型时数据集不会成为瓶颈。如果数据集太大而无法放入内存，使用该方法可以创建高性能的磁盘缓存，这比读取许多小文件更有效。
+- `.prefetch()` 在训练时同时执行数据预处理和模型训练。
 
 在 [数据性能指南](../guide/data/data_performance.md) 可以了解更多性能相关问题。
 
@@ -185,15 +186,15 @@ val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 可以将 `Embedding` 理解为一个查找表，从整数索引（代表特定单词）映射到密集向量（它们的嵌入）。嵌入的维数（或宽度）可以设置，通过反复试验确定合适的嵌入维度。
 
-将 1000 个单词的词汇嵌入到 5 维向量：
+- 将 1000 个单词的词汇嵌入到 5 维向量
 
 ```python
 embedding_layer = tf.keras.layers.Embedding(1000, 5)
 ```
 
-在创建嵌入层时，嵌入的权重随机初始化；在训练期间，通过反向传播逐步调整；训练后，所学的单词嵌入大致编码单词之间的相似性（因为它们只是针对你的特定问题和特定数据集学习的）。
+在创建嵌入层时，嵌入的权重随机初始化；在训练期间，嵌入权重通过反向传播逐步调整；训练后，所学的单词嵌入大致编码单词之间的相似性（因为它们只是针对你的特定问题和特定数据集学习，不具有普适性）。
 
-如果将一个整数传递给嵌入层，整数被嵌入表格中的向量替换，获得密集向量输出：
+- 如果将一个整数传递给嵌入层，整数被嵌入表格中的向量替换，获得密集向量输出
 
 ```python
 result = embedding_layer(tf.constant([1, 2, 3]))
@@ -207,11 +208,11 @@ array([[ 0.04670345,  0.01376003, -0.04175159,  0.04715754, -0.04501879],
       dtype=float32)
 ```
 
-对文本或序列，嵌入层接受 shape 为 `(samples, sequence_length)` 的 2D 整数张量，每个样本对应一个整数序列。
+对文本或序列，嵌入层接受 shape 为 `(samples, sequence_length)` 的 2D 整数张量输入，每个样本对应一个整数序列。
 
-嵌入层可以嵌入可变长度的序列。可以向上面的嵌入层输入 shape 为 `(32, 10)` (32 条长度为 10 的序列) 批量数据，也可以输入 shape 为 `(64, 15)`（64 条长度为 15 的序列）批量数据。
+嵌入层可以嵌入可变长度的序列。例如，可以向上面的嵌入层输入 shape 为 `(32, 10)` (32 条长度为 10 的序列) 批量数据，也可以输入 shape 为 `(64, 15)`（64 条长度为 15 的序列）批量数据。
 
-返回的张量比输入多一个轴，嵌入向量沿最后一个轴对齐。传入 `(2, 3)` 批量输入，输出 `(2, 3, N)`，N 指嵌入跨度。
+返回的张量比输入多一个轴，嵌入向量沿最后一个轴对齐。例如，传入 `(2, 3)` 批量输入，输出 `(2, 3, N)`，N 指嵌入维度。
 
 ```python
 result = embedding_layer(tf.constant([[0, 1, 2], [3, 4, 5]]))
@@ -222,7 +223,9 @@ result.shape
 TensorShape([2, 3, 5])
 ```
 
-当给定一批序列作为输入，嵌入层返回一个 `(samples, sequence_length, embedding_dimensionality)` 3D 浮点数张量。将变长序列转换为固定表示形式，有多种标准方法。可以在传递给 Dense 层前使用 RNN，Attention 或池化层，本文使用池化层，因为它最简单。
+当给定一批输入序列，嵌入层返回一个 `(samples, sequence_length, embedding_dimensionality)` 3D 浮点数张量。
+
+对变长序列，可以将其转换为固定表示形式，转换方法有多种，可以在传递给 `Dense` 层前使用 RNN，Attention 或池化层。本文使用池化层，因为它最简单。
 
 ## 文本预处理
 
@@ -241,7 +244,7 @@ def custom_standardization(input_data):
 vocab_size = 10000
 sequence_length = 100
 
-# 使用 TextVectorization layer 将字符串归一化、拆分和映射到整数。
+# 使用 TextVectorization layer 将字符串归一化、拆分并映射到整数。
 # 注意，该 layer 使用上面自定义的标准化函数
 # 设置 maximum_sequence length，因为样本长度不一
 vectorize_layer = TextVectorization(
@@ -259,11 +262,11 @@ vectorize_layer.adapt(text_ds)
 
 使用 [Keras 串联 API](../guide/keras/sequential_model.md) 定义情感分类模型。在该情况下，这是一个 "Continuous bag of words" (CBOW) 风格模型：
 
-- [TextVectorization](../api/tf/keras/layers/TextVectorization.md) layer 将字符串转换为词汇表索引。前面已经将 `vectorize_layer` 初始化为 TextVectorization layer，并对数据集 `text_ds` 调用 `adapt` 构建其词汇表。现在 `vectorize_layer` 可以作为端到端分类模型的第一层，将转换后的字符串输入到嵌入层。
-- [Embedding](../api/tf/keras/layers/Embedding.md) 接收整数编码词汇表，并为每个单词查找嵌入向量。这些嵌入向量在训练过程中学习所得。该向量向输出数组添加了一个维度，shape 为 `(batch, sequence, embedding)`。
+- [TextVectorization](../api/tf/keras/layers/TextVectorization.md) layer 将字符串转换为词汇表索引。前面已经将 `vectorize_layer` 初始化为 `TextVectorization` layer，并对数据集 `text_ds` 调用 `adapt` 构建其词汇表。现在 `vectorize_layer` 可以作为端到端分类模型的第一层，将转换后的字符串输入到嵌入层。
+- [Embedding](../api/tf/keras/layers/Embedding.md) 接收整数编码词汇表，为每个单词查找嵌入向量。这些嵌入向量是训练过程中学习所得。该向量向输出数组添加了一个维度，输出 shape 为 `(batch, sequence, embedding)`。
 - [GlobalAveragePooling1D](../api/tf/keras/layers/GlobalAveragePooling1D.md) layer 对序列维度进行平均，使每个样本返回一个固定长度的向量。这是让模型处理变长输入最简单的方式。
-- 将定长向量输入到带有 16 个隐藏单元的全连接层。
-- 最后一层是只有一个节点的全连接层。
+- 将定长向量输入全连接层 `Dense(16)`。
+- 最后一层也是全连接层 `Dense(1)`。
 
 > 该模型没有使用屏蔽，填充的 0 也用作了输入，填充长度可能影响输出。要解决该问题，可以参考 [用 Keras 屏蔽和填充序列](../guide/keras/masking_and_padding.md)
 
@@ -281,13 +284,15 @@ model = Sequential([
 
 ## 编译和训练模型
 
-下面使用 [TensorBoard](https://www.tensorflow.org/tensorboard) 可视化度量指标，包括损失值和精度。首先创建 [tf.keras.callbacks.TensorBoard](../api/tf/keras/callbacks/TensorBoard.md)：
+下面使用 [TensorBoard](https://www.tensorflow.org/tensorboard) 可视化指标值，包括损失值和精度。
+
+- 首先创建 [tf.keras.callbacks.TensorBoard](../api/tf/keras/callbacks/TensorBoard.md)
 
 ```python
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="logs")
 ```
 
-使用 `Adam` 优化器和 `BinaryCrossentropy` 损失函数编译和训练模型：
+- 使用 `Adam` 优化器和 `BinaryCrossentropy` 损失函数编译和训练模型
 
 ```python
 model.compile(optimizer='adam',
@@ -337,9 +342,9 @@ Epoch 15/15
 <keras.callbacks.History at 0x7fe7d7996e50>
 ```
 
-使用该方法，模型的验证精度达到 78% （模型有点过拟合，训练精度高于验证精度）。
+可以看到，模型的验证精度达到 78% （模型有点过拟合，训练精度高于验证精度）。
 
-查看一下模型信息：
+- 查看模型信息
 
 ```python
 model.summary()
@@ -379,21 +384,21 @@ _________________________________________________________________
 
 ![](images/2022-03-04-23-48-40.png)
 
-## 检索训练后的词嵌入并保存
+## 导出训练后的词嵌入
 
-接下来，检索训练中学习到的单词嵌入。嵌入是嵌入层的权重值，权重矩阵的 shape 为 `(vocab_size, embedding_dimension)`。
+接下来，导出训练学到的单词嵌入。嵌入是嵌入层的权重值，权重矩阵的 shape 为 `(vocab_size, embedding_dimension)`。
 
-使用 `get_layer()` 和 `get_weights()` 方法从模型获得权重。`get_vocabulary()` 函数获得词汇表：
+使用 `get_layer()` 和 `get_weights()` 从模型获得权重。使用 `get_vocabulary()` 获得词汇表：
 
 ```python
 weights = model.get_layer('embedding').get_weights()[0]
 vocab = vectorize_layer.get_vocabulary()
 ```
 
-将权重写入文件。使用 [Embedding Projector](http://projector.tensorflow.org/)，需要以 tsv 格式上传两个文件：
+将权重写入文件。[Embedding Projector](http://projector.tensorflow.org/) 需要上传两个 tsv 格式文件：
 
-- 一个向量文件（包含嵌入）
-- 一个元数据文件（包含单词）
+- 向量文件（包含嵌入）
+- 元数据文件（包含单词）
 
 ```python
 out_v = io.open('vectors.tsv', 'w', encoding='utf-8')

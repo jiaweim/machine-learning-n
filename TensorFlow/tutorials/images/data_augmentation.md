@@ -16,12 +16,12 @@
 
 ## 简介
 
-下面演示如何使用 TensorFlow 执行数据增强，即通过应用随机（现实存在的）变换（如旋转）来增加训练集多样性的技术。
+下面演示如何使用 TensorFlow 执行数据增强，即使用随机（现实存在的）变换（如旋转）来增加训练集多样性的技术。
 
 在 TensorFlow 中实现数据增强的方式有两种：
 
 - 使用 Keras 预处理层，如 `tf.keras.layers.Resizing`, `tf.keras.layers.Rescaling`, `tf.keras.layers.RandomFlip` 以及 `tf.keras.layers.RandomRotation`；
-- 使用 `tf.image` 的方法，如 `tf.image.flip_left_right`, `tf.image.rgb_to_grayscale`, `tf.image.adjust_brightness`, `tf.image.centrl_crop` 以及 `tf.image.stateless_random*` 等方法。
+- 使用 `tf.image` 的方法，如 `tf.image.flip_left_right`, `tf.image.rgb_to_grayscale`, `tf.image.adjust_brightness`, `tf.image.central_crop` 以及 `tf.image.stateless_random*` 等方法。
 
 ## 配置
 
