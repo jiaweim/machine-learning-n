@@ -1,6 +1,6 @@
 # TensorFlow 2 快速入门（专家）
 
-2021-12-30, 14:04
+Last updated: 2022-06-16, 15:26
 @author Jiawei Mao
 ****
 
@@ -14,8 +14,8 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D
 from tensorflow.keras import Model
 ```
 
-```sh
-TensorFlow version: 2.8.0
+```txt
+TensorFlow version: 2.9.1
 ```
 
 加载并准备 MNIST 数据集：
@@ -26,7 +26,7 @@ mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-# Add a channels dimension
+# 添加通道维度
 x_train = x_train[..., tf.newaxis].astype("float32")
 x_test = x_test[..., tf.newaxis].astype("float32")
 ```
@@ -44,24 +44,25 @@ test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 
 ```python
 class MyModel(Model):
-  def __init__(self):
-    super(MyModel, self).__init__()
-    self.conv1 = Conv2D(32, 3, activation='relu')
-    self.flatten = Flatten()
-    self.d1 = Dense(128, activation='relu')
-    self.d2 = Dense(10)
+    def __init__(self):
+        super(MyModel, self).__init__()
+        self.conv1 = Conv2D(32, 3, activation='relu')
+        self.flatten = Flatten()
+        self.d1 = Dense(128, activation='relu')
+        self.d2 = Dense(10)
 
-  def call(self, x):
-    x = self.conv1(x)
-    x = self.flatten(x)
-    x = self.d1(x)
-    return self.d2(x)
+    def call(self, x):
+        x = self.conv1(x)
+        x = self.flatten(x)
+        x = self.d1(x)
+        return self.d2(x)
 
-# Create an instance of the model
+
+# 创建模型实例
 model = MyModel()
 ```
 
-选择训练的优化器和损失函数：
+设置优化器和损失函数：
 
 ```python
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -69,7 +70,7 @@ loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 optimizer = tf.keras.optimizers.Adam()
 ```
 
-选择衡量模型的损失和准确性的指标（metric）。metric 值在每个 epoch 完成后输出一次：
+选择衡量模型的损失和准确性的指标（metric）。metric 值在每个 epoch 完成后输出：
 
 ```python
 train_loss = tf.keras.metrics.Mean(name='train_loss')
@@ -84,16 +85,16 @@ test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
 ```python
 @tf.function
 def train_step(images, labels):
-  with tf.GradientTape() as tape:
-    # training=True is only needed if there are layers with different
-    # behavior during training versus inference (e.g. Dropout).
-    predictions = model(images, training=True)
-    loss = loss_object(labels, predictions)
-  gradients = tape.gradient(loss, model.trainable_variables)
-  optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    with tf.GradientTape() as tape:
+        # 只有在包含训练和推理时行为不同的 layer 时（如 Dropout），
+        # 才需要设置 training=True
+        predictions = model(images, training=True)
+        loss = loss_object(labels, predictions)
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-  train_loss(loss)
-  train_accuracy(labels, predictions)
+    train_loss(loss)
+    train_accuracy(labels, predictions)
 ```
 
 测试模型：
@@ -101,49 +102,49 @@ def train_step(images, labels):
 ```python
 @tf.function
 def test_step(images, labels):
-  # training=False is only needed if there are layers with different
-  # behavior during training versus inference (e.g. Dropout).
-  predictions = model(images, training=False)
-  t_loss = loss_object(labels, predictions)
+    # 只有包含训练和推理时行为不同的 layer 时（如 Dropout），
+    # 才需要设置 training=False
+    predictions = model(images, training=False)
+    t_loss = loss_object(labels, predictions)
 
-  test_loss(t_loss)
-  test_accuracy(labels, predictions)
+    test_loss(t_loss)
+    test_accuracy(labels, predictions)
 ```
 
 ```python
 EPOCHS = 5
 
 for epoch in range(EPOCHS):
-  # Reset the metrics at the start of the next epoch
-  train_loss.reset_states()
-  train_accuracy.reset_states()
-  test_loss.reset_states()
-  test_accuracy.reset_states()
+    # 在 epoch 开始前重置 metrics
+    train_loss.reset_states()
+    train_accuracy.reset_states()
+    test_loss.reset_states()
+    test_accuracy.reset_states()
 
-  for images, labels in train_ds:
-    train_step(images, labels)
+    for images, labels in train_ds:
+        train_step(images, labels)
 
-  for test_images, test_labels in test_ds:
-    test_step(test_images, test_labels)
+    for test_images, test_labels in test_ds:
+        test_step(test_images, test_labels)
 
-  print(
-    f'Epoch {epoch + 1}, '
-    f'Loss: {train_loss.result()}, '
-    f'Accuracy: {train_accuracy.result() * 100}, '
-    f'Test Loss: {test_loss.result()}, '
-    f'Test Accuracy: {test_accuracy.result() * 100}'
-  )
+    print(
+        f'Epoch {epoch + 1}, '
+        f'Loss: {train_loss.result()}, '
+        f'Accuracy: {train_accuracy.result() * 100}, '
+        f'Test Loss: {test_loss.result()}, '
+        f'Test Accuracy: {test_accuracy.result() * 100}'
+    )
 ```
 
-```sh
-Epoch 1, Loss: 0.13439151644706726, Accuracy: 95.98833465576172, Test Loss: 0.06330505013465881, Test Accuracy: 98.02999877929688
-Epoch 2, Loss: 0.04413021355867386, Accuracy: 98.63166809082031, Test Loss: 0.0737706869840622, Test Accuracy: 97.57999420166016
-Epoch 3, Loss: 0.024562617763876915, Accuracy: 99.1866683959961, Test Loss: 0.04913036897778511, Test Accuracy: 98.5
-Epoch 4, Loss: 0.014813972637057304, Accuracy: 99.51499938964844, Test Loss: 0.06434403359889984, Test Accuracy: 98.1199951171875
-Epoch 5, Loss: 0.010033201426267624, Accuracy: 99.66999816894531, Test Loss: 0.07429419457912445, Test Accuracy: 98.15999603271484
+```txt
+Epoch 1, Loss: 0.13300782442092896, Accuracy: 95.98666381835938, Test Loss: 0.06714330613613129, Test Accuracy: 97.65999603271484
+Epoch 2, Loss: 0.04121926426887512, Accuracy: 98.70832824707031, Test Loss: 0.05591356009244919, Test Accuracy: 98.15999603271484
+Epoch 3, Loss: 0.021372780203819275, Accuracy: 99.29500579833984, Test Loss: 0.05870741233229637, Test Accuracy: 98.1199951171875
+Epoch 4, Loss: 0.013534549623727798, Accuracy: 99.55500030517578, Test Loss: 0.053924888372421265, Test Accuracy: 98.3499984741211
+Epoch 5, Loss: 0.00904169213026762, Accuracy: 99.68666076660156, Test Loss: 0.06500118225812912, Test Accuracy: 98.30999755859375
 ```
 
-一个图像分类器到这儿就完成了，在该数据集上的准确度达到 ~98%。
+一个图像分类器到这儿就完成了，在该数据集上的准确度约为 98%。
 
 ## 参考
 

@@ -31,7 +31,7 @@ import tensorflow as tf
 print("TensorFlow version: ", tf.__version__)
 ```
 
-```sh
+```txt
 TensorFlow version:  2.9.1
 ```
 
@@ -66,7 +66,7 @@ predictions = model(x_train[:1]).numpy()
 predictions
 ```
 
-```sh
+```txt
 array([[-0.64067507, -0.21394847, -0.21010129,  0.45867267,  0.24329919,
          0.6170706 , -0.4533612 ,  0.5403824 ,  0.72258055,  0.83108985]],
       dtype=float32)
@@ -78,14 +78,14 @@ array([[-0.64067507, -0.21394847, -0.21010129,  0.45867267,  0.24329919,
 tf.nn.softmax(predictions).numpy()
 ```
 
-```sh
+```txt
 array([[0.03884973, 0.05952687, 0.05975632, 0.11663494, 0.09403578,
         0.13665326, 0.046853  , 0.12656532, 0.15185966, 0.16926509]],
       dtype=float32)
 ```
 
 > [!NOTE]
-> 可以把 `tf.nn.softmax` 作为神经网络最后一层的激活函数，这样模型直接输出便于理解的概率值，但不推荐使用这种方法，因为 softmax 的输出无法为所有模型提供精确且数值稳定的损失值。
+> 可以把 `tf.nn.softmax` 作为神经网络最后一层的激活函数，这样模型直接输出便于理解的概率值，但不推荐这样做，因为 softmax 的输出无法为所有模型提供精确且数值稳定的损失值。
 
 使用 `losses.SparseCategoricalCrossentropy` 定义损失函数，对每个样本，该函数使用 logit 向量计算标量损失：
 
@@ -101,7 +101,7 @@ loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 loss_fn(y_train[:1], predictions).numpy()
 ```
 
-```sh
+```txt
 1.9903085
 ```
 
@@ -146,7 +146,7 @@ Epoch 5/5
 model.evaluate(x_test, y_test, verbose=2)
 ```
 
-```sh
+```txt
 313/313 - 1s - loss: 0.0683 - accuracy: 0.9785 - 850ms/epoch - 3ms/step
 [0.06833968311548233, 0.9785000085830688]
 ```
