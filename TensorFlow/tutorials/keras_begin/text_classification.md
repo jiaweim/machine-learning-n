@@ -17,12 +17,13 @@
   - [4. 练习：Stack Overflow 问题的多分类](#4-练习stack-overflow-问题的多分类)
   - [5. 参考](#5-参考)
 
-2022-01-01, 22:10
-***
+Last updated: 2022-06-20, 15:23
+@author Jiawei Mao
+****
 
 ## 1. 简介
 
-下面演示如何对文本进行分类。示例：训练一个二分类模型，对 IMDB 数据集进行情感分析（sentiment analysis）。
+下面演示如何对文本进行分类。在 IMDB 数据集上训练一个用于情感分析（sentiment analysis））的二分类模型作为演示。
 
 ```python
 import matplotlib.pyplot as plt
@@ -48,7 +49,7 @@ print(tf.__version__)
 
 下面开始训练一个情感分析模型，即根据电影评论文本将评论分好评和差评。这是一个典型的二元分类问题。
 
-使用大型电影评论数据集，该数据集包含来自[互联网电影数据库](https://www.imdb.com/) 的 50,000 条电影评论的文本，其中 25,000 条用作训练集，25,000 条用作测试集。训练集和测试集都是平衡的，即包含相同数量的好评和差评。
+使用的大型电影评论数据集包含来自[互联网电影数据库](https://www.imdb.com/)的 50,000 条电影评论的文本，其中 25,000 条用作训练集，25,000 条用作测试集。训练集和测试集都是平衡的，即包含相同数量的好评和差评。
 
 ### 2.1 下载 IMDB 数据集
 
@@ -105,7 +106,7 @@ Rachel Griffiths writes and directs this award winning short film. A heartwarmin
 
 ### 2.2 加载数据集
 
-接下来，从磁盘加载数据，并将其转换成适合训练的格式。`text_dataset_from_directory` 从目录载入数据，要求目录结构为：
+接下来，从磁盘加载数据集，并将其转换成适合训练的格式。`text_dataset_from_directory` 从目录载入数据，要求目录结构为：
 
 ```txt
 main_directory/
@@ -117,14 +118,14 @@ main_directory/
 ......b_text_2.txt
 ```
 
-要准备用于二元分类的数据集，磁盘上要有两个文件夹，与 `class_a` 和 `class_b` 对应。对该实例，即 `aclImdb/train/pos` 和 `aclImdb/train/neg` 目录。由于 IMDB 数据集还包含其它文件夹，在使用前要删除：
+对二元分类的数据集需要两个文件夹，与 `class_a` 和 `class_b` 对应。对该示例为 `aclImdb/train/pos` 和 `aclImdb/train/neg` 目录。由于 IMDB 数据集还包含其它文件夹，在使用前将其删除：
 
 ```python
 remove_dir = os.path.join(train_dir, 'unsup')
 shutil.rmtree(remove_dir)
 ```
 
-接下来，使用 `text_dataset_from_directory` 创建标记数据集 `tf.data.Dataset`。`tf.data` 包含大量处理数据的工具。
+接下来，使用 `text_dataset_from_directory` 创建含标记数据集 `tf.data.Dataset`（`tf.data` 包含大量处理数据的工具）。
 
 在进行机器学习试验时，最好将数据集分为三部分：训练集、验证集和测试集。
 
@@ -179,10 +180,10 @@ Label 0 corresponds to neg
 Label 1 corresponds to pos
 ```
 
-接下来创建验证集和测试集。训练集文件夹中余下的 5000 条评论用于验证集。
+接下来创建验证集和测试集。`train\` 目录中余下的 5000 条评论用作验证集。
 
 > [!NOTE]
-> 使用 `validation_split` 和 `subset` 参数时，要么指定随机 seed，或者设置 `shuffle=False`，以确保验证集和测试集没有重叠。
+> 使用 `validation_split` 和 `subset` 参数时，要么指定随机 seed，要么设置 `shuffle=False`，以确保验证集和测试集没有重叠。
 
 ```python
 raw_val_ds = tf.keras.utils.text_dataset_from_directory(
@@ -210,18 +211,18 @@ Found 25000 files belonging to 2 classes.
 
 ### 2.3 数据预处理
 
-下面使用 `tf.keras.layers.TextVectorization` 对数据进行标准化、标记化以及向量化。
+下面使用 `tf.keras.layers.TextVectorization` 对数据进行标准化、标记化以及向量化：
 
-- 标准化指预处理文本，通常值删除标点、HTML 元素等以简化数据集。
-- 标记化指将字符串拆分为标记（例如，通过空格将句子拆分为单词）。
-- 向量化是将标记转换为数字，以便输入神经网络。
+- **标准化**指预处理文本，如删除标点、HTML 元素等以简化数据集；
+- **标记化**指将字符串拆分为标记，如使用空格将句子拆分为单词；
+- **向量化**指将标记转换为数字，以便输入神经网络。
 
 所有这些任务都可以使用 `TextVectorization` 完成。
 
-如上所述，评论中包含 HTML 标签，例如 `<br />`。`TextVectorization` 的默认标准化器不会删除这些标签（默认会将文本转换为小写，并去除标点符号），因此需要自定义标准化函数来删除 HTML 标签。
+由于评论中包含 HTML 标签，例如 `<br />`，`TextVectorization` 的默认标准化器不会删除这些标签（默认将文本转换为小写，并去除标点符号），因此需要自定义标准化函数来删除 HTML 标签。
 
 > [!NOTE]
-> 为了避免训练集和测试集的偏差（training-testing skew），训练集上测试集应该采用相同的预处理。为了便于实现这一点，可以将 `TextVectorization` 直接包含在模型中。
+> 为了避免训练集和测试集的偏差（training-testing skew），训练集和测试集应该采用相同的预处理。为了便于实现这一点，可以将 `TextVectorization` 直接包含在模型中。
 
 ```python
 def custom_standardization(input_data):
@@ -232,9 +233,9 @@ def custom_standardization(input_data):
                                     '')
 ```
 
-要开始创建 `TextVectorization` layer 了，并使用该 layer 执行标准化、标记化和向量化。设置 `output_mode='int'` 从而为每个标记创建唯一整数索引。
+开始创建 `TextVectorization` layer，并使用该 layer 执行标准化、标记化和向量化。设置 `output_mode='int'` 为每个标记创建唯一整数索引。
 
-使用默认的 split 函数以及上面自定义标准化函数。并显式定义最大序列长度 `sequence_length`，该 layer 会根据该长度对序列进行填充或截断操作：
+使用默认的 split 函数以及上面自定义标准化函数，并定义最大序列长度 `sequence_length`，该 layer 会根据该长度对序列进行填充或截断操作：
 
 ```python
 max_features = 10000
@@ -247,12 +248,12 @@ vectorize_layer = layers.TextVectorization(
     output_sequence_length=sequence_length)
 ```
 
-然后调用 `adapt` 使预处理 layer 适应数据集，实现字符串整数索引的转换。
+然后调用 `adapt` 使预处理 layer 适应数据集，实现字符串到整数索引的转换。
 
 > [!NOTE]
 > 对训练集调用`adapt`，而不是测试集
 
-创建一个只包含文本的数据集（不带标签），然后调用 `adapt`:
+创建只包含文本的数据集（不带标签），然后调用 `adapt`:
 
 ```python
 train_text = raw_train_ds.map(lambda x, y: x)
@@ -306,7 +307,7 @@ array([[  86,   17,  260,    2,  222,    1,  571,   31,  229,   11, 2418,
            0,    0,    0,    0,    0,    0,    0,    0]], dtype=int64)>, <tf.Tensor: shape=(), dtype=int32, numpy=0>)
 ```
 
-可以看到，所有的标记都已替换为整数。调用 `.get_vocabulary()` 可以查看每个标记对应的整数：
+可以看到，所有的标记都已替换为整数。可以调用 `.get_vocabulary()` 查看每个标记对应的整数：
 
 ```python
 print("1287 ---> ", vectorize_layer.get_vocabulary()[1287])
@@ -387,8 +388,8 @@ _________________________________________________________________
 
 上面按顺序叠加 layer 构建分类器：
 
-1. 第一层 `Embedding`。该层将评论的整数编码转换为嵌入向量。嵌入向量在模型训练时学习。输出多了一个维度，为 `(batch, sequence, embedding)`。
-2. 下一层 `GlobalAveragePooling1D` 通过对序列维度进行平均，为每个样本返回一个固定长度的输出向量。这使得模型可以处理变长序列。
+1. 第一层 `Embedding`，将评论的整数编码转换为嵌入向量。嵌入向量在模型训练时学习。输出多了一个维度，为 `(batch, sequence, embedding)`。
+2. `GlobalAveragePooling1D` 对序列维度进行平均，将每个样本转换为一个固定长度的输出向量，从而可以处理变长序列。
 3. 固定长度的输出向量传入一个具有 16 个隐藏单元的 `Dense` 层
 4. 最后为输出 `Dense` 层。
 
@@ -518,7 +519,7 @@ plt.show()
 
 ## 3. 导出模型
 
-在上例中，将文本提供给模型前应用了 `TextVectorization` layer。如果希望模型能直接处理原始字符串，可以在模型中包含 `TextVectorization` layer。为此，可以使用刚训练的权重创建新的 模型：
+在上例中，将文本提供给模型前应用了 `TextVectorization` layer。如果希望模型能直接处理原始字符串，可以在模型中包含 `TextVectorization` layer。为此，可以使用刚训练的权重创建新的模型：
 
 ```python
 export_model = tf.keras.Sequential([
@@ -599,9 +600,318 @@ train/
 对该练习，可以对前面的流程做如下修改：
 
 1. 更新下载数据集的代码，将 IMDB 替换为 Stack Overflow 数据集。由于 Stack Overflow 数据集具有类似的目录结构，因此无需做太多修改。
-2. 将模型的输出层修改为 `Dense(4)`，因为现在有输出四个类别。
+2. 将模型的输出层修改为 `Dense(4)`，因为现在有四个类别。
 3. 编译模型时，将损失函数修改为 `tf.keras.losses.SparseCategoricalCrossentropy`。这是用于多分类问题、标签为整数的损失函数。另外，将指标改为 `metrics=['accuracy']`，因为这是多分类问题，`tf.metrics.BinaryAccuracy` 只用于二分类问题。
 4. 绘图时，将 `binary_accuracy` 和 `val_binary_accuracy` 分别修改为 `accuracy` 和 `val_accuracy`。
+
+- 导入包
+
+```python
+import matplotlib.pyplot as plt
+import os
+import re
+import shutil
+import string
+import tensorflow as tf
+
+from tensorflow.keras import layers
+from tensorflow.keras import losses
+```
+
+- 下载数据集
+
+```python
+url = "https://storage.googleapis.com/download.tensorflow.org/data/stack_overflow_16k.tar.gz"
+dataset = tf.keras.utils.get_file("stack_overflow_16k", url,
+                                  untar=True, cache_dir=".",
+                                  cache_subdir="stack_overflow_16k")
+dataset_dir = os.path.dirname(dataset)
+
+os.listdir(dataset_dir)
+```
+
+```txt
+['README.md', 'stack_overflow_16k.tar.gz', 'test', 'train']
+```
+
+- 查看训练集目录
+
+```python
+train_dir = os.path.join(dataset_dir, 'train')
+os.listdir(train_dir)
+```
+
+```python
+['csharp', 'java', 'javascript', 'python']
+```
+
+- 查看文件
+
+```python
+sample_file = os.path.join(train_dir, 'java/666.txt')
+with open(sample_file) as f:
+    print(f.read())
+```
+
+```txt
+"how to find max and min value so how do i find max and min value of group of numbers. ex: the numbers are ..int num[] = {1,2,3,4,5,6,7,8,9,2,2,2,2,2,};...the next things is how to find out how many times 2 appears in the array..this is what i think...char a = ""2"".int count = 0;.if (num.length = a) {.    count++;.    system.out.print (count);.}"
+```
+
+- 定义训练集
+
+```python
+batch_size = 32
+seed = 42
+
+raw_train_ds = tf.keras.utils.text_dataset_from_directory(
+    'stack_overflow_16k/train',
+    batch_size=batch_size,
+    validation_split=0.2,
+    subset='training',
+    seed=seed
+)
+```
+
+```txt
+Found 8000 files belonging to 4 classes.
+Using 6400 files for training.
+```
+
+- 查看标签
+
+```python
+print("Label 0 corresponds to", raw_train_ds.class_names[0])
+print("Label 1 corresponds to", raw_train_ds.class_names[1])
+print("Label 2 corresponds to", raw_train_ds.class_names[2])
+print("Label 3 corresponds to", raw_train_ds.class_names[3])
+```
+
+```txt
+Label 0 corresponds to csharp
+Label 1 corresponds to java
+Label 2 corresponds to javascript
+Label 3 corresponds to python
+```
+
+- 定义验证集
+
+```python
+raw_val_ds = tf.keras.utils.text_dataset_from_directory(
+    "stack_overflow_16k/train",
+    batch_size=batch_size,
+    validation_split=0.2,
+    subset='validation',
+    seed=seed
+)
+```
+
+```txt
+Found 8000 files belonging to 4 classes.
+Using 1600 files for validation.
+```
+
+- 定义测试集
+
+```python
+raw_test_ds = tf.keras.utils.text_dataset_from_directory(
+    "stack_overflow_16k/test",
+    batch_size=batch_size
+)
+```
+
+```txt
+Found 8000 files belonging to 4 classes.
+```
+
+- 定义标准化函数
+
+```python
+def custom_standardization(input_data):
+    lowercase = tf.strings.lower(input_data)
+    stripped_html = tf.strings.regex_replace(lowercase, '<br />', ' ')
+    return tf.strings.regex_replace(stripped_html,
+                                    '[%s]' % re.escape(string.punctuation),
+                                    '')
+```
+
+- 定义 `TextVectorization`
+
+```python
+max_features = 10000
+sequence_length = 250
+
+vectorize_layer = layers.TextVectorization(
+    standardize=custom_standardization,
+    max_tokens=max_features,
+    output_mode='int',
+    output_sequence_length=sequence_length
+)
+```
+
+- 预处理数据集
+
+```python
+train_text = raw_train_ds.map(lambda x, y: x)
+vectorize_layer.adapt(train_text)
+
+def vectorize_text(text, label):
+    text = tf.expand_dims(text, -1)
+    return vectorize_layer(text), label
+
+train_ds = raw_train_ds.map(vectorize_text)
+val_ds = raw_val_ds.map(vectorize_text)
+test_ds = raw_test_ds.map(vectorize_text)
+```
+
+- 性能配置
+
+```python
+AUTOTUNE = tf.data.AUTOTUNE
+
+train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
+val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+test_ds = test_ds.cache().prefetch(buffer_size=AUTOTUNE)
+```
+
+- 创建模型
+
+```python
+embedding_dim = 16
+model = keras.Sequential([
+    layers.Embedding(max_features + 1, embedding_dim),
+    layers.Dropout(0.2),
+    layers.GlobalAveragePooling1D(),
+    layers.Dropout(0.2),
+    layers.Dense(4)
+])
+model.summary()
+```
+
+```txt
+Model: "sequential_1"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ embedding_1 (Embedding)     (None, None, 16)          160016    
+                                                                 
+ dropout_2 (Dropout)         (None, None, 16)          0         
+                                                                 
+ global_average_pooling1d_1   (None, 16)               0         
+ (GlobalAveragePooling1D)                                        
+                                                                 
+ dropout_3 (Dropout)         (None, 16)                0         
+                                                                 
+ dense_1 (Dense)             (None, 4)                 68        
+                                                                 
+=================================================================
+Total params: 160,084
+Trainable params: 160,084
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+- 编译模型
+
+```python
+model.compile(loss=losses.SparseCategoricalCrossentropy(from_logits=True),
+              optimizer='adam',
+              metrics=['accuracy'])
+```
+
+- 训练
+
+```python
+epochs = 10
+history = model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=epochs
+)
+```
+
+```txt
+Epoch 1/10
+200/200 [==============================] - 2s 7ms/step - loss: 1.3782 - accuracy: 0.3441 - val_loss: 1.3671 - val_accuracy: 0.5075
+Epoch 2/10
+200/200 [==============================] - 1s 5ms/step - loss: 1.3505 - accuracy: 0.4481 - val_loss: 1.3311 - val_accuracy: 0.5231
+Epoch 3/10
+200/200 [==============================] - 1s 5ms/step - loss: 1.3018 - accuracy: 0.5361 - val_loss: 1.2741 - val_accuracy: 0.5838
+Epoch 4/10
+200/200 [==============================] - 1s 5ms/step - loss: 1.2356 - accuracy: 0.5948 - val_loss: 1.2012 - val_accuracy: 0.6200
+Epoch 5/10
+200/200 [==============================] - 1s 6ms/step - loss: 1.1576 - accuracy: 0.6391 - val_loss: 1.1241 - val_accuracy: 0.6612
+Epoch 6/10
+200/200 [==============================] - 1s 6ms/step - loss: 1.0803 - accuracy: 0.6778 - val_loss: 1.0519 - val_accuracy: 0.6963
+Epoch 7/10
+200/200 [==============================] - 1s 5ms/step - loss: 1.0098 - accuracy: 0.7069 - val_loss: 0.9877 - val_accuracy: 0.7219
+Epoch 8/10
+200/200 [==============================] - 1s 6ms/step - loss: 0.9463 - accuracy: 0.7248 - val_loss: 0.9314 - val_accuracy: 0.7287
+Epoch 9/10
+200/200 [==============================] - 1s 6ms/step - loss: 0.8909 - accuracy: 0.7459 - val_loss: 0.8827 - val_accuracy: 0.7412
+Epoch 10/10
+200/200 [==============================] - 1s 5ms/step - loss: 0.8418 - accuracy: 0.7597 - val_loss: 0.8410 - val_accuracy: 0.7556
+```
+
+- 验证模型
+
+```python
+loss, accuracy = model.evaluate(test_ds)
+print("Loss:", loss)
+print("Accuracy:", accuracy)
+```
+
+```txt
+250/250 [==============================] - 1s 5ms/step - loss: 0.8742 - accuracy: 0.7249
+Loss: 0.8742028474807739
+Accuracy: 0.7248749732971191
+```
+
+- 提取训练数据
+
+```python
+history_dict = history.history
+history_dict.keys()
+```
+
+```txt
+dict_keys(['loss', 'accuracy', 'val_loss', 'val_accuracy'])
+```
+
+- 绘制损失图
+
+```python
+acc = history_dict['accuracy']
+val_acc = history_dict['val_accuracy']
+loss = history_dict['loss']
+val_loss = history_dict['val_loss']
+
+epochs = range(1, len(acc) + 1)
+plt.plot(epochs, loss, 'bo', label='Trainnig loss')
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+plt.title("Training and validation loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+
+plt.show()
+```
+
+![](images/2022-06-20-16-01-00.png)
+
+- 绘制精度图
+
+```python
+plt.plot(epochs, acc, 'bo', label='Training acc')
+plt.plot(epochs, val_acc, 'b', label='Validation acc')
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend(loc='lower right')
+
+plt.show()
+```
+
+![](images/2022-06-20-16-01-26.png)
 
 ## 5. 参考
 
