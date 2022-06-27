@@ -1,20 +1,20 @@
 # TensorFlow 基础
 
 - [TensorFlow 基础](#tensorflow-基础)
-  - [简介](#简介)
-  - [张量](#张量)
-  - [变量](#变量)
-  - [自动微分](#自动微分)
-  - [Graph 和 tf.function](#graph-和-tffunction)
-  - [Module, layer 和 model](#module-layer-和-model)
-  - [训练循环](#训练循环)
-  - [参考](#参考)
+  - [1. 简介](#1-简介)
+  - [2. 张量](#2-张量)
+  - [3. 变量](#3-变量)
+  - [4. 自动微分](#4-自动微分)
+  - [5. Graph 和 tf.function](#5-graph-和-tffunction)
+  - [6. Module, layer 和 model](#6-module-layer-和-model)
+  - [7. 训练循环](#7-训练循环)
+  - [8. 参考](#8-参考)
 
 Last updated：2022-06-09, 15:50
 @author Jiawei Mao
 ****
 
-## 简介
+## 1. 简介
 
 下面对 TensorFlow 的基础知识进行简要概述。
 
@@ -26,7 +26,7 @@ TensorFlow 是一个端到端的机器学习平台，支持：
 - 模型的构建、训练和导出；
 - ...
 
-## 张量
+## 2. 张量
 
 TensorFlow 将高维数组称为张量（tensor），以 [tf.Tensor](../../api/tf/Tensor.md) 对象表示。下面是一个二维张量：
 
@@ -97,7 +97,7 @@ else:
 
 详情请参考 [Tensor 指南](tensor.md)。
 
-## 变量
+## 3. 变量
 
 常规 [tf.Tensor](../../api/tf/Tensor.md) 对象不可变（immutable），在 TensorFlow 中使用 `tf.Variable` 存储可变张量（如模型的权重必须可变）。
 
@@ -113,7 +113,7 @@ else:
 
 详情请参考 [Variable 指南](variable.md)。
 
-## 自动微分
+## 4. 自动微分
 
 [梯度下降](https://en.wikipedia.org/wiki/Gradient_descent) 及其相关算法是现代机器学习的基石。
 
@@ -144,7 +144,7 @@ $y$ 的导数 $y'=f'(x)=(2\times x+2)=4$。TensorFlow 可以自动完成该计�
 
 详情请参考 [梯度和自动微分指南](autodiff.md)。
 
-## Graph 和 tf.function
+## 5. Graph 和 tf.function
 
 除了像使用 Python 库一样交互式地使用 TensorFlow，TensorFlow 还支持：
 
@@ -184,7 +184,7 @@ Tracing.
 
 详情请参考 [Graph 指南](graph.md)。
 
-## Module, layer 和 model
+## 6. Module, layer 和 model
 
 [tf.Module](../../api/tf/Module.md) 类用于管理 [tf.Variable](../../api/tf/Variable.md) 对象以及对变量进行操作的 [tf.function](../../api/tf/function.md) 对象。
 
@@ -231,7 +231,7 @@ INFO:tensorflow:Assets written to: .saved\assets
 
 详情请参考 [模块、层和模型指南](module.md)。
 
-## 训练循环
+## 7. 训练循环
 
 现在把上面的功能组合在一起，创建一个简单的模型。
 
@@ -374,6 +374,6 @@ plt.title('Keras training progress');
 
 详情请参考 [训练循环指南](basic_training_loop.md)。
 
-## 参考
+## 8. 参考
 
 - https://www.tensorflow.org/guide/basics

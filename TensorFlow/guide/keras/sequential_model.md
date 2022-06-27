@@ -1,9 +1,21 @@
-# Sequential model
+# 序列模型
 
-2021-12-21, 17:27
+- [序列模型](#序列模型)
+  - [1. 配置](#1-配置)
+  - [2. 何时使用序列模型](#2-何时使用序列模型)
+  - [3. 创建序列模型](#3-创建序列模型)
+  - [4. 指定输入 shape](#4-指定输入-shape)
+  - [5. 通用调试工作流](#5-通用调试工作流)
+  - [6. 使用模型](#6-使用模型)
+  - [7. 使用序列模型提取特征](#7-使用序列模型提取特征)
+  - [8. 基于序列模型的迁移学习](#8-基于序列模型的迁移学习)
+  - [9. 参考](#9-参考)
+
+Last updated: 2022-06-27, 11:26
+@author Jiawei Mao
 ****
 
-## 配置
+## 1. 配置
 
 ```python
 import tensorflow as tf
@@ -11,9 +23,9 @@ from tensorflow import keras
 from tensorflow.keras import layers
 ```
 
-## 何时使用序列模型
+## 2. 何时使用序列模型
 
-序列（`Sequential`）模型适合于简单的层堆栈，每一层只有一个输入张量和一个输出张量。
+序列（`Sequential`）模型适合于简单的层堆栈，每层只有一个输入张量和一个输出张量。
 
 从语法上来说，下面的序列模型：
 
@@ -34,12 +46,12 @@ y = model(x)
 与下面的函数定义等价：
 
 ```python
-# Create 3 layers
+# 创建 3 个 layer
 layer1 = layers.Dense(2, activation="relu", name="layer1")
 layer2 = layers.Dense(3, activation="relu", name="layer2")
 layer3 = layers.Dense(4, name="layer3")
 
-# Call layers on a test input
+# 在测试输入上调用 layers
 x = tf.ones((3, 3))
 y = layer3(layer2(layer1(x)))
 ```
@@ -47,13 +59,13 @@ y = layer3(layer2(layer1(x)))
 以下情形不适合用 `Sequential` 模型：
 
 - 有多个输入或多个输出；
-- 任意一个网络层有多个输入或多个输出；
+- 包含有多个输入或多个输出的网络层；
 - 需要 layer 共享；
 - 需要非线性拓扑结构。
 
-## 创建 Sequential 模型
+## 3. 创建序列模型
 
-可以将 layer 列表传递给 `Sequential` 构造函数创建 `Sequential` 模型：
+将 layer 列表传递给 `Sequential` 的构造函数来创建序列模型：
 
 ```python
 model = keras.Sequential(
@@ -65,7 +77,7 @@ model = keras.Sequential(
 )
 ```
 
-可以通过 `layers` 属性访问这些 layers：
+这些 layers 可以通过 `layers` 属性访问：
 
 ```python
 >>> model.layers
@@ -74,7 +86,7 @@ model = keras.Sequential(
  <keras.layers.core.dense.Dense at 0x1e0d4f2aa30>]
 ```
 
-也可以通过调用 `add()` 逐渐添加 layer：
+也可以通过 `add()` 逐步添加 layer：
 
 ```python
 model = keras.Sequential()
@@ -83,7 +95,7 @@ model.add(layers.Dense(3, activation="relu"))
 model.add(layers.Dense(4))
 ```
 
-可以使用 `pop()` 方法移除 layer：
+还可以使用 `pop()` 方法移除 layer：
 
 ```python
 >>> model.pop()
@@ -91,7 +103,7 @@ model.add(layers.Dense(4))
 2
 ```
 
-可以使用 `name` 参数为创建的模型指定名称：
+可以使用 `name` 参数为创建的模型命名：
 
 ```python
 model = keras.Sequential(name="my_sequential")
@@ -100,20 +112,22 @@ model.add(layers.Dense(3, activation="relu", name="layer2"))
 model.add(layers.Dense(4, name="layer3"))
 ```
 
-## 指定输入 shape
+## 4. 指定输入 shape
 
-通常来说，Keras 中的所有 layers 都需要知道它们输入的 shape，以便能够创建对应的 weights。所以按照如下方式创建 layer，由于不知道输入 shape，所以初始状态没有 weights：
+通常来说，Keras 中的所有 layers 需要知道其输入 shape，才能创建对应的 weights。
+
+- 按照如下方式创建 layer，由于不知道输入 shape，所以其初始状态没有 weights：
 
 ```python
 >>> layer = layers.Dense(3)
->>> layer.weights
+>>> layer.weights # 空 list
 []
 ```
 
-Keras 在第一次调用时根据根据输入 shape 创建权重矩阵，因为权重矩阵的 shape 依赖于输入的 shape：
+- Keras 在第一次调用时根据输入 shape 创建权重矩阵，因为权重矩阵的 shape 依赖于输入的 shape
 
 ```py
->>> # Call layer on a test input
+>>> # 在测试输入上调用 layer
 >>> x = tf.ones((1, 4))
 >>> y = layer(x)
 >>> layer.weights  # Now it has weights, of shape (4, 3) and (3,)
@@ -125,7 +139,7 @@ Keras 在第一次调用时根据根据输入 shape 创建权重矩阵，因为�
  <tf.Variable 'dense_6/bias:0' shape=(3,) dtype=float32, numpy=array([0., 0., 0.], dtype=float32)>]
 ```
 
-上述行为也适用于 Sequential 模型，在实例化没有输入的 Sequential 模型时，它还没有构建，此时也没有 weights，此时调用 `model.weights` 会出错。在接受输入数据后，模型才创建 weights：
+上述行为也适用于 Sequential 模型，在实例化没有输入的 Sequential 模型时，它还没有构建，因此也没有 weights，此时调用 `model.weights` 会出错。在接受输入数据后，模型才创建 weights：
 
 ```python
 >>> model = keras.Sequential([
@@ -158,7 +172,7 @@ Trainable params: 35
 Non-trainable params: 0
 ```
 
-以递增的方式构建 Sequential 模型时，能够随时使用 summary 显示模型会很有用。此时可以通过向模型传递 `Input` 对象来启动模型，这样它从一开始就知道输入 shape：
+以递增的方式构建 Sequential 模型时，并随时使用 summary 显示模型对验证模型的准确性很有效。此时可以通过向模型传递 `Input` 对象来启动模型，这样它从一开始就知道输入 shape：
 
 ```python
 model = keras.Sequential()
@@ -168,7 +182,7 @@ model.add(layers.Dense(2, activation='relu'))
 model.summary()
 ```
 
-```sh
+```txt
 Model: "sequential_3"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
@@ -207,13 +221,13 @@ Trainable params: 10
 Non-trainable params: 0
 ```
 
-这样预定义输入 shape 的模型总有 weights 和 输出 shape。
+这样预定义输入 shape 的模型总有 weights 和输出 shape。
 
 一般来说，如果知道输入 shape，对 Sequential 模型建议提前指定 shape。
 
-## 通用调试工作流
+## 5. 通用调试工作流
 
-在构建新的 Sequential 模型时，使用 `add()` 逐渐添加 layers，并使用 `summary()` 查看模型摘要很有用。例如，可以查看 `Conv2D` 和 `MaxPooling2D` 层如何向下采样图像特征：
+在构建新的 Sequential 模型时，使用 `add()` 逐步添加 layers，并使用 `summary()` 查看模型摘要很有用。例如，可以查看 `Conv2D` 和 `MaxPooling2D` 层如何向下采样图像特征：
 
 ```python
 >>> model = keras.Sequential()
@@ -326,7 +340,7 @@ Trainable params: 49,002
 Non-trainable params: 0
 ```
 
-## 使用模型
+## 6. 使用模型
 
 准备好模型后：
 
@@ -334,9 +348,9 @@ Non-trainable params: 0
 - 保存和恢复模型；
 - 使用多个 GPU 加速训练模型。
 
-## 使用序列模型提取特征
+## 7. 使用序列模型提取特征
 
-Sequential 构建好后，其行为和 [函数API](functional.md) 模型类似，即每层都有 `input` 和 `output` 属性。这些属性可用来做一些简洁的事情，比如创建一个模型，提取 Sequential 模型中所有中间层的输出：
+序列模型构建好后，其行为和 [函数 API](functional.md) 模型类似，即每层都有 `input` 和 `output` 属性。这些属性可用来做一些简单的事情，比如用来快速创建模型，提取 Sequential 模型中所有中间层的输出：
 
 ```python
 initial_model = keras.Sequential(
@@ -377,9 +391,9 @@ x = tf.ones((1, 250, 250, 3))
 features = feature_extractor(x)
 ```
 
-## 基于序列模型的迁移学习
+## 8. 基于序列模型的迁移学习
 
-[迁移学习](transfer_learning.md)冻结模型的底层，只循环顶层。下面是两个常见的涉及序列模型的迁移学习范本。
+[迁移学习](transfer_learning.md)冻结模型的底层，只训练顶层。下面是两个常见的涉及序列模型的迁移学习范本。
 
 首先，假设你有一个序列模型，需要**冻结除最后一层外的所有层**，此时只需要迭代模型的 `model.layers`（除最后一层），对每层设置 `layer.trainable = False`。如下：
 
@@ -392,43 +406,43 @@ model = keras.Sequential([
     layers.Dense(10),
 ])
 
-# Presumably you would want to first load pre-trained weights.
+# 加载预训练的权重
 model.load_weights(...)
 
-# Freeze all layers except the last one.
+# 冻结最后一层外的所有层
 for layer in model.layers[:-1]:
   layer.trainable = False
 
-# Recompile and train (this will only update the weights of the last layer).
+# 重新编译和训练，此时只会更新最后一层的权重
 model.compile(...)
 model.fit(...)
 ```
 
-另一种是使用序列模型堆叠预先训练过的模型和一些刚初始化的分类层。如下：
+另一种是使用序列模型堆叠预先训练过的模型和一些新初始化的分类层。如下：
 
 ```py
-# Load a convolutional base with pre-trained weights
+# 加载预训练的基础卷积层
 base_model = keras.applications.Xception(
     weights='imagenet',
     include_top=False,
     pooling='avg')
 
-# Freeze the base model
+# 冻结基础模型
 base_model.trainable = False
 
-# Use a Sequential model to add a trainable classifier on top
+# 使用序列模型在顶部添加可训练的分类器
 model = keras.Sequential([
     base_model,
     layers.Dense(1000),
 ])
 
-# Compile & train
+# 编译，训练
 model.compile(...)
 model.fit(...)
 ```
 
 **使用迁移学习会经常使用这两种模式**。
 
-## 参考
+## 9. 参考
 
 - https://www.tensorflow.org/guide/keras/sequential_model
