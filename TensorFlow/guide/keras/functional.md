@@ -1,4 +1,22 @@
-# Functional API
+# 函数 API
+
+- [函数 API](#函数-api)
+  - [配置](#配置)
+  - [简介](#简介)
+  - [训练、评估和推断](#训练评估和推断)
+  - [保存和序列化](#保存和序列化)
+  - [使用相同 layers 定义多个模型](#使用相同-layers-定义多个模型)
+  - [模型是可调用的](#模型是可调用的)
+  - [复杂拓扑图形结构](#复杂拓扑图形结构)
+    - [多输入输出](#多输入输出)
+    - [A toy ResNet model](#a-toy-resnet-model)
+  - [共享层](#共享层)
+  - [提取和重用 graph 节点](#提取和重用-graph-节点)
+  - [自定义层扩展 API](#自定义层扩展-api)
+  - [何时使用函数 API](#何时使用函数-api)
+    - [函数 API 优势](#函数-api-优势)
+  - [API 混搭](#api-混搭)
+  - [参考](#参考)
 
 2022-02-16, 10:13
 ***
@@ -14,9 +32,9 @@ from tensorflow.keras import layers
 
 ## 简介
 
-Keras 函数式（functional）API 是一种比 [tf.keras.Sequential](sequential_model.md) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，甚至可以创建包含多个输入或多个输出的模型。
+Keras 函数（functional）API 是一种比 [tf.keras.Sequential](sequential_model.md) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，以及包含多个输入或多个输出的模型。
 
-其主要思想是，深度学习模型是由神经网络层组成的有向无环图（directed acyclic graph, DAG），函数式 API 提供构建这种图的方法。
+其主要思想是，深度学习模型是由神经网络 layer 组成的有向无环图（directed acyclic graph, DAG），函数式 API 提供构建这种图的方法。
 
 考虑如下模型：
 
@@ -38,9 +56,9 @@ Keras 函数式（functional）API 是一种比 [tf.keras.Sequential](sequential
 inputs = keras.Input(shape=(784,))
 ```
 
-输入数据向量长度设置为 784。此处只指定样本 shape，忽略 batch size。
+输入向量 shape 设置为 784。此处只指定样本 shape，忽略 batch size。
 
-假如输入是 shape 为 `(32, 32, 3)` 的图片。此时输入定义方法为：
+假如输入 shape 为 `(32, 32, 3)` 的图片。此时可定义输入为：
 
 ```python
 img_inputs = keras.Input(shape=(32, 32, 3))
@@ -55,7 +73,7 @@ TensorShape([None, 784])
 tf.float32
 ```
 
-然后 DAG 图的下一个节点，将 `inputs` 对象作为输入：
+定义 DAG 图的下一个节点，将 `inputs` 对象作为输入：
 
 ```python
 dense = layers.Dense(64, activation="relu")
@@ -77,11 +95,13 @@ outputs = layers.Dense(10)(x)
 model = keras.Model(inputs=inputs, outputs=outputs, name="mnist_model")
 ```
 
-让我们来看看这个模型：
+查看模型：
 
 ```python
->>> model.summary()
+model.summary()
+```
 
+```txt
 Model: "mnist_model"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
@@ -127,7 +147,7 @@ keras.utils.plot_model(model, "my_first_model_with_shape_info.png", show_shapes=
 
 `Model` 类内置有训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的算法，如 GAN。
 
-下面，我们载入 MNIST 数据集，将其 reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
+下面，加载 MNIST 数据集，将其 reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
 
 ```python
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
@@ -148,7 +168,7 @@ print("Test loss:", test_scores[0])
 print("Test accuracy:", test_scores[1])
 ```
 
-```sh
+```txt
 Epoch 1/2
 750/750 [==============================] - 1s 1ms/step - loss: 0.3340 - accuracy: 0.9047 - val_loss: 0.1792 - val_accuracy: 0.9486
 Epoch 2/2
@@ -178,7 +198,7 @@ model_path = r"D:\it\test\model"
 model.save(model_path)
 ```
 
-```sh
+```txt
 INFO:tensorflow:Assets written to: D:\it\test\model\assets
 ```
 
@@ -189,11 +209,11 @@ del model
 model = keras.models.load_model(model_path
 ```
 
-## 使用相同的 graph layers 定义多个模型
+## 使用相同 layers 定义多个模型
 
 在函数式 API 中，通过指定图的输入和输出创建模型。这意味着可以使用单个 graph of layers 生成多个模型。
 
-下面我们演示使用相同的 layers 堆栈实例化两个模型：
+下面演示使用相同的 layers 堆栈实例化两个模型：
 
 - 一个将输入图像转换为 16 维向量 `encoder` 模型
 - 一个用于训练的端到端 autoencoder。
@@ -211,7 +231,7 @@ encoder = keras.Model(encoder_input, encoder_output, name='encoder')
 encoder.summary()
 ```
 
-```sh
+```txt
 Model: "encoder"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
@@ -336,7 +356,7 @@ autoencoder = keras.Model(autoencoder_input, decoded_img, name="autoencoder")
 autoencoder.summary()
 ```
 
-如上所示，模型可以嵌套，一个模型可以包含子模型。模型嵌套常用于模型集成。例如，下面将一个组模型组合成一个单一模型，来平均它们的预测：
+如上所示，模型可以嵌套，一个模型可以包含子模型。模型嵌套常用于模型集成。例如，将一组模型组合成一个单一模型，来平均它们的预测：
 
 ```python
 def get_model():
@@ -357,9 +377,9 @@ outputs = layers.average([y1, y2, y3])
 ensemble_model = keras.Model(inputs=inputs, outputs=outputs)
 ```
 
-## 处理复杂拓扑图形结构
+## 复杂拓扑图形结构
 
-### 多个输入和输出
+### 多输入输出
 
 函数式 API 可以创建包含多个输入和输出的模型，[Sequential](sequential_model.md) API 就不行。
 
@@ -422,7 +442,7 @@ keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=Tr
 
 ![](images/2022-02-24-16-05-54.png)
 
-在编译这个模型时，不同输出可以采用不同的损失函数。甚至可以为不同损失分配不同的权重，以调整它们对总训练损失的贡献：
+在编译这类模型时，不同输出可以采用不同的损失函数。甚至可以为不同损失分配不同的权重，以调整它们对总训练损失的贡献：
 
 ```python
 model.compile(
@@ -448,15 +468,15 @@ model.compile(
 )
 ```
 
-输入数据和目标值通过 NumPy 数组传入：
+输入数据和目标值，通过 NumPy 数组传入：
 
 ```python
-# Dummy input data
+# 虚拟输入数据
 title_data = np.random.randint(num_words, size=(1280, 10))
 body_data = np.random.randint(num_words, size=(1280, 100))
 tags_data = np.random.randint(2, size=(1280, num_tags)).astype("float32")
 
-# Dummy target data
+# 虚拟目标值
 priority_targets = np.random.random(size=(1280, 1))
 dept_targets = np.random.randint(2, size=(1280, num_departments))
 
@@ -466,6 +486,361 @@ model.fit(
     epochs=2,
     batch_size=32,
 )
+```
+
+```txt
+Epoch 1/2
+40/40 [==============================] - 4s 17ms/step - loss: 1.3428 - priority_loss: 0.7025 - department_loss: 3.2012
+Epoch 2/2
+40/40 [==============================] - 1s 13ms/step - loss: 1.3294 - priority_loss: 0.6992 - department_loss: 3.1509
+<keras.callbacks.History at 0x2438808d5b0>
+```
+
+当对数据集调用 `fit`，要么生成 `([title_data, body_data, tags_data], [priority_targets, dept_targets])` tuple of list，或 `({'title': title_data, 'body': body_data, 'tags': tags_data}, {'priority': priority_targets, 'department': dept_targets})` a tuple of dict。
+
+### A toy ResNet model
+
+除了多输入、输出模型外，函数 API 还可以创建非线性拓扑结构模型，而 `Sequential` API 不行。
+
+比如可以用于创建残差连接。下面用 CIFAR10 构建一个 toy ResNet 模型来演示：
+
+```python
+inputs = keras.Input(shape=(32, 32, 3), name="img")
+x = layers.Conv2D(32, 3, activation="relu")(inputs)
+x = layers.Conv2D(64, 3, activation="relu")(x)
+block_1_output = layers.MaxPooling2D(3)(x)
+
+x = layers.Conv2D(64, 3, activation="relu", padding="same")(block_1_output)
+x = layers.Conv2D(64, 3, activation="relu", padding="same")(x)
+block_2_output = layers.add([x, block_1_output])
+
+x = layers.Conv2D(64, 3, activation="relu", padding="same")(block_2_output)
+x = layers.Conv2D(64, 3, activation="relu", padding="same")(x)
+block_3_output = layers.add([x, block_2_output])
+
+x = layers.Conv2D(64, 3, activation="relu")(block_3_output)
+x = layers.GlobalAveragePooling2D()(x)
+x = layers.Dense(256, activation="relu")(x)
+x = layers.Dropout(0.5)(x)
+outputs = layers.Dense(10)(x)
+
+model = keras.Model(inputs, outputs, name="toy_resnet")
+model.summary()
+```
+
+```txt
+Model: "toy_resnet"
+__________________________________________________________________________________________________
+ Layer (type)                   Output Shape         Param #     Connected to                     
+==================================================================================================
+ img (InputLayer)               [(None, 32, 32, 3)]  0           []                               
+                                                                                                  
+ conv2d (Conv2D)                (None, 30, 30, 32)   896         ['img[0][0]']                    
+                                                                                                  
+ conv2d_1 (Conv2D)              (None, 28, 28, 64)   18496       ['conv2d[0][0]']                 
+                                                                                                  
+ max_pooling2d (MaxPooling2D)   (None, 9, 9, 64)     0           ['conv2d_1[0][0]']               
+                                                                                                  
+ conv2d_2 (Conv2D)              (None, 9, 9, 64)     36928       ['max_pooling2d[0][0]']          
+                                                                                                  
+ conv2d_3 (Conv2D)              (None, 9, 9, 64)     36928       ['conv2d_2[0][0]']               
+                                                                                                  
+ add (Add)                      (None, 9, 9, 64)     0           ['conv2d_3[0][0]',               
+                                                                  'max_pooling2d[0][0]']          
+                                                                                                  
+ conv2d_4 (Conv2D)              (None, 9, 9, 64)     36928       ['add[0][0]']                    
+                                                                                                  
+ conv2d_5 (Conv2D)              (None, 9, 9, 64)     36928       ['conv2d_4[0][0]']               
+                                                                                                  
+ add_1 (Add)                    (None, 9, 9, 64)     0           ['conv2d_5[0][0]',               
+                                                                  'add[0][0]']                    
+                                                                                                  
+ conv2d_6 (Conv2D)              (None, 7, 7, 64)     36928       ['add_1[0][0]']                  
+                                                                                                  
+ global_average_pooling2d (Glob  (None, 64)          0           ['conv2d_6[0][0]']               
+ alAveragePooling2D)                                                                              
+                                                                                                  
+ dense_3 (Dense)                (None, 256)          16640       ['global_average_pooling2d[0][0]'
+                                                                 ]                                
+                                                                                                  
+ dropout (Dropout)              (None, 256)          0           ['dense_3[0][0]']                
+                                                                                                  
+ dense_4 (Dense)                (None, 10)           2570        ['dropout[0][0]']                
+                                                                                                  
+==================================================================================================
+Total params: 223,242
+Trainable params: 223,242
+Non-trainable params: 0
+```
+
+模型图：
+
+```python
+keras.utils.plot_model(model, "mini_resnet.png", show_shapes=True)
+```
+
+![](images/2022-06-27-15-11-56.png)
+
+训练模型：
+
+```python
+(x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
+y_train = keras.utils.to_categorical(y_train, 10)
+y_test = keras.utils.to_categorical(y_test, 10)
+
+model.compile(
+    optimizer=keras.optimizers.RMSprop(1e-3),
+    loss=keras.losses.CategoricalCrossentropy(from_logits=True),
+    metrics=["acc"],
+)
+# 这里只使用训练集的前 1000 个样本以节省时间
+model.fit(x_train[:1000], y_train[:1000], batch_size=64, epochs=1, validation_split=0.2)
+```
+
+```txt
+13/13 [==============================] - 4s 47ms/step - loss: 2.3047 - acc: 0.1338 - val_loss: 2.2925 - val_acc: 0.1150
+<keras.callbacks.History at 0x2450f855430>
+```
+
+## 共享层
+
+函数 API 的另一个重要用途是创建包含共享层的模型。共享层是同一模型中多次重复使用的层，它们学习 GRAPH 多个路径相关的特征。
+
+共享层通常用于编码来自相似空间的输入（如，两端具有相似词汇的不同文本），它们能够在不同的输入之间共享信息，并且能够在相对较少的数据上训练这种模型。如果在其中一个输入中看到一个指定单词，其它通过共享层的输入处理都将收益。
+
+在函数 API 中要共享某一层，只需要多次调用该层。例如，在两个不同的文本输入中共享 `Embedding` 层：
+
+```python
+# 将 1000 个 unique 单词映射到 128 维向量
+shared_embedding = layers.Embedding(1000, 128)
+
+# 变长整数序列
+text_input_a = keras.Input(shape=(None,), dtype="int32")
+
+# 变长整数序列
+text_input_b = keras.Input(shape=(None,), dtype="int32")
+
+# 使用相同 layer 编码两个输入
+encoded_input_a = shared_embedding(text_input_a)
+encoded_input_b = shared_embedding(text_input_b)
+```
+
+## 提取和重用 graph 节点
+
+由于 layer graph 是静态数据结构，因此可以访问和检查其内容。这意味着可以访问 GRAPH 中间层的激活值，并在其它地方使用，如提取特征。
+
+例如，VGG19 模型，使用的 ImageNet 预训练权重：
+
+```python
+vgg19 = tf.keras.applications.VGG19()
+```
+
+```txt
+Downloading data from https://storage.googleapis.com/tensorflow/keras-applications/vgg19/vgg19_weights_tf_dim_ordering_tf_kernels.h5
+574710816/574710816 [==============================] - 118s 0us/step
+```
+
+通过查询 GRAPH 数据结构，获得模型中间激活值：
+
+```python
+features_list = [layer.output for layer in vgg19.layers]
+```
+
+使用这些特征创建一个新的特征提取模型，该模型返回中间层激活值：
+
+```python
+feat_extraction_model = keras.Model(inputs=vgg19.input, outputs=features_list)
+
+img = np.random.random((1, 224, 224, 3)).astype("float32")
+extracted_features = feat_extraction_model(img)
+```
+
+这种方法在[风格迁移学习](https://keras.io/examples/generative/neural_style_transfer/) 中会用到。
+
+## 自定义层扩展 API
+
+`tf.keras` 包含各种内置 layers，例如：
+
+- 卷积层：`Conv1D`, `Conv2D`, `Conv3D`, `Conv2DTranspose`
+- 池化层：`MaxPooling1D`, `MaxPooling2D`, `MaxPooling3D`, `AveragePooling1D`
+- RNN  层：`GRU`, `LSTM`, `ConvLSTM2D`
+- `BatchNormalization`, `Dropout`, `Embedding` 等。
+
+但是，如果找不到所需内容，可以通过自定义层来扩展 API。所有的 layer 都扩展 `Layer` 类并实现：
+
+- `call` 方法，指定 layer 执行的计算
+- `build` 方法，创建 layer 的权重（这是一种代码风格，因为权重的创建也可以放在 `__init__`）
+
+自定义 layer 详情，参考[自定义 layer 和 model 指南](custom_layers_and_models.md)。
+
+下面是 `tf.keras.layers.Densee` 的基本实现：
+
+```python
+class CustomDense(layers.Layer):
+    def __init__(self, units=32):
+        super(CustomDense, self).__init__()
+        self.units = units
+
+    def build(self, input_shape):
+        self.w = self.add_weight(
+            shape=(input_shape[-1], self.units),
+            initializer="random_normal",
+            trainable=True,
+        )
+        self.b = self.add_weight(
+            shape=(self.units,), initializer="random_normal", trainable=True
+        )
+
+    def call(self, inputs):
+        return tf.matmul(inputs, self.w) + self.b
+
+
+inputs = keras.Input((4,))
+outputs = CustomDense(10)(inputs)
+
+model = keras.Model(inputs, outputs)
+```
+
+为了在自定义 layer 中支持序列化，需要实现 `get_config` 方法，该方法返回 layer 实例的构造函数参数：
+
+```python
+class CustomDense(layers.Layer):
+    def __init__(self, units=32):
+        super(CustomDense, self).__init__()
+        self.units = units
+
+    def build(self, input_shape):
+        self.w = self.add_weight(
+            shape=(input_shape[-1], self.units),
+            initializer="random_normal",
+            trainable=True,
+        )
+        self.b = self.add_weight(
+            shape=(self.units,), initializer="random_normal", trainable=True
+        )
+
+    def call(self, inputs):
+        return tf.matmul(inputs, self.w) + self.b
+
+    def get_config(self):
+        return {"units": self.units}
+
+
+inputs = keras.Input((4,))
+outputs = CustomDense(10)(inputs)
+
+model = keras.Model(inputs, outputs)
+config = model.get_config()
+
+new_model = keras.Model.from_config(config, custom_objects={"CustomDense": CustomDense})
+```
+
+还可以实现 `from_config(cls, config)` 类方法，该方法用于在给定配置 dict 下重新创建 layer 实例。`from_config` 的默认实现：
+
+```python
+def from_config(cls, config):
+  return cls(**config)
+```
+
+## 何时使用函数 API
+
+是否应该使用 Keras 函数 API 创建新模型，或者直接扩展 `Model` 类？一般来说，函数 API 更高级、更简单、更安全，具有许多扩展 `Model` 类不支持的特征。
+
+然而，当构建的模型不好表示为有向无环图时，就只能扩展 `Model` 类，扩展 `Model` 类提供了更大的灵活性。例如，使用函数 API 无法实现 Tree-RNN，只能通过扩展 `Model` 类实现。
+
+### 函数 API 优势
+
+以下特征也适用于 `Sequential` 模型，但不适用于扩展子类模型。
+
+**更简洁**
+
+没有 `super(MyClass, self).__init__(...)`, `def call(self, ...):` 等定义。对比：
+
+```python
+inputs = keras.Input(shape=(32,))
+x = layers.Dense(64, activation='relu')(inputs)
+outputs = layers.Dense(10)(x)
+mlp = keras.Model(inputs, outputs)
+```
+
+扩展 `Model` 版本：
+
+```python
+class MLP(keras.Model):
+
+  def __init__(self, **kwargs):
+    super(MLP, self).__init__(**kwargs)
+    self.dense_1 = layers.Dense(64, activation='relu')
+    self.dense_2 = layers.Dense(10)
+
+  def call(self, inputs):
+    x = self.dense_1(inputs)
+    return self.dense_2(x)
+
+# Instantiate the model.
+mlp = MLP()
+# Necessary to create the model's state.
+# The model doesn't have a state until it's called at least once.
+_ = mlp(tf.zeros((1, 32)))
+```
+
+**定义连接图时验证模型**
+
+在函数 API 中，输入规范（shape 和 dtype）提前使用 `Input` 指定。每次调用 一个 layer 时，该 layer 都会检查传递给它的输入是否符合要求，如果没有，就会发出有用的错误信息。
+
+这样可以保证使用函数 API 创建的任何模型都能运行。所有调试（与收敛相关的调试除外）都是在模型构建期间进行的，而不是执行期。这类似于编译器中的类型检查。
+
+**函数模型可绘制、可检查**
+
+## API 混搭
+
+函数 API 和扩展 `Model` 子类模型两种方法并不是二选一。`tf.keras` API 的所有模型都可以相互交互，即 `Sequential` 模型、函数模型和扩展 `Model` 子类模型都可以相互交互。
+
+可以将函数模型或 `Sequential` 模型作为子类模型的一部分：
+
+```python
+units = 32
+timesteps = 10
+input_dim = 5
+
+# 定义函数模型
+inputs = keras.Input((None, units))
+x = layers.GlobalAveragePooling1D()(inputs)
+outputs = layers.Dense(1)(x)
+model = keras.Model(inputs, outputs)
+
+class CustomRNN(layers.Layer):
+    def __init__(self):
+        super(CustomRNN, self).__init__()
+        self.units = units
+        self.projection_1 = layers.Dense(units=units, activation="tanh")
+        self.projection_2 = layers.Dense(units=units, activation="tanh")
+        # Our previously-defined Functional model
+        self.classifier = model
+
+    def call(self, inputs):
+        outputs = []
+        state = tf.zeros(shape=(inputs.shape[0], self.units))
+        for t in range(inputs.shape[1]):
+            x = inputs[:, t, :]
+            h = self.projection_1(x)
+            y = h + self.projection_2(state)
+            state = y
+            outputs.append(y)
+        features = tf.stack(outputs, axis=1)
+        print(features.shape)
+        return self.classifier(features)
+
+
+rnn_model = CustomRNN()
+_ = rnn_model(tf.zeros((1, timesteps, input_dim)))
+```
+
+```txt
+(1, 10, 32)
 ```
 
 ## 参考
