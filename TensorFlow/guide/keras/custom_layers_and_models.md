@@ -1,4 +1,13 @@
-# 自定义 Layer 和 Model
+# 使用子类 API 创建 Layer 和 Model
+
+- [使用子类 API 创建 Layer 和 Model](#使用子类-api-创建-layer-和-model)
+  - [设置](#设置)
+  - [Layer 类：（权重和计算的组合）](#layer-类权重和计算的组合)
+  - [不可训练权重](#不可训练权重)
+  - [将 weight 的创建推迟到输入 shape 已知](#将-weight-的创建推迟到输入-shape-已知)
+  - [Layer 可递归组合](#layer-可递归组合)
+  - [add_loss](#add_loss)
+  - [参考](#参考)
 
 2022-03-08, 23:39
 ***
@@ -12,9 +21,9 @@ from tensorflow import keras
 
 ## Layer 类：（权重和计算的组合）
 
-Keras 的核心抽象之一是 `Layer` 类。layer 类封装状态（layer 的权重）以及输入到输出的转换（"call" 方法，向前传播）。
+Keras 的核心抽象之一是 `Layer` 类。layer 类同时封装状态（layer 的权重）和输入到输出的转换（"call" 方法，layer 的前向传播）。
 
-下面是一个密集连接层。它状态为：变量 `w` 和 `b`：
+下面是一个全连接层，其状态为：变量 `w` 和 `b`：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -27,14 +36,15 @@ class Linear(keras.layers.Layer):
         )
         b_init = tf.zeros_initializer()
         self.b = tf.Variable(
-            initial_value=b_init(shape=(units,), dtype="float32"), trainable=True
+            initial_value=b_init(shape=(units,), dtype="float32"),
+            trainable=True
         )
 
     def call(self, inputs):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-可以像使用 Python 函数一样使用 layer，输出为张量：
+可以像使用 Python 函数一样调用 layer：
 
 ```python
 x = tf.ones((2, 2))
@@ -43,19 +53,20 @@ y = linear_layer(x)
 print(y)
 ```
 
-```sh
+```bash
 tf.Tensor(
-[[ 0.00962844 -0.01307489 -0.1452128   0.0538918 ]
- [ 0.00962844 -0.01307489 -0.1452128   0.0538918 ]], shape=(2, 4), dtype=float32)
+[[ 0.01460802 -0.02662525  0.07070637 -0.01873659]
+ [ 0.01460802 -0.02662525  0.07070637 -0.01873659]], shape=(2, 4), dtype=float32)
 ```
 
-注意，将 `w` 和 `b` 设置为 layer 属性后，layer 会自动跟踪权重：
+> [!NOTE]
+> 将 `w` 和 `b` 设置为 layer 属性后，layer 会自动跟踪权重。
 
 ```python
 assert linear_layer.weights == [linear_layer.w, linear_layer.b]
 ```
 
-也可以使用快捷方式 `add_weight()` 增加权重：
+也可以使用快捷方式 `add_weight()` 添加权重：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -76,17 +87,19 @@ y = linear_layer(x)
 print(y)
 ```
 
-```sh
+```bash
 tf.Tensor(
-[[ 0.05790994  0.060931   -0.0402256  -0.09450993]
- [ 0.05790994  0.060931   -0.0402256  -0.09450993]], shape=(2, 4), dtype=float32)
+[[-0.02559814  0.07031661 -0.07307922 -0.00163199]
+ [-0.02559814  0.07031661 -0.07307922 -0.00163199]], shape=(2, 4), dtype=float32)
 ```
 
-## non-trainable weights
+对比前面的定义，可以发现，`add_weight` 和定义 `tf.Variable` 代码形式基本一致，可以看作语法糖。
 
-除了可训练权重，layer 可以包含不可训练权重。在训练的时候，反向传播不考虑这些权重值。
+## 不可训练权重
 
-添加 non-trainable weight 方法：
+除了可训练权重，layer 可以包含不可训练权重。在训练时，反向传播不更新不可训练权重的值。
+
+添加不可训练权重的方法：
 
 ```python
 class ComputeSum(keras.layers.Layer):
@@ -107,18 +120,17 @@ y = my_sum(x)
 print(y.numpy())
 ```
 
-```sh
+```bash
 [2. 2.]
 [4. 4.]
 ```
 
-`total` 是 `layer.weights` 的一部分，但是属于 non-trainable weight:
+`total` 是 `layer.weights` 的一部分，但是属于不可训练权重:
 
 ```python
 print("weights:", len(my_sum.weights))
 print("non-trainable weights:", len(my_sum.non_trainable_weights))
 
-# It's not included in the trainable weights:
 print("trainable_weights:", my_sum.trainable_weights)
 ```
 
@@ -128,7 +140,7 @@ non-trainable weights: 1
 trainable_weights: []
 ```
 
-## 最佳实践：将 weight 的创建推迟到输入 shape 已知
+## 将 weight 的创建推迟到输入 shape 已知
 
 上面的 `Linear` 层在 `__init__()` 中根据参数 `input_dim` 计算权重 `w` 和 `b` 的 shape:
 
@@ -145,9 +157,9 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-但是很多时候，我们可能事先不知道输入的大小，因此希望在实例化该层之后，在知道 shape 后再 lazily 创建 weights。
+但是很多时候，事先不知道输入的大小，因此希望在知道 shape 后再 lazily 创建 weights。
 
-在 Keras API 中，我们建议在 layer 的 `build(self, inputs_shape)` 方法中创建 weights。如下：
+在 Keras API 中，建议在 layer 的 `build(self, inputs_shape)` 方法中创建 weights。如下：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -169,24 +181,24 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-layer 的 `__call__()` 方法在第一次调用时会自动运行 build 方法。lazy 初始化的 layer，使用更容易：
+layer 的 `__call__()` 方法在第一次调用时会自动运行 `build` 方法。lazy 初始化的 layer，使用更容易：
 
 ```python
-# 实例化时，我们不知道输入 shape
+# 实例化时，不知道输入 shape
 linear_layer = Linear(32)
 
 # 第一次调用 layer 时动态创建 layer 的权重
 y = linear_layer(x)
 ```
 
-如上所示，单独实现 `build()` 可以很好地将权重的创建与使用分开。然而，对于一些高级自定义 layer，将状态创建和计算分开几乎不可能。layer 的创建者依然可以将权重的创建推迟到第一次调用 `__call__()`
+如上所示，单独实现 `build()` 可以很好地将权重的创建与使用分开。然而，对一些高级自定义 layer，将状态创建和计算分开几乎不可能。layer 创建者依然可以将权重的创建推迟到第一次调用 `__call__()`
 ，但是要注意以后的调用使用相同的权重。另外，`__call__()` 第一次执行很可能在 `tf.function` 中，因此 `__call__()` 中创建任何变量都应该放在 `tf.init_scope` 中。
 
 ## Layer 可递归组合
 
-创建将一个 layer 实例作为另一个 layer 的属性，则外层 layer 会自动跟踪内层创建的权重。
+如果将一个 layer 实例作为另一个 layer 的属性，则外层 layer 会自动跟踪内层 layer 的权重。
 
-建议在 `__init__()` 中创建这样的 sublayers，权重则由第一次调用 `__call__()` 时触发构建。
+建议在 `__init__()` 中创建 sublayers，权重则由第一次调用 `__call__()` 时触发构建。
 
 ```python
 class MLPBlock(keras.layers.Layer):
@@ -205,17 +217,17 @@ class MLPBlock(keras.layers.Layer):
 
 
 mlp = MLPBlock()
-y = mlp(tf.ones(shape=(3, 64)))  # The first call to the `mlp` will create the weights
+y = mlp(tf.ones(shape=(3, 64)))  # 第一次调用 `mlp` 时触发创建 weights
 print("weights:", len(mlp.weights))
 print("trainable weights:", len(mlp.trainable_weights))
 ```
 
-```sh
+```bash
 weights: 6
 trainable weights: 6
 ```
 
-## add_loss()
+## add_loss
 
 在 `call()` 方法中可以创建在训练循环时要使用的损失张量，通过调用 `self.add_loss(value)` 实现：
 

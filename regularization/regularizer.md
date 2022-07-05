@@ -3,6 +3,7 @@
 - [正则化](#正则化)
   - [过拟合](#过拟合)
   - [正则化种类](#正则化种类)
+  - [L2 正则化](#l2-正则化)
   - [权值衰减](#权值衰减)
   - [Dropout](#dropout)
   - [BatchNormalization](#batchnormalization)
@@ -21,6 +22,12 @@
 
 模型的复杂度大致可以用 non-zero weights 的数目表示，换句话说，如果两个模型 M1 和 M2 性能接近，那么我们应该选择更简单的模型，即 non-zero weights 更少的模型。
 
+正则化在损失函数上添加限制，以缩小解空间，从而减少求出过拟合解的可能性。常见的正则化技术包括：
+
+- L1 正则化
+- L2 正则化
+- Dropout 正则化
+
 ## 正则化种类
 
 在机器学习中使用的正则化方法有三种：
@@ -36,6 +43,11 @@ from tf.keras.regularizers import l2, activity_l2
 model.add(Dense(64, input_dim=64, W_regularizer=l2(0.01),
 activity_regularizer=activity_l2(0.01)))
 ```
+
+## L2 正则化
+
+
+
 
 ## 权值衰减
 

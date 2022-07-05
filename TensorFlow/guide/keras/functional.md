@@ -1,27 +1,29 @@
 # 函数 API
 
 - [函数 API](#函数-api)
-  - [配置](#配置)
-  - [简介](#简介)
-  - [训练、评估和推断](#训练评估和推断)
-  - [保存和序列化](#保存和序列化)
-  - [使用相同 layers 定义多个模型](#使用相同-layers-定义多个模型)
-  - [模型是可调用的](#模型是可调用的)
-  - [复杂拓扑图形结构](#复杂拓扑图形结构)
-    - [多输入输出](#多输入输出)
-    - [A toy ResNet model](#a-toy-resnet-model)
-  - [共享层](#共享层)
-  - [提取和重用 graph 节点](#提取和重用-graph-节点)
-  - [自定义层扩展 API](#自定义层扩展-api)
-  - [何时使用函数 API](#何时使用函数-api)
-    - [函数 API 优势](#函数-api-优势)
-  - [API 混搭](#api-混搭)
-  - [参考](#参考)
+  - [1. 配置](#1-配置)
+  - [2. 简介](#2-简介)
+  - [3. 训练、评估和推断](#3-训练评估和推断)
+  - [4. 保存和序列化](#4-保存和序列化)
+  - [5. 使用相同 layers 定义多个模型](#5-使用相同-layers-定义多个模型)
+  - [6. 模型是可调用的](#6-模型是可调用的)
+  - [7. 复杂拓扑图形结构](#7-复杂拓扑图形结构)
+    - [7.1 多输入输出](#71-多输入输出)
+    - [7.2 A toy ResNet model](#72-a-toy-resnet-model)
+  - [8. 共享层](#8-共享层)
+  - [9. 提取和重用 graph 节点](#9-提取和重用-graph-节点)
+  - [10. 自定义 layer](#10-自定义-layer)
+  - [11. 何时使用函数 API](#11-何时使用函数-api)
+    - [11.1 函数 API 优势](#111-函数-api-优势)
+    - [11.2 函数 API 缺点](#112-函数-api-缺点)
+  - [12. API 混搭](#12-api-混搭)
+  - [13. 参考](#13-参考)
 
-2022-02-16, 10:13
-***
+Last updated: 2022-06-30, 15:36
+@author Jiawei Mao
+****
 
-## 配置
+## 1. 配置
 
 ```python
 import numpy as np
@@ -30,7 +32,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 ```
 
-## 简介
+## 2. 简介
 
 Keras 函数（functional）API 是一种比 [tf.keras.Sequential](sequential_model.md) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，以及包含多个输入或多个输出的模型。
 
@@ -56,7 +58,7 @@ Keras 函数（functional）API 是一种比 [tf.keras.Sequential](sequential_mo
 inputs = keras.Input(shape=(784,))
 ```
 
-输入向量 shape 设置为 784。此处只指定样本 shape，忽略 batch size。
+输入向量 shape 设置为 784。此处一般只指定样本 shape，忽略 batch size。
 
 假如输入 shape 为 `(32, 32, 3)` 的图片。此时可定义输入为：
 
@@ -95,7 +97,7 @@ outputs = layers.Dense(10)(x)
 model = keras.Model(inputs=inputs, outputs=outputs, name="mnist_model")
 ```
 
-查看模型：
+- 查看模型
 
 ```python
 model.summary()
@@ -121,7 +123,7 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-将模型结构输出为图片：
+- 将模型结构输出为图片
 
 ```python
 keras.utils.plot_model(model, "my_first_model.png")
@@ -131,7 +133,7 @@ keras.utils.plot_model(model, "my_first_model.png")
 
 ![](images/2022-02-16-12-10-57.png)
 
-导出图片时可以显示每个 layer 的输入和输出 shape:
+- 导出图片时可以显示每个 layer 的输入和输出 shape
 
 ```python
 keras.utils.plot_model(model, "my_first_model_with_shape_info.png", show_shapes=True)
@@ -141,13 +143,13 @@ keras.utils.plot_model(model, "my_first_model_with_shape_info.png", show_shapes=
 
 这个图和创建该图的代码几乎相同。只是将连接箭头用方法调用替换了。
 
-## 训练、评估和推断
+## 3. 训练、评估和推断
 
 使用函数 API 构建的模型，在训练、评估和推断方面与 [Sequential](sequential_model.md) 模型完全相同。
 
-`Model` 类内置有训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的算法，如 GAN。
+`Model` 类内置有训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的训练流程，如 GAN。
 
-下面，加载 MNIST 数据集，将其 reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
+下面，加载 MNIST 数据集，reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
 
 ```python
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
@@ -178,11 +180,9 @@ Test loss: 0.15118415653705597
 Test accuracy: 0.9559999704360962
 ```
 
-## 保存和序列化
+## 4. 保存和序列化
 
-使用函数式 API 创建的模型的保存与序列化方式与使用 [Sequential](sequential_model.md) 创建的模型相同。
-
-保存函数式 API 创建的模型的标准方法是调用 `model.save()` 将整个模型保存为单个文件。随后可以用该文件重新创建完全相同的模型。
+使用函数式 API 创建的模型的保存与序列化方式与使用 [Sequential](sequential_model.md) 创建的模型相同。保存函数式 API 创建的模型的标准方法是调用 `model.save()` 将整个模型保存为单个文件。随后可以用该文件重新创建完全相同的模型。
 
 该文件包括：
 
@@ -206,12 +206,12 @@ INFO:tensorflow:Assets written to: D:\it\test\model\assets
 
 ```python
 del model
-model = keras.models.load_model(model_path
+model = keras.models.load_model(model_path)
 ```
 
-## 使用相同 layers 定义多个模型
+## 5. 使用相同 layers 定义多个模型
 
-在函数式 API 中，通过指定图的输入和输出创建模型。这意味着可以使用单个 graph of layers 生成多个模型。
+在函数 API 中，通过指定图的输入和输出创建模型。这意味着单个 graph of layers 可用来生成多个模型。
 
 下面演示使用相同的 layers 堆栈实例化两个模型：
 
@@ -318,9 +318,9 @@ _________________________________________________________________
 
 这里解码架构与编码架构严格对称，因此输出形状和输入形状 `(28, 28, 1)` 相同。
 
-`Conv2D` 层反过来是 `Conv2DTranspose` 层，`MaxPooling2D` 层反过来是 `UpSampling2D`层。
+`Conv2D` layer 的逆操作是 `Conv2DTranspose` layer，`MaxPooling2D` 的逆操作是 `UpSampling2D` 层。
 
-## 模型是可调用的
+## 6. 模型是可调用的
 
 模型和 layer 一样，都是可调用的。通过调用模型，不仅可以重用模型结构，还可以重用它的权重。
 
@@ -337,7 +337,34 @@ encoder_output = layers.GlobalMaxPooling2D()(x)
 
 encoder = keras.Model(encoder_input, encoder_output, name="encoder")
 encoder.summary()
+```
 
+```txt
+Model: "encoder"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+original_img (InputLayer)    [(None, 28, 28, 1)]       0         
+_________________________________________________________________
+conv2d_4 (Conv2D)            (None, 26, 26, 16)        160       
+_________________________________________________________________
+conv2d_5 (Conv2D)            (None, 24, 24, 32)        4640      
+_________________________________________________________________
+max_pooling2d_1 (MaxPooling2 (None, 8, 8, 32)          0         
+_________________________________________________________________
+conv2d_6 (Conv2D)            (None, 6, 6, 32)          9248      
+_________________________________________________________________
+conv2d_7 (Conv2D)            (None, 4, 4, 16)          4624      
+_________________________________________________________________
+global_max_pooling2d_1 (Glob (None, 16)                0         
+=================================================================
+Total params: 18,672
+Trainable params: 18,672
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+```python
 decoder_input = keras.Input(shape=(16,), name="encoded_img")
 x = layers.Reshape((4, 4, 1))(decoder_input)
 x = layers.Conv2DTranspose(16, 3, activation="relu")(x)
@@ -348,7 +375,34 @@ decoder_output = layers.Conv2DTranspose(1, 3, activation="relu")(x)
 
 decoder = keras.Model(decoder_input, decoder_output, name="decoder")
 decoder.summary()
+```
 
+```txt
+Model: "decoder"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+encoded_img (InputLayer)     [(None, 16)]              0         
+_________________________________________________________________
+reshape_1 (Reshape)          (None, 4, 4, 1)           0         
+_________________________________________________________________
+conv2d_transpose_4 (Conv2DTr (None, 6, 6, 16)          160       
+_________________________________________________________________
+conv2d_transpose_5 (Conv2DTr (None, 8, 8, 32)          4640      
+_________________________________________________________________
+up_sampling2d_1 (UpSampling2 (None, 24, 24, 32)        0         
+_________________________________________________________________
+conv2d_transpose_6 (Conv2DTr (None, 26, 26, 16)        4624      
+_________________________________________________________________
+conv2d_transpose_7 (Conv2DTr (None, 28, 28, 1)         145       
+=================================================================
+Total params: 9,569
+Trainable params: 9,569
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+```python
 autoencoder_input = keras.Input(shape=(28, 28, 1), name="img")
 encoded_img = encoder(autoencoder_input)
 decoded_img = decoder(encoded_img)
@@ -356,7 +410,24 @@ autoencoder = keras.Model(autoencoder_input, decoded_img, name="autoencoder")
 autoencoder.summary()
 ```
 
-如上所示，模型可以嵌套，一个模型可以包含子模型。模型嵌套常用于模型集成。例如，将一组模型组合成一个单一模型，来平均它们的预测：
+```txt
+Model: "autoencoder"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+img (InputLayer)             [(None, 28, 28, 1)]       0         
+_________________________________________________________________
+encoder (Functional)         (None, 16)                18672     
+_________________________________________________________________
+decoder (Functional)         (None, 28, 28, 1)         9569      
+=================================================================
+Total params: 28,241
+Trainable params: 28,241
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+如上所示，模型可以嵌套，即一个模型可以包含子模型。模型嵌套常用于模型集成。例如，将一组模型组合成一个单一模型，来平均它们的预测：
 
 ```python
 def get_model():
@@ -377,16 +448,16 @@ outputs = layers.average([y1, y2, y3])
 ensemble_model = keras.Model(inputs=inputs, outputs=outputs)
 ```
 
-## 复杂拓扑图形结构
+## 7. 复杂拓扑图形结构
 
-### 多输入输出
+### 7.1 多输入输出
 
-函数式 API 可以创建包含多个输入和输出的模型，[Sequential](sequential_model.md) API 就不行。
+函数 API 可以创建包含多个输入和输出的模型，[Sequential](sequential_model.md) API 就不行。
 
 例如，如果你要构建一个系统，用于按优先级对客户的票据进行排序，并将其转到正确的部门，那么该模型至少有三个输入：
 
-- 票据的标题（文本输入）
-- 票据的内容（文本输入）
+- 票据标题（文本输入）
+- 票据内容（文本输入）
 - 用户添加的标签（分类输入）
 
 该模型包含两个输出：
@@ -394,7 +465,7 @@ ensemble_model = keras.Model(inputs=inputs, outputs=outputs)
 - 优先级打分（0 到 1 之间，sigmoid 输出）
 - 处理票据的部门（softmax 输出）
 
-下面使用函数式 API 构建该模型：
+下面使用函数 API 构建该模型：
 
 ```python
 num_tags = 12  # 标签个数
@@ -496,13 +567,13 @@ Epoch 2/2
 <keras.callbacks.History at 0x2438808d5b0>
 ```
 
-当对数据集调用 `fit`，要么生成 `([title_data, body_data, tags_data], [priority_targets, dept_targets])` tuple of list，或 `({'title': title_data, 'body': body_data, 'tags': tags_data}, {'priority': priority_targets, 'department': dept_targets})` a tuple of dict。
+当以 `Dataset` 对象调用 `fit`，要么生成 `([title_data, body_data, tags_data], [priority_targets, dept_targets])` tuple of list，或 `({'title': title_data, 'body': body_data, 'tags': tags_data}, {'priority': priority_targets, 'department': dept_targets})` a tuple of dict。
 
-### A toy ResNet model
+### 7.2 A toy ResNet model
 
-除了多输入、输出模型外，函数 API 还可以创建非线性拓扑结构模型，而 `Sequential` API 不行。
+除了多输入、多输出模型外，函数 API 还可以创建非线性拓扑结构模型，而 `Sequential` API 不行。
 
-比如可以用于创建残差连接。下面用 CIFAR10 构建一个 toy ResNet 模型来演示：
+比如可以用来创建残差连接。下面用 CIFAR10 构建一个 toy ResNet 模型来演示：
 
 ```python
 inputs = keras.Input(shape=(32, 32, 3), name="img")
@@ -605,11 +676,11 @@ model.fit(x_train[:1000], y_train[:1000], batch_size=64, epochs=1, validation_sp
 <keras.callbacks.History at 0x2450f855430>
 ```
 
-## 共享层
+## 8. 共享层
 
-函数 API 的另一个重要用途是创建包含共享层的模型。共享层是同一模型中多次重复使用的层，它们学习 GRAPH 多个路径相关的特征。
+函数 API 的另一个重要用途是创建包含共享层的模型。共享层是同一模型中多次重复使用的层，它们学习与 GRAPH 中多条路径相关的特征。
 
-共享层通常用于编码来自相似空间的输入（如，两端具有相似词汇的不同文本），它们能够在不同的输入之间共享信息，并且能够在相对较少的数据上训练这种模型。如果在其中一个输入中看到一个指定单词，其它通过共享层的输入处理都将收益。
+共享层通常用于编码来自相似空间的输入（如，两段具有相似词汇的不同文本），它们能够在不同的输入之间共享信息，并且能够在相对较少的数据上训练这种模型。如果在其中一个输入中看到一个指定单词，其它通过共享层的输入处理都将受益。
 
 在函数 API 中要共享某一层，只需要多次调用该层。例如，在两个不同的文本输入中共享 `Embedding` 层：
 
@@ -628,11 +699,11 @@ encoded_input_a = shared_embedding(text_input_a)
 encoded_input_b = shared_embedding(text_input_b)
 ```
 
-## 提取和重用 graph 节点
+## 9. 提取和重用 graph 节点
 
-由于 layer graph 是静态数据结构，因此可以访问和检查其内容。这意味着可以访问 GRAPH 中间层的激活值，并在其它地方使用，如提取特征。
+layer graph 是静态数据结构，可以访问、检查其内容。这意味着可以访问 GRAPH 中间层的激活值，并在其它地方使用，如提取特征。
 
-例如，VGG19 模型，使用的 ImageNet 预训练权重：
+例如，使用 ImageNet 预训练权重 VGG19 模型：
 
 ```python
 vgg19 = tf.keras.applications.VGG19()
@@ -658,9 +729,9 @@ img = np.random.random((1, 224, 224, 3)).astype("float32")
 extracted_features = feat_extraction_model(img)
 ```
 
-这种方法在[风格迁移学习](https://keras.io/examples/generative/neural_style_transfer/) 中会用到。
+这种方法在 [风格迁移学习](https://keras.io/examples/generative/neural_style_transfer/) 中会用到。
 
-## 自定义层扩展 API
+## 10. 自定义 layer
 
 `tf.keras` 包含各种内置 layers，例如：
 
@@ -669,14 +740,14 @@ extracted_features = feat_extraction_model(img)
 - RNN  层：`GRU`, `LSTM`, `ConvLSTM2D`
 - `BatchNormalization`, `Dropout`, `Embedding` 等。
 
-但是，如果找不到所需内容，可以通过自定义层来扩展 API。所有的 layer 都扩展 `Layer` 类并实现：
+如果这些都不满足需求，还可以自定义层。所有的 layer 都扩展 `Layer` 类并实现：
 
 - `call` 方法，指定 layer 执行的计算
-- `build` 方法，创建 layer 的权重（这是一种代码风格，因为权重的创建也可以放在 `__init__`）
+- `build` 方法，创建 layer 的权重（代码风格建议，权重的创建也可以放在 `__init__`）
 
 自定义 layer 详情，参考[自定义 layer 和 model 指南](custom_layers_and_models.md)。
 
-下面是 `tf.keras.layers.Densee` 的基本实现：
+下面是 `tf.keras.layers.Dense` 的基本实现：
 
 ```python
 class CustomDense(layers.Layer):
@@ -745,19 +816,21 @@ def from_config(cls, config):
   return cls(**config)
 ```
 
-## 何时使用函数 API
+## 11. 何时使用函数 API
 
-是否应该使用 Keras 函数 API 创建新模型，或者直接扩展 `Model` 类？一般来说，函数 API 更高级、更简单、更安全，具有许多扩展 `Model` 类不支持的特征。
+是使用 Keras 函数 API 创建新模型，还是扩展 `Model` 类？一般来说，函数 API 更高级、更简单、更安全，具有许多扩展 `Model` 类不支持的特征。
 
 然而，当构建的模型不好表示为有向无环图时，就只能扩展 `Model` 类，扩展 `Model` 类提供了更大的灵活性。例如，使用函数 API 无法实现 Tree-RNN，只能通过扩展 `Model` 类实现。
 
-### 函数 API 优势
+### 11.1 函数 API 优势
 
-以下特征也适用于 `Sequential` 模型，但不适用于扩展子类模型。
+以下特征也适用于 `Sequential` 模型（也是数据结构），但不适用于扩展子类模型（Python 字节码，而非数据结构）。
 
 **更简洁**
 
-没有 `super(MyClass, self).__init__(...)`, `def call(self, ...):` 等定义。对比：
+没有 `super(MyClass, self).__init__(...)`, `def call(self, ...):` 等定义。
+
+- Keras 函数版本
 
 ```python
 inputs = keras.Input(shape=(32,))
@@ -766,7 +839,7 @@ outputs = layers.Dense(10)(x)
 mlp = keras.Model(inputs, outputs)
 ```
 
-扩展 `Model` 版本：
+- 扩展 `Model` 版本
 
 ```python
 class MLP(keras.Model):
@@ -780,10 +853,10 @@ class MLP(keras.Model):
     x = self.dense_1(inputs)
     return self.dense_2(x)
 
-# Instantiate the model.
+# 实例化模型
 mlp = MLP()
-# Necessary to create the model's state.
-# The model doesn't have a state until it's called at least once.
+# 创建模型状态所需
+# 模型至少被调用一次，才具有状态
 _ = mlp(tf.zeros((1, 32)))
 ```
 
@@ -791,11 +864,30 @@ _ = mlp(tf.zeros((1, 32)))
 
 在函数 API 中，输入规范（shape 和 dtype）提前使用 `Input` 指定。每次调用 一个 layer 时，该 layer 都会检查传递给它的输入是否符合要求，如果没有，就会发出有用的错误信息。
 
-这样可以保证使用函数 API 创建的任何模型都能运行。所有调试（与收敛相关的调试除外）都是在模型构建期间进行的，而不是执行期。这类似于编译器中的类型检查。
+这样可以保证使用函数 API 创建的模型能运行。所有调试（与收敛相关的调试除外）都是在模型构建期间进行的，而不是执行期。这类似于编译器中的类型检查。
 
 **函数模型可绘制、可检查**
 
-## API 混搭
+可以将模型绘制为图像，并且可以轻松访问其中间节点。例如，提取、重用中间层的激活：
+
+```python
+features_list = [layer.output for layer in vgg19.layers]
+feat_extraction_model = keras.Model(inputs=vgg19.input, outputs=features_list)
+```
+
+**函数模型可以序列化和额克隆**
+
+由于函数模型是数据结构而不是代码段，所以可以安全地序列化，也可以保存为单个文件，这样在不访问原始代码的情况下就可以重新创建完全相同的模型。
+
+要序列化子类模型，必须在模型中实现 `get_config()` 和 `from_config()` 模型。
+
+### 11.2 函数 API 缺点
+
+**不支持动态体系结构**
+
+函数 API 将模型视为 layer 的 DAG 图，对大多数深度学习结构确实如此，但不是全部，例如递归网络和 Tree-RNN 就不是 DAG 图，无法使用函数 API 中实现。
+
+## 12. API 混搭
 
 函数 API 和扩展 `Model` 子类模型两种方法并不是二选一。`tf.keras` API 的所有模型都可以相互交互，即 `Sequential` 模型、函数模型和扩展 `Model` 子类模型都可以相互交互。
 
@@ -843,6 +935,56 @@ _ = rnn_model(tf.zeros((1, timesteps, input_dim)))
 (1, 10, 32)
 ```
 
-## 参考
+可以在函数 API 中使用子类 layer 或模型，只需要实现遵循以下模式的 `call` 方法：
+
+- `call(self, inputs, **kwargs)`，其中 `inputs` 为张量或张量的嵌套结构，如张量列表，`**kwargs` 为非张量参数。
+- `call(self, inputs, training=None, **kwargs)` `training` 为 boolean 值，表示该 layer 是在训练模式还是推理模式。
+- `call(self, inputs, mask=None, **kwargs)`，`mask` 为 boolean 屏蔽张量，RNN 中很有用
+- `call(self, inputs, training=None, mask=None, **kwargs)`，同时包含 `mask` 和 `training` 参数。
+
+另外，可以在自定义 layer 或 model 上实现 `get_config`，这样创建的函数模型就可以序列化和克隆。
+
+下面是从头开始自定义的 RNN 示例：
+
+```python
+units = 32
+timesteps = 10
+input_dim = 5
+batch_size = 16
+
+class CustomRNN(layers.Layer):
+    def __init__(self):
+        super(CustomRNN, self).__init__()
+        self.units = units
+        self.projection_1 = layers.Dense(units=units, activation="tanh")
+        self.projection_2 = layers.Dense(units=units, activation="tanh")
+        self.classifier = layers.Dense(1)
+
+    def call(self, inputs):
+        outputs = []
+        state = tf.zeros(shape=(inputs.shape[0], self.units))
+        for t in range(inputs.shape[1]):
+            x = inputs[:, t, :]
+            h = self.projection_1(x)
+            y = h + self.projection_2(state)
+            state = y
+            outputs.append(y)
+        features = tf.stack(outputs, axis=1)
+        return self.classifier(features)
+
+
+# 使用 `batch_shape` 指定输入静态 batch 大小
+# 因为 `CustomRNN` 内部计算需要静态 batch size (创建 `state` 零张量时)
+inputs = keras.Input(batch_shape=(batch_size, timesteps, input_dim))
+x = layers.Conv1D(32, 3)(inputs)
+outputs = CustomRNN()(x)
+
+model = keras.Model(inputs, outputs)
+
+rnn_model = CustomRNN()
+_ = rnn_model(tf.zeros((1, 10, 5)))
+```
+
+## 13. 参考
 
 - https://www.tensorflow.org/guide/keras/functional
