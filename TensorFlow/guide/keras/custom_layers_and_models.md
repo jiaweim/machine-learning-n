@@ -2,7 +2,7 @@
 
 - [使用子类 API 创建 Layer 和 Model](#使用子类-api-创建-layer-和-model)
   - [1. 设置](#1-设置)
-  - [2. Layer 类：权重和计算的组合](#2-layer-类权重和计算的组合)
+  - [2. Layer：权重和计算的组合](#2-layer权重和计算的组合)
   - [3. 不可训练权重](#3-不可训练权重)
   - [4. 将 weight 的创建推迟到输入 shape 已知](#4-将-weight-的创建推迟到输入-shape-已知)
   - [5. Layer 可递归组合](#5-layer-可递归组合)
@@ -27,7 +27,7 @@ import tensorflow as tf
 from tensorflow import keras
 ```
 
-## 2. Layer 类：权重和计算的组合
+## 2. Layer：权重和计算的组合
 
 `Layer` 类是 Keras 的核心抽象之一，它封装了状态（layer 权重）和输入到输出的转换（"call" 方法，layer 的前向传播）。
 
