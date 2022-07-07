@@ -1,17 +1,42 @@
-# tf.math
+# Module: tf.math
 
 2021-06-03, 20:11
 ***
 
 ## 简介
 
+数学操作。
+
+> [!NOTE]
+> 以张量为参数的函数也支持 `tf.convert_to_tensor` 接受的任何参数类型。
+> TF 中逐元素二元操作遵循 numpy 风格的广播。
+
 TensorFlow 提供了多种数学函数，包括：
 
 - 基本算术运算和三角函数；
-- 特殊的数学函数，如 [tf.math.igamma](#igamma) 和 [tf.math.zeta](#zeta)；
-- 复数函数，如 
+- 特殊的数学函数，如 `tf.math.igamma` 和 `tf.math.zeta`；
+- 复数函数，如 `tf.math.imag` 和 `tf.math.angle`；
+- 缩小和扫描，如 `tf.math.reduce_mean` 和 `tf.math.cumsum`；
+- segment 函数，如 `tf.math.segment_sum`
 
-> 接受 `Tensor` 为参数的函数也接受 `tf.convert_to_tensor` 所接受的参数类型。
+## 分段函数
+
+TF 提供了几个可用于张量 segment 进行数学计算的操作。这里，segment 是沿着张量第一维的划分，即，它定义了从第一维到 `segment_ids` 的映射。`segment_ids` 张量的 size 
+
+例如:
+
+```python
+c = tf.constant([[1, 2, 3, 4], [-1, -2, -3, -4], [5, 6, 7, 8]])
+tf.math.segment_sum(c, tf.constant([0, 0, 1]))
+```
+
+```txt
+<tf.Tensor: shape=(2, 4), dtype=int32, numpy=
+array([[0, 0, 0, 0],
+       [5, 6, 7, 8]])>
+```
+
+标准的 `segment_*` 函数假设 segment 索引已排序。如果索引未排序，则应使用对应的 `unsorted_segment_*` 函数。这些函数包含一个额外参数 `num_segments`，以便
 
 ## igamma
 

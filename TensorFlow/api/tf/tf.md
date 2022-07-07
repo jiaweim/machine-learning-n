@@ -1,6 +1,6 @@
-# tf 模块
+# Module: tf
 
-- [tf 模块](#tf-模块)
+- [Module: tf](#module-tf)
   - [模块](#模块)
   - [类](#类)
   - [函数](#函数)
@@ -14,53 +14,48 @@
 
 |模块|说明|
 |---|---|
-|`audio`|public API for tf.audio namespace|
+|audio|public API for tf.audio namespace|
 |autodiff|Public API for tf.autodiff namespace|
-|autograph|Conversion of eager-style Python into TensorFlow graph code|
-|bitwise|Operations for manipulating the binary representations of integers|
-|compat|Compatibility functions|
+|autograph|将 eager 风格 Python 转换为 TensorFlow graph|
+|bitwise|对整数二进制形式的操作|
+|compat|兼容函数|
 |config|Public API for tf.config namespace|
-|data|tf.data.Dataset API for input pipelines.|
+|data|用于输入管道的 `tf.data.Dataset` API|
 |debugging|Public API for tf.debugging namespace.|
-|distribute|Library for running a computation across multiple devices.|
+|distribute|用于在多个设备上运行计算的库|
 |dtypes | Public API for tf.dtypes namespace.|
-|errors | Exception types for TensorFlow errors.|
-|estimator | Estimator|High level tools for working with models.|
+|errors | TensorFlow 的异常类型|
+|estimator | Estimator：用于处理模型的高级工具|
 |experimental | Public API for tf.experimental namespace.|
 |feature_column | Public API for tf.feature_column namespace.|
-|graph_util | Helpers to manipulate a tensor graph in python.|
-|image | Image ops.|
-|initializers | Public API for tf.keras.initializers namespace.|
+|graph_util | 在 Python 中操作张量图的辅助函数|
+|image | 图像操作|
 |io | Public API for tf.io namespace.|
-|keras | Public API for tf.keras namespace.|
-|linalg | Operations for linear algebra.|
+|keras | TensorFlow 高级 API Keras 的实现|
+|linalg | 线性代数操作|
 |lite | Public API for tf.lite namespace.|
 |lookup | Public API for tf.lookup namespace.|
-|losses | Public API for tf.keras.losses namespace.|
-|math | Math Operations.|
-|metrics | Public API for tf.keras.metrics namespace.|
-|mixed_precision | Public API for tf.mixed_precision namespace.|
+|math | 数学操作|
 |mlir | Public API for tf.mlir namespace.|
-|nest | Public API for tf.nest namespace.|
-|nn | Primitive Neural Net (NN) Operations.|
-|optimizers | Public API for tf.keras.optimizers namespace.|
+|nest | 结构相关函数 |
+|nn | 神经网络基础操作|
 |profiler | Public API for tf.profiler namespace.|
 |quantization | Public API for tf.quantization namespace.|
 |queue | Public API for tf.queue namespace.|
-|ragged | Ragged Tensors.|
+|ragged |参差张量|
 |random | Public API for tf.random namespace.|
 |raw_ops | Public API for tf.raw_ops namespace.|
 |saved_model | Public API for tf.saved_model namespace.|
-|sets | Tensorflow set operations.|
-|signal | Signal processing operations.|
-|sparse | Sparse Tensor Representation.|
-|strings | Operations for working with string Tensors.|
-|summary | Operations for writing summary data, for use in analysis and visualization.|
-|sysconfig | System configuration library.|
+|sets | Tensorflow 集合操作|
+|signal | 信号处理操作|
+|sparse | 稀疏张量表示|
+|strings | 字符串张量操作|
+|summary | 输出摘要数据操作，用于分析和可视化|
+|sysconfig | 系统配置库|
 |test | Testing.|
-|tpu | Ops related to Tensor Processing Units.|
-|train | Support for training models.|
-|types | Public TensorFlow type definitions.|
+|tpu | TPU 相关操作|
+|train | 模型训练|
+|types | TensorFlow 类型定义|
 |version | Public API for tf.version namespace.|
 |xla | Public API for tf.xla namespace.|
 
@@ -68,7 +63,7 @@
 
 |类|说明|
 |---|---|
-|AggregationMethod|A class listing aggregation methods used to combine gradients.|
+|AggregationMethod|包含用于合并梯度的方法|
 |CriticalSection|Critical section.|
 |DType|Represents the type of the elements in a Tensor.|
 |DeviceSpec|Represents a (possibly partial) specification for a TensorFlow device.|

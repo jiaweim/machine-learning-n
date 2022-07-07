@@ -1,9 +1,17 @@
-# tf.math.reduce_sum
+# reduce_sum
+
+- [reduce_sum](#reduce_sum)
+  - [简介](#简介)
+  - [参数](#参数)
+  - [示例](#示例)
+  - [参考](#参考)
 
 2022-02-23, 15:47
 ****
 
 ## 简介
+
+计算元素加和。
 
 ```python
 tf.math.reduce_sum(
