@@ -1,6 +1,6 @@
-# Tensor
+# 张量
 
-- [Tensor](#tensor)
+- [张量](#张量)
   - [简介](#简介)
   - [基础](#基础)
   - [shape](#shape)
@@ -16,14 +16,13 @@
   - [稀疏张量](#稀疏张量)
   - [参考](#参考)
 
-Last updated:
-2022-06-13, 10:35
+Last updated: 2022-07-07, 14:27
 @author Jiawei Mao
 ****
 
 ## 简介
 
-张量（Tensor）是具有统一类型（`dtype`）的多维数组，功能和 NumPy 的 `np.arrays` 类似。在 [tf.dtypes.DType](../../api/tf/dtypes/DType.md) 可以查看 TensorFlow 支持的 `dtypes`。
+张量（Tensor）是具有统一类型（`dtype`）的多维数组，功能和 NumPy 的 `np.arrays` 类似。在 [tf.dtypes.DType](https://www.tensorflow.org/api_docs/python/tf/dtypes/DType) 可以查看 TensorFlow 支持的所有数据类型。
 
 所有的张量都是不可变的（immutable），因此不能修改张量内容，只能创建新的张量。
 
