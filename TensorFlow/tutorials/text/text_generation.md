@@ -148,9 +148,9 @@ print(f'{len(vocab)} unique characters')
 
 ### 3.1 向量化文本
 
-在训练前需要将文本转换为数值表示。
+在训练前需要将文本转换为数字表示。使用 `tf.keras.layers.StringLookup` 将字符转换为数字 ID。
 
-使用 `tf.keras.layers.StringLookup` layer 将字符转换为数字 ID，先将文本拆分为 tokens：
+先将文本拆分为 tokens：
 
 ```python
 example_texts = ['abcdefg', 'xyz']
@@ -201,7 +201,7 @@ chars
 <tf.RaggedTensor [[b'a', b'b', b'c', b'd', b'e', b'f', b'g'], [b'x', b'y', b'z']]>
 ```
 
-可以用 `tf.strings.reduce_join` 将字符连接为字符串：
+用 `tf.strings.reduce_join` 将字符连接为字符串：
 
 ```python
 tf.strings.reduce_join(chars, axis=-1).numpy()
