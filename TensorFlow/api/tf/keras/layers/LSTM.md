@@ -3,17 +3,34 @@
 2022-02-21, 15:58
 ***
 
+## 简介
+
 ```python
 tf.keras.layers.LSTM(
-    units, activation='tanh', recurrent_activation='sigmoid',
-    use_bias=True, kernel_initializer='glorot_uniform',
+    units,
+    activation='tanh',
+    recurrent_activation='sigmoid',
+    use_bias=True,
+    kernel_initializer='glorot_uniform',
     recurrent_initializer='orthogonal',
-    bias_initializer='zeros', unit_forget_bias=True,
-    kernel_regularizer=None, recurrent_regularizer=None, bias_regularizer=None,
-    activity_regularizer=None, kernel_constraint=None, recurrent_constraint=None,
-    bias_constraint=None, dropout=0.0, recurrent_dropout=0.0,
-    return_sequences=False, return_state=False, go_backwards=False, stateful=False,
-    time_major=False, unroll=False, **kwargs
+    bias_initializer='zeros',
+    unit_forget_bias=True,
+    kernel_regularizer=None,
+    recurrent_regularizer=None,
+    bias_regularizer=None,
+    activity_regularizer=None,
+    kernel_constraint=None,
+    recurrent_constraint=None,
+    bias_constraint=None,
+    dropout=0.0,
+    recurrent_dropout=0.0,
+    return_sequences=False,
+    return_state=False,
+    go_backwards=False,
+    stateful=False,
+    time_major=False,
+    unroll=False,
+    **kwargs
 )
 ```
 
@@ -71,7 +88,7 @@ tf.keras.layers.LSTM(
 |return_sequences|Boolean. Whether to return the last output. in the output sequence, or the full sequence. Default: False.|
 |return_state|Boolean. Whether to return the last state in addition to the output. Default: False.|
 |go_backwards|Boolean (default False). If True, process the input sequence backwards and return the reversed sequence.|
-|stateful|Boolean (default False). If True, the last state for each sample at index i in a batch will be used as initial state for the sample of index i in the following batch.|
+|stateful|Boolean (default False). True 表示当前 batch 样本 i 的最终状态用作下一个 batch 的样本 i 的初始状态|
 |time_major|The shape format of the inputs and outputs tensors. If True, the inputs and outputs will be in shape [timesteps, batch, feature], whereas in the False case, it will be [batch, timesteps, feature]. Using time_major = True is a bit more efficient because it avoids transposes at the beginning and end of the RNN calculation. However, most TensorFlow data is batch-major, so by default this function accepts input and emits output in batch-major form.|
 |unroll|Boolean (default False). If True, the network will be unrolled, else a symbolic loop will be used. Unrolling can speed-up a RNN, although it tends to be more memory-intensive. Unrolling is only suitable for short sequences.|
 
@@ -103,7 +120,19 @@ get_dropout_mask_for_cell(
 )
 ```
 
+### reset_states
 
+```python
+reset_states(
+    states=None
+)
+```
+
+重置 stateful RNN layer 的状态。
+
+仅当使用 `stateful = True` 构造 RNN 层时才能使用。参数 `states` 为表示初始状态的 numpy 数组，`None` 时将自动创建合适 shape 的全零 numpy 数组作为初始状态。
+
+> 在处理长序列数据时，需要维持 RNN 的隐藏状态，这一功能通常用单词 "stateful" 表示，许多深度学习框架都支持该参数，表示是否保存上一时刻的隐藏状态。
 
 ## 参考
 

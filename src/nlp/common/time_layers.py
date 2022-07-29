@@ -4,6 +4,10 @@ from src.nlp.common.functions import softmax, sigmoid
 
 
 class RNN:
+    """
+    单步 RNN 实现
+    """
+
     def __init__(self, Wx, Wh, b):
         self.params = [Wx, Wh, b]
         self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
@@ -12,9 +16,9 @@ class RNN:
     def forward(self, x, h_prev):
         Wx, Wh, b = self.params
         t = np.dot(h_prev, Wh) + np.dot(x, Wx) + b
-        h_next = np.tanh(t)
+        h_next = np.tanh(t)  # 隐状态值
         self.cache = (x, h_prev, h_next)
-        return h_next
+        return h_next  # 输出 h_next
 
     def backward(self, dh_next):
         Wx, Wh, b = self.params
@@ -40,7 +44,7 @@ class TimeRNN:
         self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
         self.layers = None  # 保存多个 RNN 层
 
-        self.h, self.dh = None, None  # h 最后一个 RNN 层的隐状态, dh 保存传给前一个块的隐藏状态
+        self.h, self.dh = None, None  # h 是最后一个 RNN 层的隐状态, dh 保存传给前一个块的隐藏状态
         self.stateful = stateful  # True 表示维持 RNN 的隐藏状态，False 表示在调用 forward() 时，第一个 RNN 的隐状态被初始化为 0
 
     def set_state(self, h):
@@ -274,7 +278,7 @@ class TimeAffine:
         self.x = None
 
     def forward(self, x):
-        N, T, D = x.shape
+        N, T, D = x.shape  # 批处理
         W, b = self.params
 
         rx = x.reshape(N * T, -1)

@@ -1,7 +1,7 @@
 from src.nlp.dataset import ptb
 import numpy as np
 import matplotlib.pyplot as plt
-from src.nlp.common import SGD
+from src.nlp.common.optimizer import SGD
 from simple_rnnlm import SimpleRnnlm
 
 # 设置超参数
@@ -16,15 +16,16 @@ max_epoch = 100
 corpus, word_to_id, id_to_word = ptb.load_data('train')
 corpus_size = 1000
 corpus = corpus[:corpus_size]
-vocab_size = int(max(corpus) + 1)
+vocab_size = int(max(corpus) + 1)  # 418
 
 xs = corpus[:-1]  # 输入
 ts = corpus[1:]  # 输出（监督标签）
-data_size = len(xs)
+data_size = len(xs)  # 999
 print('corpus size: %d, vocabulary size: %d' % (corpus_size, vocab_size))
 
 # 学习用的参数
-max_iters = data_size // (batch_size * time_size)
+max_iters = data_size // (batch_size * time_size)  # 999//(10 * 5) = 19
+
 time_idx = 0
 total_loss = 0
 loss_count = 0
@@ -34,18 +35,19 @@ ppl_list = []
 model = SimpleRnnlm(vocab_size, wordvec_size, hidden_size)
 optimizer = SGD(lr)
 
-# 1. 计算读入mini-batch的各笔样本数据的开始位置
+# 1. 计算读入mini-batch的各笔样本数据的开始位置 offsets
 jump = (corpus_size - 1) // batch_size
-offsets = [i * jump for i in range(batch_size)]  # 计算各批次数据的开始位置
+offsets = [i * jump for i in range(batch_size)]  # offsets 存放各批次数据的开始位置 [0, 99, 198, 297, 396, 495, 594, 693, 792, 891]
 
 for epoch in range(max_epoch):
     for iter in range(max_iters):
-        # 2. 获取mini-batch
+        # 2. 获取mini-batch，按顺序读入数据
         batch_x = np.empty((batch_size, time_size), dtype='i')
         batch_t = np.empty((batch_size, time_size), dtype='i')
-        for t in range(time_size):
+        for t in range(time_size):  # [0,1,2,3,4]
             for i, offset in enumerate(offsets):
-                batch_x[i, t] = xs[(offset + time_idx) % data_size]
+                print("id", (offset + time_idx) % data_size)
+                batch_x[i, t] = xs[(offset + time_idx) % data_size]  # 将 time_idx 处的数据从语料库取出
                 batch_t[i, t] = ts[(offset + time_idx) % data_size]
             time_idx += 1
 
@@ -56,7 +58,7 @@ for epoch in range(max_epoch):
         total_loss += loss
         loss_count += 1
 
-    # 3. 各个epoch的困惑度评价
+    # 3. 各个epoch的困惑度
     ppl = np.exp(total_loss / loss_count)
     print('| epoch %d | perplexity %.2f'
           % (epoch + 1, ppl))

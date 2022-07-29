@@ -2,12 +2,16 @@ from src.nlp.common.time_layers import *
 
 
 class SimpleRnnlm:
+    """
+    简单 RNN 语言模型实现
+    """
+
     def __init__(self, vocab_size, wordvec_size, hidden_size):
         V, D, H = vocab_size, wordvec_size, hidden_size
         rn = np.random.randn
 
         # 初始化权重
-        embed_W = (rn(V, D) / 100).astype('f')
+        embed_W = (rn(V, D) / 100).astype('f')  # 嵌入层
         rnn_Wx = (rn(D, H) / np.sqrt(D)).astype('f')
         rnn_Wh = (rn(H, H) / np.sqrt(H)).astype('f')
         rnn_b = np.zeros(H).astype('f')
@@ -20,7 +24,7 @@ class SimpleRnnlm:
             TimeRNN(rnn_Wx, rnn_Wh, rnn_b, stateful=True),
             TimeAffine(affine_W, affine_b)
         ]
-        self.loss_layer = TimeSoftmaxWithLoss()
+        self.loss_layer = TimeSoftmaxWithLoss()  # 不包含权重，单独处理
         self.rnn_layer = self.layers[1]
 
         # 将所有的权重和梯度整理到列表中
