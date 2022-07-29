@@ -24,7 +24,7 @@ class RNN:
         Wx, Wh, b = self.params
         x, h_prev, h_next = self.cache
 
-        dt = dh_next * (1 - h_next ** 2)
+        dt = dh_next * (1 - h_next**2)
         db = np.sum(dt, axis=0)
         dWh = np.dot(h_prev.T, dt)
         dh_prev = np.dot(dt, Wh.T)
@@ -45,7 +45,9 @@ class TimeRNN:
         self.layers = None  # 保存多个 RNN 层
 
         self.h, self.dh = None, None  # h 是最后一个 RNN 层的隐状态, dh 保存传给前一个块的隐藏状态
-        self.stateful = stateful  # True 表示维持 RNN 的隐藏状态，False 表示在调用 forward() 时，第一个 RNN 的隐状态被初始化为 0
+        self.stateful = (
+            stateful  # True 表示维持 RNN 的隐藏状态，False 表示在调用 forward() 时，第一个 RNN 的隐状态被初始化为 0
+        )
 
     def set_state(self, h):
         self.h = h
@@ -59,9 +61,9 @@ class TimeRNN:
         D, H = Wx.shape
 
         self.layers = []  # 保存所有 RNN 单元
-        hs = np.empty((N, T, H), dtype='f')  # hidden states
+        hs = np.empty((N, T, H), dtype="f")  # hidden states
         if not self.stateful or self.h is None:  # 首次调用 h 为 None
-            self.h = np.zeros((N, H), dtype='f')
+            self.h = np.zeros((N, H), dtype="f")
 
         for t in range(T):  # 循环 T 次
             layer = RNN(*self.params)  # 生成 RNN 层，RNN 个数和序列长度相同
@@ -75,7 +77,7 @@ class TimeRNN:
         N, T, H = dhs.shape
         D, H = Wx.shape
 
-        dxs = np.empty((N, T, D), dtype='f')  # 传递给下游的梯度
+        dxs = np.empty((N, T, D), dtype="f")  # 传递给下游的梯度
         dh = 0
         grads = [0, 0, 0]
         for t in reversed(range(T)):
@@ -103,7 +105,7 @@ class TimeEmbedding:
         N, T = xs.shape
         V, D = self.W.shape
 
-        out = np.empty((N, T, D), dtype='f')
+        out = np.empty((N, T, D), dtype="f")
         self.layers = []
 
         for t in range(T):
@@ -128,21 +130,19 @@ class TimeEmbedding:
 
 class LSTM:
     def __init__(self, Wx, Wh, b):
-        '''
-
+        """
         Parameters
         ----------
-        Wx: 输入`x`用的权重参数（整合了4个权重）
-        Wh: 隐藏状态`h`用的权重参数（整合了4个权重）
-        b: 偏置（整合了4个偏置）
-        '''
+        Wx: 输入`x`用的权重参数（整合了4个权重 [Wf, Wg, Wi, Wo])
+        Wh: 隐藏状态`h`用的权重参数 (整合了4个权重)
+        b: 偏置 (整合了4个偏置)
+        """
         self.params = [Wx, Wh, b]
         self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
         self.cache = None  # 保存正向传播的中间结果
 
     def forward(self, x, h_prev, c_prev):
         """
-
         Parameters
         ----------
         x 当前时刻的输入
@@ -160,13 +160,13 @@ class LSTM:
 
         # slice，将仿射变换结果均等分为四份
         f = A[:, :H]
-        g = A[:, H:2 * H]
-        i = A[:, 2 * H:3 * H]
-        o = A[:, 3 * H:]
+        g = A[:, H : 2 * H]
+        i = A[:, 2 * H : 3 * H]
+        o = A[:, 3 * H :]
 
         f = sigmoid(f)  # forget gate weights
         g = np.tanh(g)  # candidate cell state
-        i = sigmoid(i)  # input date
+        i = sigmoid(i)  # input gate
         o = sigmoid(o)  # output gate
 
         c_next = f * c_prev + g * i
@@ -181,7 +181,7 @@ class LSTM:
 
         tanh_c_next = np.tanh(c_next)
 
-        ds = dc_next + (dh_next * o) * (1 - tanh_c_next ** 2)
+        ds = dc_next + (dh_next * o) * (1 - tanh_c_next**2)
 
         dc_prev = ds * f
 
@@ -193,7 +193,7 @@ class LSTM:
         di *= i * (1 - i)
         df *= f * (1 - f)
         do *= o * (1 - o)
-        dg *= (1 - g ** 2)
+        dg *= 1 - g**2
 
         dA = np.hstack((df, dg, di, do))
 
@@ -227,12 +227,12 @@ class TimeLSTM:
         H = Wh.shape[0]
 
         self.layers = []
-        hs = np.empty((N, T, H), dtype='f')
+        hs = np.empty((N, T, H), dtype="f")
 
         if not self.stateful or self.h is None:  # 是否初始化
-            self.h = np.zeros((N, H), dtype='f')
+            self.h = np.zeros((N, H), dtype="f")
         if not self.stateful or self.c is None:
-            self.c = np.zeros((N, H), dtype='f')
+            self.c = np.zeros((N, H), dtype="f")
 
         for t in range(T):
             layer = LSTM(*self.params)
@@ -248,7 +248,7 @@ class TimeLSTM:
         N, T, H = dhs.shape
         D = Wx.shape[0]
 
-        dxs = np.empty((N, T, D), dtype='f')
+        dxs = np.empty((N, T, D), dtype="f")
         dh, dc = 0, 0
 
         grads = [0, 0, 0]
@@ -317,7 +317,7 @@ class TimeSoftmaxWithLoss:
         if ts.ndim == 3:  # 在监督标签为one-hot向量的情况下
             ts = ts.argmax(axis=2)
 
-        mask = (ts != self.ignore_label)
+        mask = ts != self.ignore_label
 
         # 按批次大小和时序大小进行整理（reshape）
         xs = xs.reshape(N * T, V)
@@ -369,8 +369,7 @@ class TimeDropout:
 
 
 class TimeBiLSTM:
-    def __init__(self, Wx1, Wh1, b1,
-                 Wx2, Wh2, b2, stateful=False):
+    def __init__(self, Wx1, Wh1, b1, Wx2, Wh2, b2, stateful=False):
         self.forward_lstm = TimeLSTM(Wx1, Wh1, b1, stateful)
         self.backward_lstm = TimeLSTM(Wx2, Wh2, b2, stateful)
         self.params = self.forward_lstm.params + self.backward_lstm.params
@@ -432,7 +431,7 @@ class TimeSigmoidWithLoss:
 
     def backward(self, dout=1):
         N, T = self.xs_shape
-        dxs = np.empty(self.xs_shape, dtype='f')
+        dxs = np.empty(self.xs_shape, dtype="f")
 
         dout *= 1 / T
         for t in range(T):
@@ -444,14 +443,14 @@ class TimeSigmoidWithLoss:
 
 class GRU:
     def __init__(self, Wx, Wh, b):
-        '''
+        """
 
         Parameters
         ----------
         Wx: 用于输入`x`的权重参数（整合了3个权重）
         Wh: 用于隐藏状态`h` 的权重参数（整合了3个权重）
         b: 偏置（整合了3个偏置）
-        '''
+        """
         self.params = [Wx, Wh, b]
         self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
         self.cache = None
@@ -459,9 +458,9 @@ class GRU:
     def forward(self, x, h_prev):
         Wx, Wh, b = self.params
         H = Wh.shape[0]
-        Wxz, Wxr, Wxh = Wx[:, :H], Wx[:, H:2 * H], Wx[:, 2 * H:]
-        Whz, Whr, Whh = Wh[:, :H], Wh[:, H:2 * H], Wh[:, 2 * H:]
-        bz, br, bh = b[:H], b[H:2 * H], b[2 * H:]
+        Wxz, Wxr, Wxh = Wx[:, :H], Wx[:, H : 2 * H], Wx[:, 2 * H :]
+        Whz, Whr, Whh = Wh[:, :H], Wh[:, H : 2 * H], Wh[:, 2 * H :]
+        bz, br, bh = b[:H], b[H : 2 * H], b[2 * H :]
 
         z = sigmoid(np.dot(x, Wxz) + np.dot(h_prev, Whz) + bz)
         r = sigmoid(np.dot(x, Wxr) + np.dot(h_prev, Whr) + br)
@@ -475,15 +474,15 @@ class GRU:
     def backward(self, dh_next):
         Wx, Wh, b = self.params
         H = Wh.shape[0]
-        Wxz, Wxr, Wxh = Wx[:, :H], Wx[:, H:2 * H], Wx[:, 2 * H:]
-        Whz, Whr, Whh = Wh[:, :H], Wh[:, H:2 * H], Wh[:, 2 * H:]
+        Wxz, Wxr, Wxh = Wx[:, :H], Wx[:, H : 2 * H], Wx[:, 2 * H :]
+        Whz, Whr, Whh = Wh[:, :H], Wh[:, H : 2 * H], Wh[:, 2 * H :]
         x, h_prev, z, r, h_hat = self.cache
 
         dh_hat = dh_next * z
         dh_prev = dh_next * (1 - z)
 
         # tanh
-        dt = dh_hat * (1 - h_hat ** 2)
+        dt = dh_hat * (1 - h_hat**2)
         dbh = np.sum(dt, axis=0)
         dWhh = np.dot((r * h_prev).T, dt)
         dhr = np.dot(dt, Whh.T)
@@ -533,10 +532,10 @@ class TimeGRU:
         N, T, D = xs.shape
         H = Wh.shape[0]
         self.layers = []
-        hs = np.empty((N, T, H), dtype='f')
+        hs = np.empty((N, T, H), dtype="f")
 
         if not self.stateful or self.h is None:
-            self.h = np.zeros((N, H), dtype='f')
+            self.h = np.zeros((N, H), dtype="f")
 
         for t in range(T):
             layer = GRU(*self.params)
@@ -550,7 +549,7 @@ class TimeGRU:
         N, T, H = dhs.shape
         D = Wx.shape[0]
 
-        dxs = np.empty((N, T, D), dtype='f')
+        dxs = np.empty((N, T, D), dtype="f")
 
         dh = 0
         grads = [0, 0, 0]
@@ -597,7 +596,7 @@ class Simple_TimeSoftmaxWithLoss:
     def backward(self, dout=1):
         layers, xs = self.cache
         N, T, V = xs.shape
-        dxs = np.empty(xs.shape, dtype='f')
+        dxs = np.empty(xs.shape, dtype="f")
 
         dout *= 1 / T
         for t in range(T):
@@ -618,7 +617,7 @@ class Simple_TimeAffine:
         D, M = self.W.shape
 
         self.layers = []
-        out = np.empty((N, T, M), dtype='f')
+        out = np.empty((N, T, M), dtype="f")
         for t in range(T):
             layer = Affine(self.W, self.b)
             out[:, t, :] = layer.forward(xs[:, t, :])
@@ -630,7 +629,7 @@ class Simple_TimeAffine:
         N, T, M = dout.shape
         D, M = self.W.shape
 
-        dxs = np.empty((N, T, D), dtype='f')
+        dxs = np.empty((N, T, D), dtype="f")
         self.dW, self.db = 0, 0
         for t in range(T):
             layer = self.layers[t]

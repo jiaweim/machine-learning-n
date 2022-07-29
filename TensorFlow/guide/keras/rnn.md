@@ -3,7 +3,7 @@
 - [RNN with Keras](#rnn-with-keras)
   - [简介](#简介)
   - [配置](#配置)
-  - [内置 RNN 层](#内置-rnn-层)
+  - [内置 RNN 层的一个简单示例](#内置-rnn-层的一个简单示例)
   - [输出和状态](#输出和状态)
   - [RNN 层和 RNN 单元](#rnn-层和-rnn-单元)
   - [跨批量状态](#跨批量状态)
@@ -20,14 +20,14 @@
 
 循环神经网络（Recurrent neural network, RNN）是一类擅长对时间序列或自然语言等序列数据建模的神经网络。
 
-实践中，RNN 层使用 `for` 循环迭代序列的时间步，同时维护一个内部状态，该状态对看过的时间步信息进行编码。
+实践中，RNN layer 使用 `for` 循环迭代序列的时间步，同时维护一个内部状态，该状态对看过的时间步信息进行编码。
 
-> 内部状态不是 weight，而是记录序列、时间步等状态信息。
+> 内部状态不是 weight，而是记录序列、时间步等状态信息，即 hidden state。所以重置状态步影响权重。
 
 Keras RNN API 的特点：
 
-- 使用简单：内置的 `keras.layers.RNN`, `keras.layers.LSTM` 和 `keras.layers.GRU` 不需要复杂配置，就可用于构建 RNN 模型；
-- 自定义简单：可以自定义 RNN cell 层（`for` 循环内部），并将其与通用 `keras.layers.RNN` 层(`for` 循环本身)一起使用，就可以构建自定义 RNN 模型。
+- **使用简单**：内置的 `keras.layers.RNN`, `keras.layers.LSTM` 和 `keras.layers.GRU` 不需要复杂配置，就可用于构建 RNN 模型；
+- **自定义简单**：可以自定义 RNN cell 层（`for` 循环内部，即单个时间步的处理方法），然后与通用 `keras.layers.RNN` 层(`for` 循环本身)一起使用，就可以构建自定义 RNN 模型。
 
 ## 配置
 
@@ -38,7 +38,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 ```
 
-## 内置 RNN 层
+## 内置 RNN 层的一个简单示例
 
 Keras 有三个内置的 RNN 层：
 
@@ -48,11 +48,11 @@ Keras 有三个内置的 RNN 层：
 
 在 2015 年初，Keras 推出了第一个可重用的 LSTM 和 GRU 的开源 Python 实现。
 
-下面是一个简单的 `Sequential` 模型，该模型处理整数序列，将每个整数嵌入到 64 维向量中，然后在 `LSTM` 层中处理：
+下面是一个简单的 `Sequential` 模型，输入为整数序列，将每个整数嵌入到 64 维向量，然后在 `LSTM` 层中处理：
 
 ```python
 model = keras.Sequential()
-# 添加嵌入层，要求输入词汇量为 1000，输出嵌入维度 64
+# 添加嵌入层，vocab size 为 1000，输出嵌入维度 64
 model.add(layers.Embedding(input_dim=1000, output_dim=64))
 
 # 添加包含 128 个内部单元的 LSTM 层
@@ -64,7 +64,7 @@ model.add(layers.Dense(10))
 model.summary()
 ```
 
-```sh
+```txt
 Model: "sequential"
 _________________________________________________________________
 Layer (type)                 Output Shape              Param #   
@@ -81,7 +81,7 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-内置 RNN 支持许多特性：
+内置 RNN 支持：
 
 - 通过 `dropout` 和 `recurrent_dropout` 参数提供循环 dropout 功能；
 - 通过 `go_backwards` 参数提供反向处理输入序列的功能；

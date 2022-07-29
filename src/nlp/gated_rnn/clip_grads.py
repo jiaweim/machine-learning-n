@@ -4,13 +4,13 @@ dW1 = np.random.rand(3, 3) * 10
 dW2 = np.random.rand(3, 3) * 10
 
 grads = [dW1, dW2]
-max_norm = 5.0
+max_norm = 5.0  # 阈值
 
 
 def clip_grads(grads, max_norm):
     total_norm = 0
     for grad in grads:
-        total_norm += np.sum(grad ** 2)
+        total_norm += np.sum(grad**2)
     total_norm = np.sqrt(total_norm)
 
     rate = max_norm / (total_norm + 1e-6)
@@ -19,6 +19,6 @@ def clip_grads(grads, max_norm):
             grad *= rate
 
 
-print('before:', dW1.flatten())
+print("before:", dW1.flatten())
 clip_grads(grads, max_norm)
-print('after:', dW1.flatten())
+print("after:", dW1.flatten())

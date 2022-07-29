@@ -1,8 +1,8 @@
 from src.nlp.rnn.rnnlm import Rnnlm
 from src.nlp.dataset import ptb
-from src.nlp.common import SGD
-from src.nlp.common import RnnlmTrainer
-from src.nlp.common import eval_perplexity
+from src.nlp.common.optimizer import SGD
+from src.nlp.common.trainer import RnnlmTrainer
+from src.nlp.common.util import eval_perplexity
 
 # 设定超参数
 batch_size = 20
@@ -27,7 +27,7 @@ trainer = RnnlmTrainer(model, optimizer)
 
 # 应用梯度裁剪进行学习
 trainer.fit(xs, ts, max_epoch, batch_size, time_size, max_grad,
-            eval_interval=20)
+            eval_interval=20)  # 每 20 次迭代计算一次困惑度
 trainer.plot(ylim=(0, 500))
 
 # 基于测试数据进行评价
