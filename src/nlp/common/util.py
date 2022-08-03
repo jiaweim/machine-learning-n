@@ -30,8 +30,8 @@ def cos_similarity(x, y, eps=1e-8):
     :param eps: 用于防止“除数为0”的微小值
     :return:
     """
-    nx = x / (np.sqrt(np.sum(x**2)) + eps)  # 正则化处理
-    ny = y / (np.sqrt(np.sum(y**2)) + eps)
+    nx = x / (np.sqrt(np.sum(x ** 2)) + eps)  # 正则化处理
+    ny = y / (np.sqrt(np.sum(y ** 2)) + eps)
     return np.dot(nx, ny)
 
 
@@ -185,7 +185,7 @@ def to_gpu(x):
 def clip_grads(grads, max_norm):
     total_norm = 0
     for grad in grads:
-        total_norm += np.sum(grad**2)
+        total_norm += np.sum(grad ** 2)
     total_norm = np.sqrt(total_norm)
 
     rate = max_norm / (total_norm + 1e-6)
@@ -226,6 +226,21 @@ def eval_perplexity(model, corpus, batch_size=10, time_size=35):
 
 
 def eval_seq2seq(model, question, correct, id_to_char, verbos=False, is_reverse=False):
+    """
+
+    Parameters
+    ----------
+    model 模型
+    question 问题，字符 ID 数组
+    correct 正确解，字符 ID 数组
+    id_to_char 字符 ID 与字符映射的字典
+    verbos 是否显示结果
+    is_reverse 是否翻转输入语句
+
+    Returns
+    -------
+
+    """
     correct = correct.flatten()
     # 开头的分隔符
     start_id = correct[0]

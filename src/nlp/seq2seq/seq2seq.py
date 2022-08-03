@@ -5,6 +5,14 @@ from src.nlp.common.base_model import BaseModel
 
 class Encoder:
     def __init__(self, vocab_size, wordvec_size, hidden_size):
+        """
+
+        Parameters
+        ----------
+        vocab_size 词汇量，即字符种类
+        wordvec_size 字符向量维数
+        hidden_size LSTM 隐藏状态的维数
+        """
         V, D, H = vocab_size, wordvec_size, hidden_size
         rn = np.random.randn
 
@@ -14,7 +22,7 @@ class Encoder:
         lstm_b = np.zeros(4 * H).astype('f')
 
         self.embed = TimeEmbedding(embed_W)
-        self.lstm = TimeLSTM(lstm_Wx, lstm_Wh, lstm_b, stateful=False)
+        self.lstm = TimeLSTM(lstm_Wx, lstm_Wh, lstm_b, stateful=False)  # 无需保持 TimeLSTM 状态
 
         self.params = self.embed.params + self.lstm.params
         self.grads = self.embed.grads + self.lstm.grads
@@ -24,7 +32,7 @@ class Encoder:
         xs = self.embed.forward(xs)
         hs = self.lstm.forward(xs)
         self.hs = hs
-        return hs[:, -1, :]
+        return hs[:, -1, :]  # 返回最后一个时间步的隐藏状态
 
     def backward(self, dh):
         dhs = np.zeros_like(self.hs)
@@ -73,7 +81,7 @@ class Decoder:
 
     def generate(self, h, start_id, sample_size):
         """
-
+        Decoder 在学习和生成文本时行为不同，上面的 forward() 方法是在学习时使用，下面是生成文本时使用
         Parameters
         ----------
         h 从编码器接收的隐藏状态

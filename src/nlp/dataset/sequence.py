@@ -60,4 +60,9 @@ def load_data(file_name='addition.txt', seed=1984):
 
 
 def get_vocab():
+    """
+    Returns
+    -------
+    返回字符与 ID 的映射
+    """
     return char_to_id, id_to_char

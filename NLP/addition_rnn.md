@@ -1,5 +1,19 @@
 # seq2seq 学习加法
 
+- [seq2seq 学习加法](#seq2seq-学习加法)
+  - [简介](#简介)
+  - [反转](#反转)
+  - [配置](#配置)
+  - [生成数据](#生成数据)
+  - [向量化数据](#向量化数据)
+  - [构建模型](#构建模型)
+  - [训练模型](#训练模型)
+  - [参考](#参考)
+
+Last updated: 2022-08-01, 15:17
+@author Jiawei Mao
+***
+
 ## 简介
 
 在本例中，训练模型学习两个数字字符串的加法。例如：
@@ -17,6 +31,16 @@
 - 三个数字（reversed）：一层 LSTM（128 HN），50k 训练样本 = 99% train/test 精度 in 100 epochs
 - 四个数字（reversed）：一层 LSTM（128 HN），400k 训练样本 = 99% train/test 精度 in 20 epochs
 - 五个数字（reversed）：一层 LSTM（128 HN），550k 训练样本 = 99% train/test 精度 in 30 epochs
+
+## 反转
+
+反转输入数据，如下：
+
+![](images/2022-08-01-16-31-36.png)
+
+该技巧是 Sequence to Sequence Learning with Neural Networks ^[Sutskever, I.; Vinyals, O.; Le, Q. V. Sequence to Sequence Learning with Neural Networks. arXiv December 14, 2014. https://doi.org/10.48550/arXiv.1409.3215.] 中提出。据研究，大多时候使用该技巧，学习进展更快，最终的精度也有提高。
+
+虽然理论上不清楚为什么反转数据后，学习进展变快，精度提高，但是直观上可以认为，反转数据后梯度的传播更平滑。
 
 ## 配置
 
@@ -168,20 +192,16 @@ model = keras.Sequential()
 # Encoder 使用单层 LSTM，HN 为 128
 # 对变长输入序列，使用 input_shape=(None, num_feature)
 model.add(layers.LSTM(128, input_shape=(MAXLEN, len(chars))))
-# As the decoder RNN's input, repeatedly provide with the last output of
-# RNN for each time step. Repeat 'DIGITS + 1' times as that's the maximum
-# length of output, e.g., when DIGITS=3, max output is 999+999=1998.
+# 解码 RNN 输入，为每个时间步提供最后的 hidden state
+# 重复 'DIGITS+1' 次，对应输出的最大长度，例如当 DIGITS=3，最大输出为 999+999=1998
 model.add(layers.RepeatVector(DIGITS + 1))
-# The decoder RNN could be multiple layers stacked or a single layer.
+# 解码 RNN 可以包含多层，也可以是单层
 for _ in range(num_layers):
-    # By setting return_sequences to True, return not only the last output but
-    # all the outputs so far in the form of (num_samples, timesteps,
-    # output_dim). This is necessary as TimeDistributed in the below expects
-    # the first dimension to be the timesteps.
+    # 将 `return_sequences` 设置为 True，返回完整隐状态，输出 shape 为
+    # (num_samples, timesteps, output_dim).
     model.add(layers.LSTM(128, return_sequences=True))
 
-# Apply a dense layer to the every temporal slice of an input. For each of step
-# of the output sequence, decide which character should be chosen.
+# 将 dense 层应用于输入的每个时间步，确定每步选择的字符
 model.add(layers.Dense(len(chars), activation="softmax"))
 model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 model.summary()
@@ -214,8 +234,7 @@ Non-trainable params: 0
 epochs = 30
 batch_size = 32
 
-# Train the model each generation and show predictions against the validation
-# dataset.
+# 训练模型，并在验证集上显示预测效果
 for epoch in range(1, epochs):
     print()
     print("Iteration", epoch)
@@ -226,8 +245,7 @@ for epoch in range(1, epochs):
         epochs=1,
         validation_data=(x_val, y_val),
     )
-    # Select 10 samples from the validation set at random so we can visualize
-    # errors.
+    # 从验证集上随机选择 10 个样本，以查看效果
     for i in range(10):
         ind = np.random.randint(0, len(x_val))
         rowx, rowy = x_val[np.array([ind])], y_val[np.array([ind])]

@@ -34,7 +34,7 @@ tf.keras.layers.LSTM(
 )
 ```
 
-基于可运行的硬件条件，`LSTM` 会选择不同实现以实现性能最优，即基于 cuDNN 的实现和纯 tensorflow 实现。如果有 GPU 可用。，并且所有参数满足下面的 cuDNN kernel 的要求，则选择更快的 cuDNN 实现。
+基于可运行的硬件条件，`LSTM` 会选择不同实现以最大化性能，即选择基于 cuDNN 的实现或纯 tensorflow 实现。如果有 GPU 可用，并且所有参数满足下面的 cuDNN 内核要求，则选择更快的 cuDNN 实现。
 
 使用 cuDNN 实现需要满足如下要求：
 
@@ -43,7 +43,7 @@ tf.keras.layers.LSTM(
 3. `recurrent_dropout` == 0
 4. `unroll` == `False`
 5. `use_bias` == `True`
-6. Inputs, if use masking, are strictly right-padded.
+6. 输入如果使用 masking，必须为 right-padded.
 7. Eager execution is enabled in the outermost context.
 
 例如：
@@ -52,11 +52,11 @@ tf.keras.layers.LSTM(
 >>> inputs = tf.random.normal([32, 10, 8])
 >>> lstm = tf.keras.layers.LSTM(4)
 >>> output = lstm(inputs)
->>> print(output.shape)
+>>> print(output.shape) # batch, hidden
 (32, 4)
 >>> lstm = tf.keras.layers.LSTM(4, return_sequences=True, return_state=True)
 >>> whole_seq_output, final_memory_state, final_carry_state = lstm(inputs)
->>> print(whole_seq_output.shape)
+>>> print(whole_seq_output.shape) # batch, time, hidden
 (32, 10, 4)
 >>> print(final_memory_state.shape)
 (32, 4)
@@ -85,8 +85,8 @@ tf.keras.layers.LSTM(
 |bias_constraint|Constraint function applied to the bias vector. Default: None.|
 |dropout|Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs. Default: 0.|
 |recurrent_dropout|Float between 0 and 1. Fraction of the units to drop for the linear transformation of the recurrent state. Default: 0.|
-|return_sequences|Boolean. Whether to return the last output. in the output sequence, or the full sequence. Default: False.|
-|return_state|Boolean. Whether to return the last state in addition to the output. Default: False.|
+|return_sequences|Boolean，是否返回完整序列的输出，默认 False|
+|return_state|Boolean，是否额外返回最终状态，默认 False|
 |go_backwards|Boolean (default False). If True, process the input sequence backwards and return the reversed sequence.|
 |stateful|Boolean (default False). True 表示当前 batch 样本 i 的最终状态用作下一个 batch 的样本 i 的初始状态|
 |time_major|The shape format of the inputs and outputs tensors. If True, the inputs and outputs will be in shape [timesteps, batch, feature], whereas in the False case, it will be [batch, timesteps, feature]. Using time_major = True is a bit more efficient because it avoids transposes at the beginning and end of the RNN calculation. However, most TensorFlow data is batch-major, so by default this function accepts input and emits output in batch-major form.|
