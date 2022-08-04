@@ -1,18 +1,27 @@
 # tf.data：构建 TensorFlow 输入管道
 
+- [tf.data：构建 TensorFlow 输入管道](#tfdata构建-tensorflow-输入管道)
+  - [简介](#简介)
+  - [基本原理](#基本原理)
+    - [Dataset 结构](#dataset-结构)
+  - [读取输入数据](#读取输入数据)
+    - [NumPy 数组](#numpy-数组)
+    - [Python generators](#python-generators)
+  - [参考](#参考)
+
 2022-01-18, 18:32
 ***
 
 ## 简介
 
-使用 `tf.data` API 可以从简单的、可重复使用的片段构建复杂的输入管道。例如，用于图像模型的管道可以从分布式文件系统中的文件聚合数据，将随机扰动应用于每个图像，并将随机选择的图像合并为批量进行训练。文本模型的管道可能涉及从原始文本数据中提取符号，将它们通过查找表转换为嵌入式符号，然后将不同长度的序列合并为批量。`tf.data` API 提供了处理大量数据的功能，支持读取不同格式的数据，并执行复杂的转换。
+使用 `tf.data` API 可以用简单的、可重复使用的代码片段构建复杂的输入管道。例如，用于图像模型的输入管道可以从分布式文件系统中的文件聚合数据，将随机扰动应用于每个图像，并将随机选择的图像合并为 batch 进行训练。文本模型的输入管道可能涉及从原始文本数据中提取符号，将它们通过查找表转换为嵌入，然后将不同长度的序列合并为 batch。`tf.data` API 提供了处理大型数据的功能，支持读取不同格式的数据，并执行复杂的转换。
 
-`tf.data` API 引入了表示元素序列的 `tf.data.Dataset` 抽象类，其中每个元素由一个或多个组件组成。例如，在图像管道中，元素可以是单个训练样本，包含一对表示图像和其标签的张量。
+`tf.data` API 引入了表示元素序列的 `tf.data.Dataset` 抽象类，每个元素由一个或多个组件组成。例如，在图像管道中，元素可能是单个样本，包含一对表示图像和其标签的张量。
 
 创建数据集的方法有两种：
 
-- 从内存或文件（一个或多个）汇总的数据构建 `Dataset`
-- 从一个或多个 `tf.data.Dataset` 对象进行数据转换构建数据集。
+- 从内存或文件（一个或多个）中的数据构建 `Dataset`
+- 从一个或多个 `tf.data.Dataset` 对象进行转换构建数据集。
 
 ```python
 import tensorflow as tf
@@ -30,21 +39,27 @@ np.set_printoptions(precision=4)
 
 ## 基本原理
 
-要创建输入管道，必须从数据源开始。例如，要从内存中的数据构造 `Dataset`，可使用 `tf.data.Dataset.from_tensors()` 或 `tf.data.Dataseet.from_tensor_slices()`。或者，如果你的输入数据以推荐的 TFRecord 格式存储，则可以使用 `tf.data.TFRecordDataset()`。
+要创建输入管道，必须提供数据源。例如，要从内存中的数据构造 `Dataset`，可使用 `tf.data.Dataset.from_tensors()` 或 `tf.data.Dataseet.from_tensor_slices()`；如果以 TFRecord 文件创建 `Dataset`，则可以使用 `tf.data.TFRecordDataset()`。
 
-有了 `Dataset` 对象后，可以通过 `tf.data.Dataset` 对象的方法将其转换为新的 `Dataset`。例如，可以使用 `Dataset.map()` 对每个元素进行转换，使用 `Dataset.batch()` 进行批量转换。
+有了 `Dataset` 对象后，可以通过 `tf.data.Dataset` 的链式方法将其转换为新的 `Dataset`。例如，可以应用逐元素转换操作，如 `Dataset.map()`，也可以使用多元素转换功能，如 `Dataset.batch`。可使用的转换请参考 [tf.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) API 文档。
 
-`Dataset` 是 Python 可迭代对象。因此可以使用 for 循环来查看其元素：
+`Dataset` 是可迭代 Python 对象，因此可以使用 for 循环来查看其元素：
 
 ```python
->>> dataset = tf.data.Dataset.from_tensor_slices([8, 3, 0, 8, 2, 1])
->>> dataset
+dataset = tf.data.Dataset.from_tensor_slices([8, 3, 0, 8, 2, 1])
+dataset
+```
+
+```txt
 <TensorSliceDataset element_spec=TensorSpec(shape=(), dtype=tf.int32, name=None)>
 ```
 
 ```python
->>> for elem in dataset:
->>>     print(elem.numpy())
+for elem in dataset:
+    print(elem.numpy())
+```
+
+```txt
 8
 3
 0
@@ -53,47 +68,68 @@ np.set_printoptions(precision=4)
 1
 ```
 
-或者使用 `iter` 显式创建 Python iterator，然后使用 `next` 查看值：
+或者使用 `iter` 显式创建 Python 迭代器，然后用 `next` 查看元素：
 
 ```python
->>> it = iter(dataset)
->>> print(next(it).numpy())`
+it = iter(dataset)
+
+print(next(it).numpy())
+```
+
+```txt
 8
 ```
 
-也可以使用 `reduce` 变换来消耗数据集元素，该操作将所有元素转换为单个值。下面使用 `reduce` 变换计算数据集所有元素之和：
+另外，也可以使用 `reduce` 变换将所有元素转换为单个值。例如，使用 `reduce` 计算所有元素之和：
 
 ```python
->>> print(dataset.reduce(0, lambda state, value: state + value).numpy())
+print(dataset.reduce(0, lambda state, value: state + value).numpy())
+```
+
+```txt
 22
 ```
 
 ### Dataset 结构
 
-dataset 包含元素序列，元素由组件嵌套组成，而组件是 `tf.TypeSpec` 表示的任意结构，包括 `tf.Tensor`, `tf.sparse.SparseTensor`, `tf.RaggedTensor`, `tf.TensorArray` 以及 `tf.data.Dataset`。
+dataset 包含元素序列，每个元素具有相同的组件嵌套结构，而单个组件可以是 `tf.TypeSpec` 表示的任意类型，包括 `tf.Tensor`, `tf.sparse.SparseTensor`, `tf.RaggedTensor`, `tf.TensorArray` 和 `tf.data.Dataset`。
 
-可用于表示嵌套结构的 Python 构造包含 `tuple`, `dict`, `NamedTuple` 和 `OrderedDict`。需要说明的是，`list` 不适合表达 dataset 元素，早期的 `tf.data` 用户对输入 `list` 被自动包装为 `tensor`，输出 `list` （如用户自定义函数）被强制转换为 `tuple` 反应比较强烈。因此，如果你想要将 `list` 作为嵌套结构，则需要先将其转换为 `tuple`，对单个组件的 `list` 输出，需要使用 `tf.stack` 进行包装。
+可用于表示嵌套结构的 Python 类型包含 `tuple`, `dict`, `NamedTuple` 和 `OrderedDict`。需要强调的是，`list` 不适合表示 dataset 元素，早期的 `tf.data` 用户对输入 `list` 被自动包装为 `tensor`，输出 `list` （如用户自定义函数）被强制转换为 `tuple` 反应比较强烈。因此，如果需要将 `list` 作为嵌套结构，则需要先将其转换为 `tuple`；如果需要将 `list` 作为单个组件输出，需要使用 `tf.stack` 进行包装。
 
-`Dataset.element_spec` 属性可用于检查每个元素组件的类型。该属性返回 `tf.TypeSpec` 对象的嵌套结构，嵌套和元素结构一致。例如：
+`Dataset.element_spec` 属性可用于检查每个元素组件的类型。该属性返回 `tf.TypeSpec` 对象的嵌套结构，嵌套结构和元素结构一致。例如：
+
+- 生成 shape 为 (4, 10) 的 [0,1) 之间的均匀分布随机数
 
 ```python
->>> dataset1 = tf.data.Dataset.from_tensor_slices(tf.random.uniform([4, 10]))
->>> dataset1.element_spec
+dataset1 = tf.data.Dataset.from_tensor_slices(tf.random.uniform([4, 10]))
+
+dataset1.element_spec
+```
+
+```txt
 TensorSpec(shape=(10,), dtype=tf.float32, name=None)
 ```
 
 ```python
->>> dataset2 = tf.data.Dataset.from_tensor_slices(
->>>    (tf.random.uniform([4]),
->>>     tf.random.uniform([4, 100], maxval=100, dtype=tf.int32)))
->>> dataset2.element_spec
+dataset2 = tf.data.Dataset.from_tensor_slices(
+    (tf.random.uniform([4]),
+     tf.random.uniform([4, 100], maxval=100, dtype=tf.int32)))
+
+dataset2.element_spec
+```
+
+```txt
 (TensorSpec(shape=(), dtype=tf.float32, name=None),
  TensorSpec(shape=(100,), dtype=tf.int32, name=None))
 ```
 
 ```python
->>> dataset3 = tf.data.Dataset.zip((dataset1, dataset2))
->>> dataset3.element_spec
+dataset3 = tf.data.Dataset.zip((dataset1, dataset2))
+
+dataset3.element_spec
+```
+
+```txt
 (TensorSpec(shape=(10,), dtype=tf.float32, name=None),
  (TensorSpec(shape=(), dtype=tf.float32, name=None),
   TensorSpec(shape=(100,), dtype=tf.int32, name=None)))
