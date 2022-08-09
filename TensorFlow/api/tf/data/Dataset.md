@@ -168,11 +168,54 @@ batch(
 
 ### cache
 
+Last updated: 2022-08-09, 13:06
+
 ```python
 cache(
     filename='', name=None
 )
 ```
+
+- **filename**
+
+`tf.string` 类型张量，用于指定缓存此数据集的目录。如果未指定 `filename`，数据集将缓存在内存中。
+
+**返回**：`Dataset`
+
+缓存该数据集中的元素。
+
+在第一次迭代该数据集时（第一个 epoch），其元素将缓存到指定的文件或内存中。
+
+> **Note:** 为了完成缓存，必须遍历整个数据集。否则，后续迭代将不使用缓存数据。
+
+```python
+>>> dataset = tf.data.Dataset.range(5)
+>>> dataset = dataset.map(lambda x: x**2)
+>>> dataset = dataset.cache()
+
+>>> # 第一次迭代数据将使用 `range` 和 `map` 生成数据
+>>> list(dataset.as_numpy_iterator())
+[0, 1, 4, 9, 16]
+
+>>> # 后续的迭代从缓存读取数据
+>>> list(dataset.as_numpy_iterator())
+[0, 1, 4, 9, 16]
+```
+
+当缓存到文件时，缓存的数据在运行期间持久保存。即使是第一次迭代数据，也是从缓存文件读取。在调用 `.cache` 之前更改输入管道无效，除非删除缓存文件或更改文件名。
+
+```python
+dataset = tf.data.Dataset.range(5)
+dataset = dataset.cache("/path/to/file")
+list(dataset.as_numpy_iterator())
+# [0, 1, 2, 3, 4]
+dataset = tf.data.Dataset.range(10)
+dataset = dataset.cache("/path/to/file")  # Same file!
+list(dataset.as_numpy_iterator())
+# [0, 1, 2, 3, 4]
+```
+
+> **Note:** `cache` 使得每次迭代数据集产生完全相同的元素。如果希望实现随机迭代顺序，则应该在调用 `cache` 后调用 `shuffle`。
 
 ### from_generator
 
@@ -333,17 +376,21 @@ for element in B.as_numpy_iterator():
 
 ### prefetch
 
+Last updated: 2022-08-09, 13:13
+
 ```python
 prefetch(
     buffer_size, name=None
 )
 ```
 
-从该数据集预先取一部分元素创建 `Dataset`，返回 `Dataset`。
+从该数据集预先取一部分元素创建 `Dataset`。
 
-大部分数据集输入管道应该以调用 `prefetch` 结尾。这样在处理当前元素时同时在准备后面的元素，从而提高吞吐量，降低延迟，但单价是使用额外的内存来存储预取的元素。
+**返回**：`Dataset`
 
-> ⭐：和其它 `Dataset` 方法一样，`prefetch` 对输入数据集的元素进行操作，没有样本和批量的概念。`examples.prefetch(2)` 将预取 2 个元素（即 2 个样本），而 `examples.batch(20).prefetch(2)` 虽然也是预取 2 个元素，但每个元素为 1 个批量，每个批量包含 20 个元素。
+大部分数据集输入管道应该以调用 `prefetch` 结尾。这样在处理当前元素时同时准备后续元素，从而提高吞吐量，降低延迟；代价是使用额外的内存来存储预取的元素。
+
+> **Note：** 和其它 `Dataset` 方法一样，`prefetch` 对输入数据集的元素进行操作，没有样本和批量的概念。`examples.prefetch(2)` 将预取 2 个元素（即 2 个样本），而 `examples.batch(20).prefetch(2)` 虽然也是预取 2 个元素，但每个元素为 1 个批量，每个批量包含 20 个元素。
 
 ```python
 >>> dataset = tf.data.Dataset.range(3)
@@ -354,8 +401,7 @@ prefetch(
 
 |参数|说明|
 |---|---|
-|buffer_size|`tf.int64` 类型的标量 `tf.Tensor`, 表示预取时缓冲元素的最大个数。如果使用 `tf.data.AUTOTUNE`，则动态调整缓冲区大小|
-|name|Optional. A name for the tf.data transformation.|
+|buffer_size|`tf.int64` 标量 `tf.Tensor`, 表示预取时缓冲元素的最大个数。如果使用 `tf.data.AUTOTUNE`，则动态调整缓冲区大小|
 
 ### repeat
 
