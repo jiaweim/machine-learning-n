@@ -4,6 +4,8 @@
   - [简介](#简介)
   - [参数](#参数)
   - [属性](#属性)
+  - [方法](#方法)
+    - [get_layer](#get_layer)
   - [参考](#参考)
 
 2022-03-09, 21:59
@@ -109,6 +111,28 @@ model = MyModel()
 
 - distribute_strategy
 
+## 方法
+
+### get_layer
+
+Last updated: 2022-08-09, 14:01
+
+```python
+get_layer(
+    name=None, index=None
+)
+```
+
+|参数|说明|
+|---|---|
+|name| layer 名称|
+|index| layer 索引|
+
+**返回**： `layer` 实例。
+
+根据名称 `name` 或索引 `index` 查找 layer。
+
+如果同时提供 `name` 和 `index`，则 `index` 优先。layer 基于水平图遍历（bottom-up）进行索引。
 
 
 ## 参考

@@ -138,3 +138,19 @@ dmypy.json
 /src/nlp/dataset/addition.txt
 src/tensorflow_demo/tfbook/inception_v3.h5
 src/tensorflow_demo/tfbook/rps.h5
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+~/
+/src/ted_hrlr_translate_pt_en_converter.zip
+/src/ted_hrlr_translate_pt_en_converter/
