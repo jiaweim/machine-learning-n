@@ -127,13 +127,7 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-/src/nlp/dataset/ptb.test.npy
-/src/nlp/dataset/ptb.test.txt
-/src/nlp/dataset/ptb.train.npy
-/src/nlp/dataset/ptb.train.txt
-/src/nlp/dataset/ptb.valid.npy
-/src/nlp/dataset/ptb.valid.txt
-/src/nlp/dataset/ptb.vocab.pkl
+/src/nlp/dataset/
 /src/nlp/gated_rnn/Rnnlm.pkl
 /src/nlp/dataset/addition.txt
 src/tensorflow_demo/tfbook/inception_v3.h5
