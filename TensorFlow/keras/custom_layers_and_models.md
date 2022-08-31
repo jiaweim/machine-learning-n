@@ -1,6 +1,6 @@
-# 使用子类 API 创建 Layer 和 Model
+# 通过继承创建 Layer 和 Model
 
-- [使用子类 API 创建 Layer 和 Model](#使用子类-api-创建-layer-和-model)
+- [通过继承创建 Layer 和 Model](#通过继承创建-layer-和-model)
   - [1. 设置](#1-设置)
   - [2. Layer：权重和计算的组合](#2-layer权重和计算的组合)
   - [3. 不可训练权重](#3-不可训练权重)
@@ -29,7 +29,7 @@ from tensorflow import keras
 
 ## 2. Layer：权重和计算的组合
 
-`Layer` 类是 Keras 的核心抽象之一，它封装了状态（layer 权重）和输入到输出的转换（"call" 方法，layer 的前向传播）。
+`Layer` 是 Keras 的核心类之一，它封装了状态（layer 权重）和输入到输出的转换（`call` 方法包含 layer 的前向传播）。
 
 下面是一个全连接层，变量 `w` 和 `b` 是其状态：
 
@@ -52,7 +52,7 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-可以像使用 Python 函数一样调用 layer：
+layer 是可调用对象，可以像使用 Python 函数一样调用：
 
 ```python
 x = tf.ones((2, 2))
@@ -61,20 +61,20 @@ y = linear_layer(x)
 print(y)
 ```
 
-```bash
+```txt
 tf.Tensor(
 [[ 0.01460802 -0.02662525  0.07070637 -0.01873659]
  [ 0.01460802 -0.02662525  0.07070637 -0.01873659]], shape=(2, 4), dtype=float32)
 ```
 
-> [!NOTE]
-> 将 `w` 和 `b` 设置为 layer 属性后，layer 会自动跟踪权重。
+> **[!NOTE]**
+> 将 `w` 和 `b` 设置为 layer 属性后（`self.w = tf.Variable(...)`），layer 会自动跟踪权重。
 
 ```python
 assert linear_layer.weights == [linear_layer.w, linear_layer.b]
 ```
 
-也可以使用快捷方式 `add_weight()` 添加权重：
+也可以使用便捷方法 `add_weight()` 添加权重：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -105,9 +105,9 @@ tf.Tensor(
 
 ## 3. 不可训练权重
 
-除了可训练权重，layer 可以包含不可训练权重。在训练时，反向传播不更新不可训练权重的值。
+除了可训练权重，layer 可以包含 non-trainable 权重。在训练时，反向传播不更新 non-trainable 权重的值。
 
-添加不可训练权重的方法：
+添加 non-trainable 权重的方法：
 
 ```python
 class ComputeSum(keras.layers.Layer):
@@ -128,12 +128,12 @@ y = my_sum(x)
 print(y.numpy())
 ```
 
-```bash
+```txt
 [2. 2.]
 [4. 4.]
 ```
 
-`total` 是 `layer.weights` 的一部分，但是属于不可训练权重:
+`total` 是 `layer.weights` 的一部分，但是不可训练:
 
 ```python
 print("weights:", len(my_sum.weights))
@@ -165,9 +165,7 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-但是很多时候，事先不知道输入的大小，因此希望在知道 shape 后再 lazily 创建 weights。
-
-在 Keras API 中，建议在 layer 的 `build(self, inputs_shape)` 方法中创建 weights。如下：
+但是很多时候，事先不知道输入的大小，因此希望能在知道 shape 后再 lazily 创建 weights。在 Keras 中，通过在 layer 的 `build(self, inputs_shape)` 方法中创建 weights 可以推迟 weight 的创建。如下：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -199,7 +197,7 @@ linear_layer = Linear(32)
 y = linear_layer(x)
 ```
 
-如上所示，单独实现 `build()` 可以很好地将权重的创建与使用分开。然而，对一些高级自定义 layer，将状态创建和计算分开几乎不可能。layer 创建者依然可以将权重的创建推迟到第一次调用 `__call__()`
+如上所示，单独实现 `build()` 可以很好地将权重的创建与使用分开。然而，对一些高级自定义 layer，将状态的创建和计算分开几乎不可能。layer 创建者依然可以将权重的创建推迟到第一次调用 `__call__()`
 ，但是要注意以后的调用使用相同的权重。另外，`__call__()` 第一次执行很可能在 `tf.function` 中，因此 `__call__()` 中创建任何变量都应该放在 `tf.init_scope` 中。
 
 ## 5. Layer 可递归组合
@@ -230,7 +228,7 @@ print("weights:", len(mlp.weights))
 print("trainable weights:", len(mlp.trainable_weights))
 ```
 
-```bash
+```txt
 weights: 6
 trainable weights: 6
 ```

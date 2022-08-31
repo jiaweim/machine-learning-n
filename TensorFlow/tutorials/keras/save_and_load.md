@@ -20,7 +20,7 @@
 
 Last updated: 2022-08-30, 15:38
 @author Jiawei Mao
-***
+****
 
 ## 1. 简介
 
@@ -133,7 +133,7 @@ _________________________________________________________________
 checkpoint_path = "training_1/cp.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
-# 创建用来保存模型 weights 的 callback
+# 创建保存模型 weights 的 callback
 cp_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_path, save_weights_only=True, verbose=1
 )
@@ -157,30 +157,7 @@ Epoch 2/10
 29/32 [==========================>...] - ETA: 0s - loss: 0.4270 - sparse_categorical_accuracy: 0.8847
 Epoch 2: saving model to training_1\cp.ckpt
 32/32 [==============================] - 0s 10ms/step - loss: 0.4148 - sparse_categorical_accuracy: 0.8880 - val_loss: 0.5796 - val_sparse_categorical_accuracy: 0.8060
-Epoch 3/10
-30/32 [===========================>..] - ETA: 0s - loss: 0.2991 - sparse_categorical_accuracy: 0.9198
-Epoch 3: saving model to training_1\cp.ckpt
-32/32 [==============================] - 0s 10ms/step - loss: 0.2933 - sparse_categorical_accuracy: 0.9210 - val_loss: 0.5255 - val_sparse_categorical_accuracy: 0.8290
-Epoch 4/10
-30/32 [===========================>..] - ETA: 0s - loss: 0.2165 - sparse_categorical_accuracy: 0.9385
-Epoch 4: saving model to training_1\cp.ckpt
-32/32 [==============================] - 0s 10ms/step - loss: 0.2126 - sparse_categorical_accuracy: 0.9400 - val_loss: 0.4396 - val_sparse_categorical_accuracy: 0.8620
-Epoch 5/10
-25/32 [======================>.......] - ETA: 0s - loss: 0.1598 - sparse_categorical_accuracy: 0.9700
-Epoch 5: saving model to training_1\cp.ckpt
-32/32 [==============================] - 0s 11ms/step - loss: 0.1538 - sparse_categorical_accuracy: 0.9710 - val_loss: 0.4128 - val_sparse_categorical_accuracy: 0.8700
-Epoch 6/10
-32/32 [==============================] - ETA: 0s - loss: 0.1117 - sparse_categorical_accuracy: 0.9780
-Epoch 6: saving model to training_1\cp.ckpt
-32/32 [==============================] - 0s 10ms/step - loss: 0.1117 - sparse_categorical_accuracy: 0.9780 - val_loss: 0.4070 - val_sparse_categorical_accuracy: 0.8720
-Epoch 7/10
-32/32 [==============================] - ETA: 0s - loss: 0.0874 - sparse_categorical_accuracy: 0.9860
-Epoch 7: saving model to training_1\cp.ckpt
-32/32 [==============================] - 0s 9ms/step - loss: 0.0874 - sparse_categorical_accuracy: 0.9860 - val_loss: 0.4053 - val_sparse_categorical_accuracy: 0.8670
-Epoch 8/10
-32/32 [==============================] - ETA: 0s - loss: 0.0668 - sparse_categorical_accuracy: 0.9920
-Epoch 8: saving model to training_1\cp.ckpt
-32/32 [==============================] - 0s 9ms/step - loss: 0.0668 - sparse_categorical_accuracy: 0.9920 - val_loss: 0.4066 - val_sparse_categorical_accuracy: 0.8660
+......
 Epoch 9/10
 22/32 [===================>..........] - ETA: 0s - loss: 0.0504 - sparse_categorical_accuracy: 0.9957
 Epoch 9: saving model to training_1\cp.ckpt
@@ -202,9 +179,9 @@ os.listdir(checkpoint_dir)
 ['checkpoint', 'cp.ckpt.data-00000-of-00001', 'cp.ckpt.index']
 ```
 
-只要两个模型具有相同的架构，就可以在它们之间共享权重。因此，当从权重恢复模型时，需要先创建一个与原始模型架构相同的模型，然后设置其权重。
+只要两个模型架构相同，就可以在它们之间共享权重。因此，当从权重恢复模型时，需要先创建一个与原始模型架构相同的模型，然后设置其权重。
 
-现在重建一个新的、没训练过的模型，并在测试集上进行评估。一个没训练过的模型输出接近随机水平（~10% 的准确率）：
+现在重建一个新的、没训练过的模型，并在测试集上进行评估。没训练过的模型性能接近随机水平（~10% 的准确率）：
 
 ```python
 # Create a basic model instance
@@ -238,9 +215,9 @@ Restored model, accuracy: 86.50%
 
 ### 4.2 Checkpoint callback 选项
 
-Checkpoint callback 提供了设置 checkpoint 名称和调整 checkpoint 频率的选项。
+Checkpoint callback 可以设置 checkpoint 名称和 checkpoint 频率。
 
-例如，训练一个模型，并每 5 个 epochs 保存一个命名 checkpoints：
+例如，训练一个模型，每 5 个 epochs 保存一个 checkpoints：
 
 ```python
 # Include the epoch in the file name (uses `str.format`)
@@ -336,7 +313,7 @@ latest
 ```
 
 ```txt
-'training_2\\cp-0050.ckpt'
+'training_2/cp-0050.ckpt'
 ```
 
 现在，重置模型，载入最新 checkpoint：
@@ -360,7 +337,7 @@ Restored model, accuracy: 87.40%
 
 ## 5. 文件说明
 
-上面的代码将权重存储到 checkping 文件集合，该二进制格式文件只包含训练后的权重。checkpoints 文件包括：
+上面的代码将权重存储到 checkpoint 文件集合，该二进制格式文件只包含训练后的权重。checkpoints 文件包括：
 
 - 包含模型权重的一个或多个 shards
 - 索引文件，指定权重在哪个 shard
