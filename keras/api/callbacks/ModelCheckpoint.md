@@ -1,6 +1,6 @@
 # ModelCheckpoint
 
-Last updated: 2022-08-30, 16:44
+Last updated: 2022-09-01, 17:01
 ****
 
 ## 简介
@@ -22,23 +22,23 @@ tf.keras.callbacks.ModelCheckpoint(
 
 以指定频率保存 Keras 模型或权重的 callback。
 
-`ModelCheckpoint` callback 通过 `model.fit()` 与训练结合使用，以指定时间间隔保存模型或权重（在 checkpoint 文件），以便稍后可以加载模型或权重，从而从保存的状态继续训练。
+`ModelCheckpoint` callback 通过 `model.fit()` 与训练结合使用，以指定时间间隔保存模型或权重为 checkpoint 文件，以便稍后可以加载模型或权重，从而从保存的状态继续训练。
 
 该 callback 提供了如下选项：
 
-- 是只保留到目前为止**性能最佳**的模型，还是不管性能，在每个 epoch 结束时保存模型；
+- 是只保留到目前为止**性能最佳**的模型，还是不管性能，每个 epoch 结束时都保存模型；
 - **最佳的定义**：要监控的指标，以及应该最大化还是最小化；
-- 保存的频率，目前支持在每个 epoch 结束时保存，或固定 epoch 间隔数保存；
+- 保存的频率，目前支持在每个 epoch 结束时保存，或指定训练 batches 后保存；
 - 是只保存权重，还是保存整个模型。
 
 > **[!NOTE]**
-> 如果出现 **WARNING:tensorflow:Can save best model only with <name> available, skipping** 信息，可以参考 `monitor` 参数说明。
+> 如果出现 `WARNING:tensorflow:Can save best model only with <name> available, skipping` 信息，可以参考 `monitor` 参数说明。
 
 ## 参数
 
 **filepath**
 
-保存模型文件的路径，string 或 `PathLike`，例如 `filepath = os.path.join(working_dir, 'ckpt', file_name)`。`filepath` 可以包含命名格式选项。例如，如果 `filepath` 为 `weights.{epoch:02d}-{val_loss:.2f}.hdf5`，则 model checkpoint 文件名包含 epoch 号和 validation loss。`filepath` 目录不应该被其它 callback 使用，以避免冲突。
+保存模型文件的路径，string 或 `PathLike`，例如 `filepath = os.path.join(working_dir, 'ckpt', file_name)`。`filepath` 可以包含命名格式化选项。例如，如果 `filepath` 为 `weights.{epoch:02d}-{val_loss:.2f}.hdf5`，则 model checkpoint 文件名包含 epoch 号和 validation loss。`filepath` 目录不应该被其它 callback 使用，以避免冲突。
 
 **monitor**
 
