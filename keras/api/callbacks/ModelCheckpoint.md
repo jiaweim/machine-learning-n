@@ -22,7 +22,7 @@ tf.keras.callbacks.ModelCheckpoint(
 
 以指定频率保存 Keras 模型或权重的 callback。
 
-`ModelCheckpoint` callback 与训练结合使用（`model.fit()`），以一定时间间隔保存模型或权重（在 checkpoint 文件），以便稍后可以加载模型或权重，以继续从保存的状态继续训练。
+`ModelCheckpoint` callback 通过 `model.fit()` 与训练结合使用，以指定时间间隔保存模型或权重（在 checkpoint 文件），以便稍后可以加载模型或权重，从而从保存的状态继续训练。
 
 该 callback 提供了如下选项：
 
@@ -109,3 +109,4 @@ model.load_weights(checkpoint_filepath)
 ## 参考
 
 - https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint
+- https://keras.io/api/callbacks/model_checkpoint/

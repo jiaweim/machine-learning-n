@@ -1,7 +1,6 @@
 # TensorFlow
 
 - [TensorFlow](#tensorflow)
-  - [TensorFlow 基础](#tensorflow-基础)
   - [教程](#教程)
   - [Keras](#keras)
   - [Keras 使用指南](#keras-使用指南)
@@ -16,16 +15,6 @@
 
 ***
 
-## TensorFlow 基础
-
-- [概述](guide/basic/basic.md)
-- [Tensor](guide/basic/basic_tensor.md)
-- [Variable](guide/basic/basic_variable.md)
-- [自动微分和梯度](guide/basic/basic_autodiff.md)
-- [graph 执行](guide/basic/basic_graph.md)
-- [模块、模型和层](guide/basic/basic_module.md)
-- [训练循环基础](guide/basic/basic_training_loop.md)
-
 ## 教程
 
 - [TensorFlow 2 快速入门（初学者）](tutorials/quickstart_beginner.md)
@@ -33,9 +22,13 @@
 
 **Keras 基础**
 
-- [图像分类：Fashion MNIST 分类](tutorials/keras_begin/image_classification.md)
-- [基本文本分类](tutorials/keras_begin/basic_text_classification.md)
+- [图像分类基础](keras/classification.md)
+- [文本分类基础](keras/text_classification.md)
+- [基于 TF Hub 的文本分类](keras/text_classification_with_hub.md)
+
 - [过拟合和欠拟合](tutorials/keras_begin/overfit_underfit.md)
+- [通过继承实现 Layer 和 Model](custom_layers_and_models.md)
+
 
 ## Keras
 
