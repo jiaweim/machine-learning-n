@@ -17,7 +17,7 @@ local 变量存在于单个进程中，通常不保存到 checkpoint，用于临
 
 |参数|说明|
 |----|---|
-|scope|(可选) a string。如果提供，则对 local 变量集合进行筛选，使用 `re.match` 匹配变量的 `name` 和 `scope`，没有 `name` 和没匹配上的被筛掉|
+|scope|(可选) a string。如果提供，则对 local 变量集合进行筛选，使用 `re.match` 匹配变量的 `name` 和 `scope`，没有 `name` 和没匹配上的变量被筛掉|
 
 ## 参考
 
