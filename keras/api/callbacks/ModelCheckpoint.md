@@ -20,7 +20,7 @@ tf.keras.callbacks.ModelCheckpoint(
 )
 ```
 
-以指定频率保存 Keras 模型或权重的 callback。
+以指定频率保存 Keras 模型或权重。
 
 `ModelCheckpoint` callback 通过 `model.fit()` 与训练结合使用，以指定时间间隔保存模型或权重为 checkpoint 文件，以便稍后可以加载模型或权重，从而从保存的状态继续训练。
 
@@ -60,7 +60,7 @@ tf.keras.callbacks.ModelCheckpoint(
 
 **save_best_only**
 
-`save_best_only=True` 只在模型被认为时目前最好时保存。如果 `filepath` 不包含格式化选项，例如 `{epoch}`，则每个新的更好的模型将覆盖之前保存的模式。
+`save_best_only=True` 只在模型被认为是目前最好时保存。如果 `filepath` 不包含格式化选项，例如 `{epoch}`，则新保存的更好模型将覆盖之前保存的模型。
 
 **mode**
 

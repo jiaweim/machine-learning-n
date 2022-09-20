@@ -18,11 +18,11 @@ tf.keras.callbacks.EarlyStopping(
 )
 ```
 
-当某个监控 metric 不再改善时停止训练。
+当某个 metric 不再改善时停止训练。
 
 假设训练的目标是最小化 loss，则监控的 metric 为 `'loss'`，模式为 `'min'`。`model.fit()` 训练循环在每个 epoch 结束时根据 `min_delta` 和 `patience` 检查 loss 是否不再减少。一旦发现 loss 不再减少，将 `model.stop_training` 设置为 True 并训练终止。
 
-要监视的量值需要在 `logs` dict 中可用。为此，要在 `model.compile()` 中设置 loss 或 metrics。
+要监视的 metric 值需要在 `logs` dict 中可用。为此，要在 `model.compile()` 中设置 loss 或 metrics。
 
 ## 参数
 
