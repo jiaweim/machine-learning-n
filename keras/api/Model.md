@@ -6,6 +6,7 @@
   - [属性](#属性)
   - [方法](#方法)
     - [get_layer](#get_layer)
+    - [to_yaml](#to_yaml)
   - [参考](#参考)
 
 2022-03-09, 21:59
@@ -134,6 +135,17 @@ get_layer(
 
 如果同时提供 `name` 和 `index`，则 `index` 优先。layer 基于水平图遍历（bottom-up）进行索引。
 
+### to_yaml
+
+```python
+to_yaml(
+    **kwargs
+)
+```
+
+返回包含网络配置的 yaml 字符串。
+
+> **!NOTE**：从 TF 2.6 开始不支持该方法，调用抛出 `RuntimeError`。
 
 ## 参考
 

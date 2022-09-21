@@ -1,14 +1,14 @@
-# 通过继承创建 Layer 和 Model
+# 通过继承定义 Layer 和 Model
 
-- [通过继承创建 Layer 和 Model](#通过继承创建-layer-和-model)
+- [通过继承定义 Layer 和 Model](#通过继承定义-layer-和-model)
   - [1. 设置](#1-设置)
-  - [2. Layer：权重和计算的组合](#2-layer权重和计算的组合)
+  - [2. Layer：权重和计算的结合](#2-layer权重和计算的结合)
   - [3. 不可训练权重](#3-不可训练权重)
-  - [4. 将 weight 的创建推迟到输入 shape 已知](#4-将-weight-的创建推迟到输入-shape-已知)
-  - [5. Layer 可递归组合](#5-layer-可递归组合)
+  - [4. 推迟 weight 的创建到输入 shape 已知](#4-推迟-weight-的创建到输入-shape-已知)
+  - [5. Layer 的递归组合](#5-layer-的递归组合)
   - [6. add_loss](#6-add_loss)
   - [7. add_metric](#7-add_metric)
-  - [8. 启用 layer 序列化](#8-启用-layer-序列化)
+  - [8. layer 序列化](#8-layer-序列化)
   - [9. call() 方法的 training 参数](#9-call-方法的-training-参数)
   - [10. call() 方法的 mask 参数](#10-call-方法的-mask-参数)
   - [11. Model 类](#11-model-类)
@@ -16,7 +16,7 @@
   - [13. 函数 API](#13-函数-api)
   - [14. 参考](#14-参考)
 
-Last updated: 2022-07-06, 16:11
+Last updated: 2022-09-21, 11:02
 @author Jiawei Mao
 ****
 
@@ -27,11 +27,11 @@ import tensorflow as tf
 from tensorflow import keras
 ```
 
-## 2. Layer：权重和计算的组合
+## 2. Layer：权重和计算的结合
 
-`Layer` 是 Keras 的核心类之一，它封装了状态（layer 权重）和输入到输出的转换（`call` 方法包含 layer 的前向传播）。
+`Layer` 是 Keras 的核心类之一，它封装了状态（layer 权重）和输入到输出的转换过程（`call` 方法包含 layer 的前向传播的计算过程）。
 
-下面是一个全连接层，变量 `w` 和 `b` 是其状态：
+下面创建一个全连接层，变量 `w` 和 `b` 是其状态（权重）：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -52,7 +52,7 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-layer 是可调用对象，可以像使用 Python 函数一样调用：
+`Layer` 是可调用对象，可以像使用 Python 函数一样调用：
 
 ```python
 x = tf.ones((2, 2))
@@ -67,14 +67,13 @@ tf.Tensor(
  [ 0.01460802 -0.02662525  0.07070637 -0.01873659]], shape=(2, 4), dtype=float32)
 ```
 
-> **[!NOTE]**
-> 将 `w` 和 `b` 设置为 layer 属性后（`self.w = tf.Variable(...)`），layer 会自动跟踪权重。
+> **[!NOTE]** 将 `w` 和 `b` 设置为 layer 属性后（`self.w = tf.Variable(...)`），layer 会自动跟踪权重。
 
 ```python
 assert linear_layer.weights == [linear_layer.w, linear_layer.b]
 ```
 
-也可以使用便捷方法 `add_weight()` 添加权重：
+也可以使用 `add_weight()` 方法显式添加权重：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -95,7 +94,7 @@ y = linear_layer(x)
 print(y)
 ```
 
-```bash
+```txt
 tf.Tensor(
 [[-0.02559814  0.07031661 -0.07307922 -0.00163199]
  [-0.02559814  0.07031661 -0.07307922 -0.00163199]], shape=(2, 4), dtype=float32)
@@ -105,9 +104,9 @@ tf.Tensor(
 
 ## 3. 不可训练权重
 
-除了可训练权重，layer 可以包含 non-trainable 权重。在训练时，反向传播不更新 non-trainable 权重的值。
+除了可训练权重，layer 还可以包含 non-trainable 权重。在训练时，反向传播不更新 non-trainable 权重的值。
 
-添加 non-trainable 权重的方法：
+设置 `trainable=False` 来添加 non-trainable 权重：
 
 ```python
 class ComputeSum(keras.layers.Layer):
@@ -118,7 +117,6 @@ class ComputeSum(keras.layers.Layer):
     def call(self, inputs):
         self.total.assign_add(tf.reduce_sum(inputs, axis=0))
         return self.total
-
 
 x = tf.ones((2, 2))
 my_sum = ComputeSum(2)
@@ -138,7 +136,6 @@ print(y.numpy())
 ```python
 print("weights:", len(my_sum.weights))
 print("non-trainable weights:", len(my_sum.non_trainable_weights))
-
 print("trainable_weights:", my_sum.trainable_weights)
 ```
 
@@ -148,9 +145,9 @@ non-trainable weights: 1
 trainable_weights: []
 ```
 
-## 4. 将 weight 的创建推迟到输入 shape 已知
+## 4. 推迟 weight 的创建到输入 shape 已知
 
-上面的 `Linear` 层在 `__init__()` 中根据参数 `input_dim` 计算权重 `w` 和 `b` 的 shape:
+上面的 `Linear` layer 在 `__init__()` 中根据参数 `input_dim` 计算权重 `w` 和 `b` 的 shape:
 
 ```python
 class Linear(keras.layers.Layer):
@@ -165,7 +162,7 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-但是很多时候，事先不知道输入的大小，因此希望能在知道 shape 后再 lazily 创建 weights。在 Keras 中，通过在 layer 的 `build(self, inputs_shape)` 方法中创建 weights 可以推迟 weight 的创建。如下：
+然而很多时候，我们事先并不知道输入 shape，因此最好能在知道输入 shape 后再创建 weights。在 Keras 中，通过在 layer 的 `build(self, inputs_shape)` 方法中创建 weights 实现该功能。如下：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -187,7 +184,7 @@ class Linear(keras.layers.Layer):
         return tf.matmul(inputs, self.w) + self.b
 ```
 
-layer 的 `__call__()` 方法在第一次调用时会自动运行 `build` 方法。lazy 初始化的 layer，使用更容易：
+layer 的 `__call__()` 方法在第一次调用时会自动运行 `build` 方法。在创建 layer 时不需要提供 shape，使用更容易：
 
 ```python
 # 实例化时，不知道输入 shape
@@ -197,14 +194,15 @@ linear_layer = Linear(32)
 y = linear_layer(x)
 ```
 
-如上所示，单独实现 `build()` 可以很好地将权重的创建与使用分开。然而，对一些高级自定义 layer，将状态的创建和计算分开几乎不可能。layer 创建者依然可以将权重的创建推迟到第一次调用 `__call__()`
-，但是要注意以后的调用使用相同的权重。另外，`__call__()` 第一次执行很可能在 `tf.function` 中，因此 `__call__()` 中创建任何变量都应该放在 `tf.init_scope` 中。
+如上所示，单独实现 `build()` 可以很好地将权重的创建与使用分开。
 
-## 5. Layer 可递归组合
+然而，对一些复杂的自定义 layer，将状态的创建和计算分开几乎不可能。layer 创建者依然可以将权重的创建推迟到第一次调用 `__call__()`，但是要注意以后的调用使用相同的权重。另外，`__call__()` 第一次执行很可能在 `tf.function` 中，因此 `__call__()` 中创建任何变量都应该放在 `tf.init_scope` 中。
+
+## 5. Layer 的递归组合
 
 如果将一个 layer 实例作为另一个 layer 的属性，则外层 layer 会自动跟踪内层 layer 的权重。
 
-建议在 `__init__()` 中创建 sublayers，权重则由第一次调用 `__call__()` 时触发构建。
+建议在 `__init__()` 中创建 sublayers，权重的创建则在第一次调用 `__call__()` 时触发。
 
 ```python
 class MLPBlock(keras.layers.Layer):
@@ -235,7 +233,7 @@ trainable weights: 6
 
 ## 6. add_loss
 
-在 `call()` 方法中可以创建在训练循环时要使用的损失张量，通过调用 `self.add_loss(value)` 实现：
+可以在 `call()` 方法中创建在训练循环中要使用的 loss 张量，通过调用 `self.add_loss(value)` 实现：
 
 ```python
 # 创建输出正则化损失的 layer
@@ -290,7 +288,7 @@ layer = OuterLayerWithKernelRegularizer()
 _ = layer(tf.zeros((1, 1)))
 
 # 等于 `1e-3 * sum(layer.dense.kernel ** 2)`,
-# created by the `kernel_regularizer` above.
+# 由上面的 `kernel_regularizer` 创建
 print(layer.losses)
 ```
 
@@ -301,17 +299,17 @@ print(layer.losses)
 在编写训练循环时，应该考虑这些损失，例如：
 
 ```python
-# 实例化优化器
+# 实例化 optimizer
 optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
 loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-# 迭代数据集的批次
+# 迭代 batch
 for x_batch_train, y_batch_train in train_dataset:
     with tf.GradientTape() as tape:
-        logits = layer(x_batch_train)  # 当前批次数据的 Logits
-        # 当前批次的损失值
+        logits = layer(x_batch_train)  # 当前 batch 的 Logits
+        # 当前 batch 的 loss
         loss_value = loss_fn(y_batch_train, logits)
-        # 加上前向传播的其它损失
+        # 加上前向传播的其它 loss
         loss_value += sum(model.losses)
 
     grads = tape.gradient(loss_value, model.trainable_weights)
@@ -332,7 +330,7 @@ model.compile(optimizer="adam", loss="mse")
 model.fit(np.random.random((2, 3)), np.random.random((2, 3)))
 
 # 在 `compile` 中也可以不设置损失
-# 因此在前向传播中使用 `add_loss` 添加了损失，即已有需要需最小化的损失
+# 因为在前向传播中使用 `add_loss` 添加了损失，即已有待最小化的 loss
 model.compile(optimizer="adam")
 model.fit(np.random.random((2, 3)), np.random.random((2, 3)))
 ```
@@ -345,9 +343,9 @@ model.fit(np.random.random((2, 3)), np.random.random((2, 3)))
 
 ## 7. add_metric
 
-与 `add_loss()` 类似，layer 还有一个 `add_metric()` 方法，可用于追踪训练过程中指标的移动平均值。
+与 `add_loss()` 类似，layer 还有一个 `add_metric()` 方法，可用于追踪训练过程中 metric 的移动平均值。
 
-例如，考虑下面的逻辑端点层，它以预测值和目标值为输入，通过 `add_loss()` 跟踪计算的损失，并通过 `add_metric()` 跟踪计算的精度指标：
+例如，考虑下面的逻辑端点 layer，它以预测值和目标值为输入，通过 `add_loss()` 追踪 loss，并通过 `add_metric()` 追踪精度 metric：
 
 ```python
 class LogisticEndpoint(keras.layers.Layer):
@@ -369,7 +367,7 @@ class LogisticEndpoint(keras.layers.Layer):
         return tf.nn.softmax(logits)
 ```
 
-以这种方式记录的指标可以用 `layer.metrics` 查询：
+以这种方式记录的 metric 可以用 `layer.metrics` 查询：
 
 ```python
 layer = LogisticEndpoint()
@@ -387,7 +385,7 @@ layer.metrics: [<keras.metrics.metrics.BinaryAccuracy object at 0x0000018F8F2EAF
 current accuracy value: 1.0
 ```
 
-与 `add_loss()` 一样，`fit()` 会自动记录这些指标：
+与 `add_loss()` 一样，`fit()` 会自动记录这些 metric：
 
 ```python
 inputs = keras.Input(shape=(3,), name="inputs")
@@ -410,9 +408,9 @@ model.fit(data)
 <keras.callbacks.History at 0x18f8ff26220>
 ```
 
-## 8. 启用 layer 序列化
+## 8. layer 序列化
 
-如果需要将自定义 layer 作为函数 API 的一部分序列化，可以实现 `get_config()` 方法：
+如果需要将自定义 layer 作为函数 API 的一部分序列化，需要实现 `get_config()` 方法：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -448,7 +446,7 @@ new_layer = Linear.from_config(config)
 {'units': 64}
 ```
 
-基类 `Layer` 的 `__init__()` 方法包含一些关键字参数，如 `name` 和 `dtype`。最好在 `__init__()` 中将这些参数传递给父类：
+基类 `Layer` 的 `__init__()` 方法包含一些关键字参数，如 `name` 和 `dtype`。最好在 `__init__()` 中将这些参数 `**kwargs` 传递给父类：
 
 ```python
 class Linear(keras.layers.Layer):
@@ -485,7 +483,7 @@ new_layer = Linear.from_config(config)
 {'name': 'linear_7', 'trainable': True, 'dtype': 'float32', 'units': 64}
 ```
 
-如果从 config 反序列化 layer 需要更大的灵活性，则可以覆盖 `from_config()` 类方法。下面是 `from_config()` 的基本实现：
+如果需要自定义从 config 反序列化 layer 的行为，则可以覆盖 `from_config()` 类方法。下面是 `from_config()` 的基本实现：
 
 ```python
 def from_config(cls, config):
@@ -494,7 +492,7 @@ def from_config(cls, config):
 
 ## 9. call() 方法的 training 参数
 
-某些 layeer，特别是 `BatchNormalization` 和 `Dropout` layer，在训练和推理过程具有不同的行为。对这类 layer，标准做法是在 `call()` 发方法中公开 `training` 参数：
+某些 layer，特别是 `BatchNormalization` 和 `Dropout`，在训练和推理时的行为不同。对这类 layer，标准做法是在 `call()` 发方法中公开 `training` 参数：
 
 ```python
 class CustomDropout(keras.layers.Layer):
@@ -510,27 +508,23 @@ class CustomDropout(keras.layers.Layer):
 
 ## 10. call() 方法的 mask 参数
 
-`mask` 是 `call()` 支持的另一个参数。
+在所有的 Keras RNN layer 中都可以找到 `mask` 参数。`mask` 是一个布尔张量，输入的每个时间步对应一个布尔值，用于在处理时间序列数据时跳过输入中某些时间步。
 
-在所有的 Keras RNN layer 中都可以找到该参数。`mask` 是一个布尔张量，输入中每个时间步对应一个布尔值，用于在处理时间序列数据时跳过输入中某些时间步。
-
-对支持 `mask` 的 layer，Keras 会自动将上一层生成的 mask 以正确的参数传递给 `__call__()` 方法。生成 mask 的 layer 包括配置 `mask_zero=True` 的 `Embedding` layer 和 `Masking` layer。
+对支持 `mask` 的 layer，Keras 会自动将上一层生成的 mask 以正确的参数形式传递给 `__call__()` 方法。生成 mask 的 layer 包括配置 `mask_zero=True` 的 `Embedding` layer 和 `Masking` layer。
 
 ## 11. Model 类
 
-通常，使用 `Layer` 类定义内部计算；使用 `Model` 类定义外部模型，即需要训练的对象。
+通常使用 `Layer` 类定义内部计算；使用 `Model` 类定义外部模型，即需要训练的对象。
 
 例如，在 ResNet50 模型中，包含多个继承 `Layer` 的 ResNet block，以及包含整个 ResNet50 网络的单个 `Model`。
 
-`Model` 类与 `Layer` 具有相同的 API，具有以下差别：
+`Model` 类与 `Layer` 具有相同的 API，包含如下差别：
 
-- 包含内置的训练、评估和预测循环，即 `model.fit()`, `model.evaluate()` 和 `model.predict()`。
+- 包含内置的训练、评估和推理循环，即 `model.fit()`, `model.evaluate()` 和 `model.predict()`。
 - 通过 `model.layers` 属性，公开其内部 layers
 - 包含保存和序列化 API `save()`, `save_weights()`
 
-实际上，`Layer` 类对应于文献中的 "layer"，如卷积层、循环层等，或者块（block），如 ResNet block, Inception block。
-
-而 `Model` 类对应文献中的 "model"，即深度学习模型，或深度神经网络。
+实际上，`Layer` 类对应于文献中的 "layer"，如卷积层、循环层等，或者块（block），如 ResNet block, Inception block；而 `Model` 类对应文献中的 "model"，即深度学习模型，或深度神经网络。
 
 那么是使用 `Layer` 还是 `Model` 类呢？就看是否需要调用 `fit()`，是否需要 `save()`，如果是，就选择 `Model`；如果否，比如你定义的类是某个更大系统的一部分，或者你准备自己编写循环和保存代码，则使用 `Layer`。
 
@@ -538,7 +532,6 @@ class CustomDropout(keras.layers.Layer):
 
 ```python
 class ResNet(tf.keras.Model):
-
     def __init__(self, num_classes=1000):
         super(ResNet, self).__init__()
         self.block_1 = ResNetBlock()
@@ -565,8 +558,8 @@ resnet.save(filepath)
 
 - `Layer` 封装了状态（在 `__init__()` 或 `build()` 中创建）和计算（在 `call()` 中定义）
 - layer 可以递归嵌套，以创建更大的计算 block
-- layer 可以通过 `add_loss()` 和 `add_metric()` 记录损失值（通常是正则化损失）和指标
-- `Model` 为外层容器，是需要训练的对象。`Model` 和 `Layer` 类似，但是增加了训练和序列化工具。
+- layer 可以通过 `add_loss()` 和 `add_metric()` 记录 loss（通常是正则化损失）和 metric
+- `Model` 为外层容器，是需要训练的对象。`Model` 和 `Layer` 类似，但是增加了训练和序列化功能。
 
 现在我们将所有这些组合在一起，创建一个端到端的示例，实现一个变分自动编码器（Variational AutoEncoder, VAE），并在 MNIST 数据集上训练。
 
@@ -575,10 +568,8 @@ VAE 继承 `Model` 类，由 `Layer` 的子类嵌套组成。它包含正则化�
 ```python
 from tensorflow.keras import layers
 
-
 class Sampling(layers.Layer):
     """Uses (z_mean, z_log_var) to sample z, the vector encoding a digit."""
-
     def call(self, inputs):
         z_mean, z_log_var = inputs
         batch = tf.shape(z_mean)[0]
@@ -589,7 +580,6 @@ class Sampling(layers.Layer):
 
 class Encoder(layers.Layer):
     """Maps MNIST digits to a triplet (z_mean, z_log_var, z)."""
-
     def __init__(self, latent_dim=32, intermediate_dim=64, name="encoder", **kwargs):
         super(Encoder, self).__init__(name=name, **kwargs)
         self.dense_proj = layers.Dense(intermediate_dim, activation="relu")
@@ -607,7 +597,6 @@ class Encoder(layers.Layer):
 
 class Decoder(layers.Layer):
     """Converts z, the encoded digit vector, back into a readable digit."""
-
     def __init__(self, original_dim, intermediate_dim=64, name="decoder", **kwargs):
         super(Decoder, self).__init__(name=name, **kwargs)
         self.dense_proj = layers.Dense(intermediate_dim, activation="relu")
@@ -620,7 +609,6 @@ class Decoder(layers.Layer):
 
 class VariationalAutoEncoder(keras.Model):
     """Combines the encoder and decoder into an end-to-end model for training."""
-
     def __init__(
             self,
             original_dim,
@@ -731,7 +719,7 @@ Epoch 2/2
 
 ## 13. 函数 API
 
-这个示例是面向对象的代码风格，也可以使用函数 API 构建模型。最重要的是，这两种风格的 API 不是互斥的，也可以混合搭配使用。
+上面的示例是面向对象的代码风格，也可以使用函数 API 构建模型。最重要的是，这两种风格的 API 不是互斥的，它们可以混合搭配使用。
 
 例如，下面的函数 API 示例重用上面定义的 `Sampling` layer：
 

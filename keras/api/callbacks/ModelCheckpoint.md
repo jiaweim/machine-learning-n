@@ -22,13 +22,13 @@ tf.keras.callbacks.ModelCheckpoint(
 
 以指定频率保存 Keras 模型或权重。
 
-`ModelCheckpoint` callback 通过 `model.fit()` 与训练结合使用，以指定时间间隔保存模型或权重为 checkpoint 文件，以便稍后可以加载模型或权重，从而从保存的状态继续训练。
+`ModelCheckpoint` callback 通过 `model.fit()` 与训练结合使用，以指定时间间隔将模型或权重保存为 checkpoint 文件，以便后续可以重新加载模型或权重，以从保存的状态继续训练。
 
 该 callback 提供了如下选项：
 
 - 是只保留到目前为止**性能最佳**的模型，还是不管性能，每个 epoch 结束时都保存模型；
 - **最佳的定义**：要监控的指标，以及应该最大化还是最小化；
-- 保存的频率，目前支持在每个 epoch 结束时保存，或指定训练 batches 后保存；
+- 保存的频率，目前支持在每个 epoch 结束时保存，或指定训练多少个 batches 后保存；
 - 是只保存权重，还是保存整个模型。
 
 > **[!NOTE]**
@@ -74,7 +74,12 @@ True 表示只保存模型的权重 `model.save_weights(filepath)`，否则保�
 
 **save_freq**
 
-'epoch' 或 integer。当使用 `'epoch'` 时，callback 在每个 epoch 后保存模型。当使用 integer，则在这些 batch 后保存模型。如果 `Model` 使用 `steps_per_execution=N` 选项进行编译，则每 Nth batch 检查保存条件。注意，如果保存和 epoch 没对齐，则监控指标可能不可靠（它可能只反应一个 batch，因为指标在每个 epoch 结束会重置）。默认 'epoch'。
+'epoch' 或 integer。
+
+- 使用 `'epoch'` 时，callback 在每个 epoch 结束时保存模型。
+- 使用 integer，则在这些 batch 后保存模型。
+
+如果 `Model` 使用 `steps_per_execution=N` 选项进行编译，则每 Nth batch 检查保存条件。注意，如果保存和 epoch 没对齐，则监控指标可能不可靠（它可能只反应一个 batch，因为指标在每个 epoch 结束会重置）。默认 'epoch'。
 
 **options**
 

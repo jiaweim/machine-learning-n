@@ -28,7 +28,7 @@ tf.keras.callbacks.ReduceLROnPlateau(
 
 **monitor**
 
-要监视的量值。
+要监视的 metric。
 
 **factor**
 
