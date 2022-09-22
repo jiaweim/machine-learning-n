@@ -16,9 +16,9 @@
   - [11. 稀疏张量](#11-稀疏张量)
   - [12. 参考](#12-参考)
 
-Last updated: 2022-07-07, 16:55
+Last updated: 2022-09-22, 10:17
 @author Jiawei Mao
-****
+*****
 
 ## 1. 简介
 
@@ -40,11 +40,11 @@ rank_0_tensor = tf.constant(4) # 默认为 int32 类型
 print(rank_0_tensor)
 ```
 
-```sh
+```txt
 tf.Tensor(4, shape=(), dtype=int32)
 ```
 
-- 向量或1-阶（rank-1）张量，类似列表，包含一个轴
+- 向量或 1-阶（rank-1）张量，类似列表，包含一个轴
 
 ```python
 rank_1_tensor = tf.constant([2.0, 3.0, 4.0]) # float 张量
@@ -55,10 +55,10 @@ print(rank_1_tensor)
 tf.Tensor([2. 3. 4.], shape=(3,), dtype=float32)
 ```
 
-- 矩阵或2-阶（rank-2）张量，包含2个轴
+- 矩阵或 2-阶（rank-2）张量，包含2个轴
 
 ```python
-# 使用 dtype 参数显式指定类型
+# 使用 dtype 参数显式指定数据类型
 rank_2_tensor = tf.constant([[1, 2],
                              [3, 4],
                              [5, 6]], dtype=tf.float16)
@@ -76,7 +76,7 @@ tf.Tensor(
 
 ![](images/2021-12-21-10-13-58.png)
 
-轴，即维度，张量可以有任意多个轴，下面是一个三阶张量：
+轴，即维度，张量可以有任意多个轴。例如，下面是一个三阶张量：
 
 ```python
 rank_3_tensor = tf.constant([
@@ -101,11 +101,11 @@ tf.Tensor(
   [25 26 27 28 29]]], shape=(3, 2, 5), dtype=int32)
 ```
 
-对高阶张量，可视化方法有多种。例如，对 shape 为 [3, 2, 5] 的 3 阶张量，可以按如下方式可视化：
+对高阶张量，可视化方法有多种。例如，对 shape 为 [3, 2, 5] 的 3 阶张量，可以按如下三种方式可视化：
 
 ![](images/2021-12-21-10-43-50.png)
 
-可以用 `np.array` 或 `tensor.numpy` 方法将张量转换为 NumPy 数组：
+用 `np.array` 或 `tensor.numpy` 方法可以将张量转换为 NumPy 数组：
 
 ```python
 >>> np.array(rank_2_tensor)
@@ -128,10 +128,10 @@ array([[1., 2.],
 
 `tf.Tensor` 类要求张量是矩形的，即沿每个轴，每个元素大小相同。不过也有一些特殊的张量类型，可以处理不同 shape：
 
-- [Ragged tensor](#ragged-tensor)
-- [Sparse tensor](#sparse-tensor)
+- [Ragged tensor](#9-参差张量)
+- [Sparse tensor](#11-稀疏张量)
 
-可以对张量进行基本的数学运算，例如：
+可以对张量进行基本的**数学运算**，例如：
 
 ```python
 a = tf.constant([[1, 2],
@@ -139,8 +139,8 @@ a = tf.constant([[1, 2],
 b = tf.constant([[1, 1],
                  [1, 1]])  # 也可以用 `tf.ones([2,2])`
 
-print(tf.add(a, b), "\n") # 逐元素加
-print(tf.multiply(a, b), "\n") # 逐元素乘
+print(tf.add(a, b), "\n") # 元素加
+print(tf.multiply(a, b), "\n") # 元素乘
 print(tf.matmul(a, b), "\n") # 矩阵乘
 ```
 
@@ -159,8 +159,8 @@ tf.Tensor(
 ```
 
 ```python
-print(a + b, "\n")  # 逐元素相加
-print(a * b, "\n")  # 逐元素相乘
+print(a + b, "\n")  # 元素加
+print(a * b, "\n")  # 元素乘
 print(a @ b, "\n")  # 矩阵乘
 ```
 
@@ -186,6 +186,32 @@ tf.Tensor(
  [9.9987662e-01 1.2339458e-04]], shape=(2, 2), dtype=float32)
 ```
 
+> **NOTE:** 通常需要 `Tensor` 参数的 TF 函数，也支持能用 `tf.convert_to_tensor` 转换为 `Tensor` 的类型，示例如下。
+
+```python
+tf.convert_to_tensor([1, 2, 3])
+```
+
+```txt
+<tf.Tensor: shape=(3,), dtype=int32, numpy=array([1, 2, 3])>
+```
+
+```python
+tf.reduce_max([1, 2, 3])
+```
+
+```txt
+<tf.Tensor: shape=(), dtype=int32, numpy=3>
+```
+
+```python
+tf.reduce_max(np.array([1, 2, 3]))
+```
+
+```txt
+<tf.Tensor: shape=(), dtype=int32, numpy=3>
+```
+
 ## 3. shape
 
 张量具有形状。首先介绍几个基本概念：
@@ -199,13 +225,13 @@ tf.Tensor(
 
 > 不同 rank 张量的可视化表示
 
-Tensor 和 [tf.TensorShape](../../api/tf/TensorShape.md) 对象包含访问这些属性的方法。
+Tensor 和 [tf.TensorShape](https://www.tensorflow.org/api_docs/python/tf/TensorShape) 包含访问这些属性的方法。
 
 ```python
 rank_4_tensor = tf.zeros([3, 2, 4, 5])
 ```
 
-rank-4 张量，shape `[3, 2, 4, 5]`，其属性图示如下：
+这是个 4 阶张量，shape `[3, 2, 4, 5]`，其属性如下：
 
 ![](images/2021-12-21-12-22-57.png)
 
@@ -227,7 +253,25 @@ Elements along the last axis of tensor: 5
 Total number of elements (3*2*4*5):  120
 ```
 
-轴一般按从全局到局部排序：首先是 batch 轴，然后是空间维度轴（width, height），最后是 feature 轴。这样可以保证 feature 向量在内存中是连续存储的。
+请注意，`Tensor.ndim` 和 `Tensor.shape` 属性返回的不是 `Tensor` 类型。如果需要 `Tensor` 类型，请使用 `tf.rank` 或 `tf.shape` 函数。这两者的区别很微妙，不过在构建计算图时很重要。
+
+```python
+tf.rank(rank_4_tensor)
+```
+
+```bash
+<tf.Tensor: shape=(), dtype=int32, numpy=4>
+```
+
+```python
+tf.shape(rank_4_tensor)
+```
+
+```txt
+<tf.Tensor: shape=(4,), dtype=int32, numpy=array([3, 2, 4, 5])>
+```
+
+轴一般按从全局到局部排序：依次为 batch 维度、空间维度（width, height），feature 维度。这样可以保证 feature 向量在内存中是连续存储的。
 
 ![](images/2021-12-21-12-29-54.png)
 
@@ -235,7 +279,7 @@ Total number of elements (3*2*4*5):  120
 
 ### 4.1 单轴索引
 
-TensorFlow 的索引规则遵循标准 Python 索引规则，如下：
+TensorFlow 的索引遵循标准 Python 索引规则，如下：
 
 - 以 0 开始；
 - 负数索引从末尾开始倒数；
@@ -250,7 +294,7 @@ print(rank_1_tensor.numpy())
 [ 0  1  1  2  3  5  8 13 21 34]
 ```
 
-用标量索引会移除轴，返回标量：
+用标量索引会减少维度，返回标量：
 
 ```python
 print("First:", rank_1_tensor[0].numpy())
@@ -264,7 +308,7 @@ Second: 1
 Last: 34
 ```
 
-使用 `:` 切片则保留轴：
+使用 `:` 切片则保留维度：
 
 ```python
 print("Everything:", rank_1_tensor[:].numpy())
@@ -275,7 +319,7 @@ print("Every other item:", rank_1_tensor[::2].numpy())
 print("Reversed:", rank_1_tensor[::-1].numpy())
 ```
 
-```sh
+```txt
 Everything: [ 0  1  1  2  3  5  8 13 21 34]
 Before 4: [0 1 1 2]
 From 4 to the end: [ 3  5  8 13 21 34]
@@ -286,7 +330,7 @@ Reversed: [34 21 13  8  5  3  2  1  1  0]
 
 ### 4.2 多轴索引
 
-高阶张量使用多个索引值进行索引。例如：
+高阶张量需要多个索引值进行索引。例如：
 
 ```python
 print(rank_2_tensor.numpy())
@@ -348,7 +392,7 @@ tf.Tensor(
 
 此处可以认为 batch=1, width = 3, height=2，features=5。
 
-关于索引和切片的更多内容请参考 [张量切片指南](../tensorflow_in_depth/tensor_slicing.md)。
+关于索引和切片的更多内容请参考[张量切片指南](https://tensorflow.org/guide/tensor_slicing)。
 
 ## 5. shape 操作
 
@@ -407,7 +451,7 @@ tf.Tensor(
  24 25 26 27 28 29], shape=(30,), dtype=int32)
 ```
 
-`tf.reshape` 一般只用于合并或拆分相邻的轴。
+`tf.reshape` 一般只用于合并或拆分相邻的维度。
 
 对这个 3x2x5 张量，reshape 为 (3x2)x5 或 3x(2x5) 都是合理的，这种邻轴操作不会混淆切片：
 
@@ -478,16 +522,16 @@ InvalidArgumentError: Input to reshape is a tensor with 30 values, but the reque
 
 在 TensorFlow 中可能碰到不完全指定的形状。要么是 shape 中包含一个 `None`（对应的轴长未知），要么整个 shape 为 `None`（张量的秩未知）。
 
-除了 [tf.RaggedTensor](../../api/tf/RaggedTensor.md)，这样的 shape 只会出现在 TensorFlow 的符号化 graph 构建 API 中：
+除了 [tf.RaggedTensor](#9-参差张量)，这样的 shape 只会出现在 TensorFlow 的符号化 graph 构建 API 中：
 
-- [tf.function](../function.md)
-- [keras 函数 API](../keras/functional.md)
+- [tf.function](https://www.tensorflow.org/guide/function)
+- [keras 函数 API](https://www.tensorflow.org/guide/keras/functional)
 
 ## 6. dtype
 
-使用 `Tensor.dtype` 属性查看 [tf.Tensor](../../api/tf/Tensor.md) 的数据类型。
+使用 `Tensor.dtype` 属性查看 `tf.Tensor` 的数据类型。
 
-在使用 Python 对象创建 [tf.Tensor](../../api/tf/Tensor.md) 时可以指定数据类型。如果不指定，TensorFlow 会根据数据自动推测类型：
+在使用 Python 对象创建 `tf.Tensor` 时可以指定数据类型。如果不指定，TensorFlow 会根据数据自动推测类型：
 
 - 将 Python 整数转换为 `tf.int32`；
 - 将 Python 浮点数转换为 `tf.float32`；
@@ -509,7 +553,7 @@ tf.Tensor([2 3 4], shape=(3,), dtype=uint8)
 
 ## 7. 广播
 
-广播（broadcasting）是从 NumPy 借用的概念。简而言之，在特定条件下，对小张量和大张量进行组合操作时，小张量会自动拉伸以适应大张量的 shape，该行为称为广播。
+广播（broadcasting）是从 NumPy 借用的概念。简而言之，在特定条件下，对低维张量和高维张量进行组合操作时，低维张量会自动拉伸到高维张量的 shape，该行为称为**广播**。
 
 最简单的广播是将一个标量和张量进行加法或乘法。此时，标量被广播为和张量相同的 shape:
 
@@ -531,7 +575,7 @@ tf.Tensor([2 4 6], shape=(3,), dtype=int32)
 
 同样，长度为 **1** 的轴可以拉伸以匹配其它参数。在同一个运算中，进行运算的两个张量都可以拉伸。
 
-例如，3x1 矩阵和 1x4 矩阵逐元素相乘可以获得 3x4 矩阵。
+例如，3x1 矩阵和 1x4 矩阵进行元素乘可以获得 3x4 矩阵。
 
 ```python
 x = tf.reshape(x,[3,1]) # (3, 1) 广播为 (3, 4)
@@ -580,7 +624,7 @@ tf.Tensor(
 
 广播操作大多时候省时省内存，因为广播实际上没有在内存中扩展张量。
 
-可以使用 `tf.broadcast_to` 查看广播效果：
+可以使用 [tf.broadcast_to](https://www.tensorflow.org/api_docs/python/tf/broadcast_to) 查看广播效果：
 
 ```python
 >>> print(tf.broadcast_to(tf.constant([1, 2, 3]), [3, 3]))
@@ -590,21 +634,21 @@ tf.Tensor(
  [1 2 3]], shape=(3, 3), dtype=int32)
 ```
 
-和前面的数学运算不同，使用 [broadcast_to](../../api/tf/broadcast_to.md) 并没有节省内存，而是真正在内存中扩展了张量。
+和前面的数学运算不同，使用 `broadcast_to` 并没有节省内存，而是真正在内存中扩展了张量。
 
 ## 8. tf.convert_to_tensor
 
-大多数操作，如 `tf.matmul` 和 `tf.reshape` 接受 [tf.Tensor](../../api/tf/Tensor.md) 类型参数。不过，从前面的例子可以看出，这些操作也接受 Python 对象。
+大多数操作，如 `tf.matmul` 和 `tf.reshape` 接受 `tf.Tensor` 类型参数。不过，从前面的例子可以看出，这些操作也接受 Python 对象。
 
-大多时候，TensorFlow 都会使用 `convert_to_tensor` 将非张量参数转换为张量。有一个转换注册表，大多数对象，如 NumPy 的 `ndarray`，`TensorShape`，Python 列表，以及 `tf.Variable` 都会自动转换。
+大多时候，TensorFlow 使用 `convert_to_tensor` 将非张量参数转换为张量。TF 有一个转换注册表，大多数对象，如 NumPy 的 `ndarray`，`TensorShape`，Python 列表，以及 `tf.Variable` 都会自动转换。
 
-如果希望自定义类型能自动转换为张量，请参考 [tf.register_tensor_conversion_function](../../api/tf/register_tensor_conversion_function.md)。
+如果希望自定义类型能自动转换为张量，请参考 [tf.register_tensor_conversion_function](https://www.tensorflow.org/api_docs/python/tf/register_tensor_conversion_function)。
 
 ## 9. 参差张量
 
-某些轴的元素数量不一致的张量称为**参差张量**（ragged），使用 `tf.ragged.RaggedTensor` 创建这类张量。
+某些维度的元素数量不一致的张量称为**参差张量**（ragged），使用 `tf.ragged.RaggedTensor` 创建这类张量。
 
-例如，下面的数据无法使用规则张量表示：
+例如，下面的数据无法使用常规张量表示：
 
 ![](images/2021-12-21-15-27-31.png)
 
@@ -624,7 +668,7 @@ except Exception as e:
 ValueError: Can't convert non-rectangular Python sequence to Tensor.
 ```
 
-此时应该使用 `tf.ragged.constant` 创建 `tf.RaggedTensor`：
+但可以使用 `tf.ragged.constant` 创建 `tf.RaggedTensor`：
 
 ```python
 ragged_tensor = tf.ragged.constant(ragged_list)
@@ -635,7 +679,7 @@ print(ragged_tensor)
 <tf.RaggedTensor [[0, 1, 2, 3], [4, 5], [6, 7, 8], [9]]>
 ```
 
-`tf.RaggedTensor` 的 shape 部分轴的长度未知：
+`tf.RaggedTensor` 的 shape 部分维度的长度未知：
 
 ```python
 >>> print(ragged_tensor.shape)
@@ -644,9 +688,9 @@ print(ragged_tensor)
 
 ## 10. 字符串张量
 
-`tf.string` 是一个 `dtype`，换句话说，张量中可以包含字符串数据。
+`tf.string` 是一个 `dtype`，换句话说，张量可以包含字符串数据。
 
-TensorFlow 中字符串具有原子性，不能像在 Python 中那样索引，字符串的长度也不算作轴长。[tf.strings](https://www.tensorflow.org/api_docs/python/tf/strings) 中包含操作字符串张量的函数。
+TensorFlow 中字符串具有原子性，即将字符串看作一个整体，不能像在 Python 中那样索引，字符串的长度也不算作维度长。[tf.strings](https://www.tensorflow.org/api_docs/python/tf/strings) 中包含操作字符串张量的函数。
 
 下面是一个字符串标量的张量：
 
@@ -672,9 +716,9 @@ print(tensor_of_strings) # shape (3,)，不包括字符串长度
 tf.Tensor([b'Gray wolf' b'Quick brown fox' b'Lazy dog'], shape=(3,), dtype=string)
 ```
 
-上面输出中，前缀 `b` 表示 `tf.string` dtype 不是 unicode 字符串，而是 byte-string。在 TensorFlow 中使用 Unicode 的详情请参考 [Unicode 教程](../text/unicode.md)。
+上面输出中，前缀 `b` 表示 `tf.string` dtype 不是 unicode 字符串，而是 byte-string。在 TensorFlow 中使用 Unicode 的详情请参考 [Unicode 教程](https://www.tensorflow.org/tutorials/load_data/unicode)。
 
-也可以传入 unicode 字符串，使用 utf-8 编码：
+也可以使用 utf-8 编码传入 unicode 字符串：
 
 ```python
 tf.constant("🥳👍")
@@ -686,7 +730,7 @@ tf.constant("🥳👍")
 
 `tf.strings` 包含一些基本的字符串函数。
 
-- [tf.strings.split](../../api/tf/strings/split.md) 拆分字符串
+- [tf.strings.split](https://www.tensorflow.org/api_docs/python/tf/strings/split) 拆分字符串
 
 ```python
 # 可以用 split 将字符串拆分为一组张量
@@ -717,7 +761,7 @@ print(tf.strings.to_number(tf.strings.split(text, " ")))
 tf.Tensor([  1.  10. 100.], shape=(3,), dtype=float32)
 ```
 
-- 虽然不能直接用 [tf.cast](../../api/tf/cast.md) 将字符串 tensor 转换为数字，但可以先转换为 byte，然后再转换为数字：
+- 虽然不能直接用 [tf.cast](https://www.tensorflow.org/api_docs/python/tf/cast) 将字符串 tensor 转换为数字，但可以先转换为 byte，然后再转换为数字：
 
 ```python
 byte_strings = tf.strings.bytes_split(tf.constant("Duck"))
@@ -755,7 +799,7 @@ dtype `tf.string` 用于所有的 raw byte 数据类型。`tf.io` 模块包含�
 
 ## 11. 稀疏张量
 
-TensorFlow 使用 [tf.sparse.SparseTensor](../../api/tf/sparse/SparseTensor.md) 表示稀疏张量，用于高效存储稀疏数据。
+TensorFlow 使用 [tf.sparse.SparseTensor](https://www.tensorflow.org/api_docs/python/tf/sparse/SparseTensor) 表示稀疏张量，用于高效存储稀疏数据。
 
 例如，创建如下的稀疏张量：
 

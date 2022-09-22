@@ -26,8 +26,6 @@ TensorFlow 支持三种类型的 Tensor:
 
 TensorFlow 支持的 tensor 类型在 `tf.dtypes.DType` 中有详细列表。
 
-
-
 ## 创建 Tensor
 
 ### tf.constant
