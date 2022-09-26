@@ -13,6 +13,13 @@
     - [tf.nn.softmax](#tfnnsoftmax)
     - [assign_sub](#assign_sub)
     - [tf.argmax](#tfargmax)
+  - [预备知识](#预备知识)
+    - [tf.where](#tfwhere)
+    - [np.random.RandomState.rand](#nprandomrandomstaterand)
+    - [np.vstack](#npvstack)
+    - [网格坐标函数](#网格坐标函数)
+    - [神经网络复杂度](#神经网络复杂度)
+    - [学习率](#学习率)
 
 ## 创建张量
 
@@ -408,3 +415,175 @@ test:
 每一列的最大值的索引： tf.Tensor([3 3 1], shape=(3,), dtype=int64)
 每一行的最大值的索引： tf.Tensor([2 2 0 0], shape=(4,), dtype=int64)
 ```
+
+## 预备知识
+
+### tf.where
+
+条件语句真返回A，条件语句假返回B：
+
+```python
+tf.where(条件语句，真返回A，假返回B)
+```
+
+例如：
+
+```python
+import tensorflow as tf
+
+a = tf.constant([1, 2, 3, 1, 1])
+b = tf.constant([0, 1, 3, 4, 5])
+c = tf.where(tf.greater(a, b), a, b)  # 若a>b，返回a对应位置的元素，否则返回b对应位置的元素
+print("c：", c)
+```
+
+```txt
+c： tf.Tensor([1 2 3 4 5], shape=(5,), dtype=int32)
+```
+
+### np.random.RandomState.rand
+
+返回一个[0,1)之间的随机数。
+
+```python
+np.random.RandomState.rand(维度) # #维度为空，返回标量
+```
+
+例如：
+
+```python
+import numpy as np
+
+rdm = np.random.RandomState(seed=1) # seed=常数每次生成随机数相同
+a = rdm.rand() # 返回一个随机标量
+b = rdm.rand(2, 3) # 返回维度为2行3列随机数矩阵
+print("a:", a)
+print("b:", b)
+```
+
+```txt
+a: 0.417022004702574
+b: [[7.20324493e-01 1.14374817e-04 3.02332573e-01]
+ [1.46755891e-01 9.23385948e-02 1.86260211e-01]]
+```
+
+### np.vstack
+
+将两个数组按垂直方向叠加。
+
+```python
+np.vstack(数组1，数组2)
+```
+
+例如：
+
+```python
+import numpy as np
+
+a = np.array([1, 2, 3])
+b = np.array([4, 5, 6])
+c = np.vstack((a, b))
+print("c:\n", c)
+```
+
+```txt
+c:
+ [[1 2 3]
+ [4 5 6]]
+```
+
+### 网格坐标函数
+
+- np.mgrid [起始值，结束值)
+
+若干组维度相同的等差数组。
+
+```python
+np.mgrid[ 起始值:结束值:步长，起始值:结束值:步长, … ]
+```
+
+- x.ravel()
+
+将x变为一维数组，把 `.` 前变量拉直
+
+```python
+x.ravel()
+```
+
+- np.c_[]
+
+使返回的间隔数值点配对.
+
+```python
+np.c_[ 数组1，数组2， … ] 
+```
+
+例如：
+
+```python
+import numpy as np
+
+# 生成等间隔数值点
+# x 从 1 开始，3 结束，步长 1；y 从 2 开始，4 结束，步长 0.5
+# 为了保持 x 和 y 的维度相同，都转换为 2 行 4 列
+x, y = np.mgrid[1:3:1, 2:4:0.5] 
+# 将x, y拉直，并合并配对为二维张量，生成二维坐标点
+grid = np.c_[x.ravel(), y.ravel()]
+print("x:\n", x)
+print("y:\n", y)
+print("x.ravel():\n", x.ravel())
+print("y.ravel():\n", y.ravel())
+print('grid:\n', grid)
+```
+
+```txt
+x:
+ [[1. 1. 1. 1.]
+ [2. 2. 2. 2.]]
+y:
+ [[2.  2.5 3.  3.5]
+ [2.  2.5 3.  3.5]]
+x.ravel():
+ [1. 1. 1. 1. 2. 2. 2. 2.]
+y.ravel():
+ [2.  2.5 3.  3.5 2.  2.5 3.  3.5]
+grid:
+ [[1.  2. ]
+ [1.  2.5]
+ [1.  3. ]
+ [1.  3.5]
+ [2.  2. ]
+ [2.  2.5]
+ [2.  3. ]
+ [2.  3.5]]
+```
+
+### 神经网络复杂度
+
+神经网络（NN）复杂度：多用NN层数和NN参数的个数表示。
+
+**空间复杂度**
+
+- 层数 = 隐藏层的层数 + 1个输出层
+- 总参数 = 总w + 总b
+
+**时间复杂度**
+
+- 乘加运算次数
+
+例如：
+
+![](images/2022-09-22-13-52-53.png)
+
+- 层数：该图包含 2 层（有效计算）
+- 总参数
+  - 第一层：3x4+4
+  - 第二层：4x2+2
+- 乘加运算次数
+  - 第一层：3x4
+  - 第二层：4x2
+
+### 学习率
+
+学习率（learning rate, lr）：参数更新的幅度。
+

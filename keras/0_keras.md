@@ -1,8 +1,10 @@
 # Keras
 
-- [Sequential API](sequential_api.md)
-- [函数 API](functional_api.md)
-- [循环神经网络](guide_rnn.md)
+## Keras Guide
+
+- [Keras Sequential API](guide/sequential_model.md)
+- [Keras 函数 API](guide/functional.md)
+- [通过继承定义 Layer 和 Model](guide/custom_layers_and_models.md)
 
 ## API
 

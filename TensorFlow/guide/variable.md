@@ -8,19 +8,19 @@
   - [5. 变量和张量的存储位置](#5-变量和张量的存储位置)
   - [6. 参考](#6-参考)
 
-Last updated: 2022-07-07, 16:59
+Last updated: 2022-09-26, 13:10
 @author Jiawei Mao
 ****
 
 ## 1. 简介
 
-TensorFlow 使用变量（TF 变量）表示程序中共享、持久化的状态。下面介绍如何创建、更新和管理 [tf.Variable](../../api/tf/Variable.md)。
+TensorFlow 使用变量表示程序中共享、持久化的状态。下面介绍如何创建、更新和管理 [tf.Variable](https://tensorflow.google.cn/api_docs/python/tf/Variable)。
 
-TF变量使用 `tf.Variable` 类创建，用于表示值可以改变的张量。高级 API 如 `tf.keras` 使用 `tf.Variable` 保存模型参数。
+TF变量使用 `tf.Variable` 类创建，表示值可变的张量。高级 API 如 `tf.keras` 使用 `tf.Variable` 保存模型参数。
 
 ## 2. 设置
 
-本笔记会讨论变量存储位置，取消注释行可以查看变量是保存在 GPU 还是 CPU。
+本笔记会讨论变量存储位置，取消下面的注释行可以查看变量是保存在 GPU 还是 CPU。
 
 ```python
 import tensorflow as tf
@@ -31,7 +31,7 @@ import tensorflow as tf
 
 ## 3. 创建变量
 
-为 `tf.Variable` 提供初始值创建 TF 变量，其 `dtype` 与初始值类型相同：
+使用 `tf.Variable` 创建 TF 变量，其 `dtype` 与提供的初始值类型相同：
 
 ```python
 my_tensor = tf.constant([[1.0, 2.0], [3.0, 4.0]])
@@ -42,7 +42,7 @@ bool_variable = tf.Variable([False, False, False, True])
 complex_variable = tf.Variable([5 + 4j, 6 + 1j])
 ```
 
-TF 变量外观和行为和张量一样，实际上，TF 变量底层由 `tf.Tensor` 实现。TF 变量同样具有 `dtype` 和 shape，且可以导出为 NumPy：
+TF 变量外观和行为和张量一样，实际上，TF 变量底层由 `tf.Tensor` 实现。TF 变量同样具有 `dtype` 和 shape，且可以转换为 NumPy：
 
 ```python
 print("Shape: ", my_variable.shape)
@@ -50,7 +50,7 @@ print("DType: ", my_variable.dtype)
 print("As NumPy: ", my_variable.numpy())
 ```
 
-```bash
+```txt
 Shape:  (2, 2)
 DType:  <dtype: 'float32'>
 As NumPy:  [[1. 2.]
@@ -68,7 +68,7 @@ print("\nIndex of highest value:", tf.argmax(my_variable))
 print("\nCopying and reshaping: ", tf.reshape(my_variable, [1, 4]))
 ```
 
-```bash
+```txt
 A variable: <tf.Variable 'Variable:0' shape=(2, 2) dtype=float32, numpy=
 array([[1., 2.],
        [3., 4.]], dtype=float32)>
@@ -95,7 +95,7 @@ except Exception as e:
   print(f"{type(e).__name__}: {e}")
 ```
 
-```bash
+```txt
 ValueError: Cannot assign value to variable ' Variable:0': Shape mismatch.The variable shape (2,), and the assigned value shape (3,) are incompatible.
 ```
 
@@ -118,7 +118,7 @@ print(a.assign_add([2,3]).numpy())  # [7. 9.]
 print(a.assign_sub([7,9]).numpy())  # [0. 0.]
 ```
 
-```sh
+```txt
 [5. 6.]
 [2. 3.]
 [7. 9.]
@@ -129,7 +129,7 @@ print(a.assign_sub([7,9]).numpy())  # [0. 0.]
 
 在基于 Python 的 TensorFlow 中，`tf.Variable` 实例的生命周期与其它 Python 对象一样。当没有对 TF 变量的引用时，它会自动释放。
 
-可以对 TF 变量命名，方便记录和调试。不同 TF 变量名字可以相同：
+推荐对 TF 变量命名，方便记录和调试。不同 TF 变量名字可以相同：
 
 ```python
 # 创建 a 和 b，名字相同，但是底层张量不同
@@ -141,15 +141,15 @@ b = tf.Variable(my_tensor + 1, name="Mark")
 print(a == b)
 ```
 
-```sh
+```txt
 tf.Tensor(
 [[False False]
  [False False]], shape=(2, 2), dtype=bool)
 ```
 
-在保存和加载模型时，会保存 TF 变量名。模型中的 TF 变量默认会自动获取 unique 名称，因此除非有其它目的，否则不需要为 TF 变量分配名称。
+在保存和加载模型时，会保存 TF 变量名。模型中的 TF 变量默认会自动获取 unique 名称，因此除非有其它目的，否则不需要显式为 TF 变量分配名称。
 
-虽然变量对于微分很重要，但有些变量不需要微分。可以在创建 TF 变量时设置 `trainable` 为 false 以关闭 TF 变量梯度。例如：
+虽然变量对于微分很重要，但有些变量不需要微分。在创建 TF 变量时设置 `trainable` 为 false 关闭 TF 变量梯度。例如：
 
 ```python
 step_counter = tf.Variable(1, trainable=False)
@@ -157,9 +157,9 @@ step_counter = tf.Variable(1, trainable=False)
 
 ## 5. 变量和张量的存储位置
 
-为了提高性能，TensorFlow 会尝试将张量和变量放在与其 `dtype` 兼容的最快设备上。这意味着如果有 GPU，大多数 TF 变量都会放在 GPU 上。
+为提高性能，TensorFlow 会尝试将张量和变量放在与其 `dtype` 兼容的最快设备上。这意味着如果有 GPU，大多数 TF 变量都会放在 GPU 上。
 
-但是，我们可以修改该行为。下面，我们在有 GPU 的前提下将一个浮点张量和一个浮点变量放在 CPU 上。通过打开设备的日志（取消本文最上面的配置注释），可以看到 TF 变量存储位置：
+可以修改该默认行为。下面，我们在有 GPU 的前提下将一个浮点张量和一个浮点变量放在 CPU 上。通过打开设备的日志（取消本文最上面的配置注释），可以看到 TF 变量存储位置：
 
 ```python
 with tf.device('CPU:0'):
@@ -178,7 +178,7 @@ tf.Tensor(
  [49. 64.]], shape=(2, 2), dtype=float32)
 ```
 
-可以将张量或 TF 变量放在一个设备，然后在另一个设备上计算。这样会带来延迟，因为需要在不同设备之间复制数据。
+也已可以将张量或 TF 变量放在一个设备上，然后在另一个设备上计算。这样会带来延迟，因为需要在不同设备之间复制数据。
 
 但是，如果有多个 GPU，但只需要一个变量副本，就可以这么干：
 
@@ -200,7 +200,7 @@ tf.Tensor(
  [ 4. 10. 18.]], shape=(2, 3), dtype=float32)
 ```
 
-有关分布式训练的更多信息，请参考 [分布式训练指南](../distributed_training.md)。
+有关分布式训练的更多信息，请参考 [分布式训练指南](https://tensorflow.google.cn/guide/distributed_training)。
 
 ## 6. 参考
 

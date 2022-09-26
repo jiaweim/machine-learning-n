@@ -723,7 +723,7 @@ features_list = [layer.output for layer in vgg19.layers]
 使用这些特征创建一个新的特征提取模型，该模型返回中间层激活值：
 
 ```python
-feat_extraction_model = keras.Model(inputs=vgg19.input, outputs=features_list)
+feat_extraction_model = keras.Model(inputs=vgg19.xs, outputs=features_list)
 
 img = np.random.random((1, 224, 224, 3)).astype("float32")
 extracted_features = feat_extraction_model(img)
@@ -872,7 +872,7 @@ _ = mlp(tf.zeros((1, 32)))
 
 ```python
 features_list = [layer.output for layer in vgg19.layers]
-feat_extraction_model = keras.Model(inputs=vgg19.input, outputs=features_list)
+feat_extraction_model = keras.Model(inputs=vgg19.xs, outputs=features_list)
 ```
 
 **函数模型可以序列化和额克隆**
