@@ -7,7 +7,7 @@
     - [内置 optimizer, loss 和 metric](#内置-optimizer-loss-和-metric)
     - [自定义 loss](#自定义-loss)
     - [自定义 metric](#自定义-metric)
-    - [不符合标准签名的损失和指标](#不符合标准签名的损失和指标)
+    - [不符合标准签名的 loss 和 metric](#不符合标准签名的-loss-和-metric)
   - [学习率](#学习率)
   - [训练时可视化损失和指标](#训练时可视化损失和指标)
     - [使用 TensorBoard callback](#使用-tensorboard-callback)
@@ -323,19 +323,19 @@ model.fit(x_train, y_train, batch_size=64, epochs=3)
 
 ```txt
 Epoch 1/3
-782/782 [==============================] - 5s 5ms/step - loss: 0.3419 - categorical_true_positives: 45148.0000
+782/782 [==============================] - 5s 6ms/step - loss: 0.3395 - categorical_true_positives: 45154.0000
 Epoch 2/3
-782/782 [==============================] - 4s 5ms/step - loss: 0.1557 - categorical_true_positives: 47646.0000
+782/782 [==============================] - 4s 6ms/step - loss: 0.1592 - categorical_true_positives: 47583.0000
 Epoch 3/3
-782/782 [==============================] - 4s 5ms/step - loss: 0.1166 - categorical_true_positives: 48200.0000
-<keras.callbacks.History at 0x27f5f48c1f0>
+782/782 [==============================] - 5s 6ms/step - loss: 0.1180 - categorical_true_positives: 48225.0000
+<keras.callbacks.History at 0x1b32e0fcf40>
 ```
 
-### 不符合标准签名的损失和指标
+### 不符合标准签名的 loss 和 metric
 
-绝大多数的损失值和指标可以从 `y_true` 和 `y_pred` 计算，其中 `y_pred` 是模型预测结果，但不是全部如此。例如，正则化损失可能只需要激活值，并且该激活值不一定是模型输出。
+绝大多数的 loss 和 metric 可以从 `y_true` 和 `y_pred` 计算，其中 `y_pred` 是模型预测结果，但并非全部如此。例如，正则化损失可能只需要激活值，并且该激活值不一定是模型的输出。
 
-在这种情况，可以在自定义层的 `call` 方法中调用 `self.add_loss(loss_value)`。以这种方式添加的损失在训练过程中被添加到 "main" 损失中（通过 `compile()`）。例如，添加正则化（Keras 内置有正则化，此处为了演示提供了一个实现）:
+此时可以在自定义 layer 的 `call` 方法中调用 `self.add_loss(loss_value)`。以这种方式添加的 loss 在训练过程中被添加到 "main" loss 中（通过 `compile()` 设置）。例如，添加激活正则化（Keras 内置有激活正则化，此处为了演示提供了一个实现）:
 
 ```python
 class ActivityRegularizationLayer(layers.Layer):

@@ -1,32 +1,13 @@
 # 正则化
 
 - [正则化](#正则化)
-  - [过拟合](#过拟合)
   - [正则化种类](#正则化种类)
-  - [L2 正则化](#l2-正则化)
   - [权值衰减](#权值衰减)
   - [Dropout](#dropout)
   - [BatchNormalization](#batchnormalization)
 
 2021-07-05, 20:14
 ***
-
-## 过拟合
-
-发生过拟合的原因主要有两个：
-
-- 模型拥有大量参数，表现力强；
-- 训练数据少。
-
-根据经验，如果在训练过程中，验证数据的损失先减少后开始增加，就可能开始发生过拟合。
-
-模型的复杂度大致可以用 non-zero weights 的数目表示，换句话说，如果两个模型 M1 和 M2 性能接近，那么我们应该选择更简单的模型，即 non-zero weights 更少的模型。
-
-正则化在损失函数上添加限制，以缩小解空间，从而减少求出过拟合解的可能性。常见的正则化技术包括：
-
-- L1 正则化
-- L2 正则化
-- Dropout 正则化
 
 ## 正则化种类
 
@@ -43,10 +24,6 @@ from tf.keras.regularizers import l2, activity_l2
 model.add(Dense(64, input_dim=64, W_regularizer=l2(0.01),
 activity_regularizer=activity_l2(0.01)))
 ```
-
-## L2 正则化
-
-
 
 
 ## 权值衰减
