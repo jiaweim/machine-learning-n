@@ -192,6 +192,9 @@ print("Model Loaded with custom objects:", loaded_1)
 print("Model loaded without the custom object class:", loaded_2)
 ```
 
+
+
+
 ## 参考
 
 - https://www.tensorflow.org/guide/keras/save_and_serialize
