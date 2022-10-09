@@ -25,15 +25,15 @@ Last updated: 2022-10-06, 20:33
 
 Keras 模型由多个组件组成：
 
-- 模型架构/配置，指定模型包含哪些 layer，以及这些 layer 的连接方式；
+- 模型架构/配置，指模型包含哪些 layer，以及这些 layer 的连接方式；
 - 权重值（模型状态，state of the model）；
-- 优化器（optimizer），通过 compile 定义；
-- losses 和 metrics，通过 compile 或调用 `add_loss()`, `add_metric()` 定义。
+- 优化器（optimizer），通过 compile 设置；
+- losses 和 metrics，通过 compile 或调用 `add_loss()`, `add_metric()` 设置。
 
 Keras API 支持一次性保存所有这些组件，也可以选择只保存一部分：
 
-- 将所有组件保存为单个 TF SavedModel 归档格式（或老式的 Keras H5 格式），这是标准做法；
-- 只保存模型架构/配置，通常保存为 JSON 格式；
+- 将所有组件保存为单个 TF SavedModel 归档格式或老式的 Keras H5 格式，这是标准做法；
+- 只保存模型架构，通常保存为 JSON 格式；
 - 只保存权重，一般在训练模型时使用。
 
 下面依次查看这些选项，以及如何使用它们。

@@ -6,6 +6,7 @@
   - [属性](#属性)
   - [方法](#方法)
     - [get_layer](#get_layer)
+    - [save](#save)
     - [to_yaml](#to_yaml)
   - [参考](#参考)
 
@@ -134,6 +135,49 @@ get_layer(
 根据名称 `name` 或索引 `index` 查找 layer。
 
 如果同时提供 `name` 和 `index`，则 `index` 优先。layer 基于水平图遍历（bottom-up）进行索引。
+
+### save
+
+Last updated: 2022-10-09, 14:57
+
+```python
+save(
+    filepath,
+    overwrite=True,
+    include_optimizer=True,
+    save_format=None,
+    signatures=None,
+    options=None,
+    save_traces=True
+)
+```
+
+将模型保存为 TF SavedModel 或单个 HDF5 文件。
+
+具体可参考 [tf.keras.models.save_model](https://tensorflow.google.cn/api_docs/python/tf/keras/models/save_model) 或 [Keras 模型的保存和加载指南](https://tensorflow.google.cn/guide/keras/save_and_serialize)。
+
+|参数|说明|
+|---|---|
+|filepath|String, PathLike, 保存模型的 SavedModel 或 H5 文件路径|
+|overwrite|是否静静地覆盖目标位置的现有文件，还是给用户提示，默认 True|
+|include_optimizer|是否保存 optimizer 的状态，默认 True|
+|save_format|'tf' 或 'h5'，将模型保存为 TF SavedModel 还是 HDF5 格式。TF 2.x 中默认为 'tf'，TF 1.x 中默认为 'h5'|
+|signatures|与 SavedModel 一同保存的签名。只适用于 "tf" 格式。详情请参考 [tf.saved_model.save](https://tensorflow.google.cn/api_docs/python/tf/saved_model/save)|
+|options|(仅适用于 SavedModel 格式) [tf.saved_model.SaveOptions](https://tensorflow.google.cn/api_docs/python/tf/saved_model/SaveOptions) 对象，用于指定保存为 SavedModel 的选项|
+|save_traces|(仅适用于 SavedModel 格式) 启用后，SavedModel 将保存每个 layer 的函数 traces。可以禁用该选项，这样就只保存每层的 config。**默认** True。禁用此选项可以减少序列化时间和文件大小，但要求所有自定义 layer/model 实现 `get_config()` 方法|
+
+示例：
+
+```python
+from keras.models import load_model
+
+model.save('my_model.h5')  # creates a HDF5 file 'my_model.h5'
+del model  # deletes the existing model
+
+# returns a compiled model
+# identical to the previous one
+model = load_model('my_model.h5')
+```
 
 ### to_yaml
 
