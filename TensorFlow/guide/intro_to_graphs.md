@@ -80,7 +80,6 @@ def a_regular_function(x, y, b):
     x = x + b
     return x
 
-
 # `a_function_that_uses_a_graph` 是一个 TF `Function`.
 a_function_that_uses_a_graph = tf.function(a_regular_function)
 
@@ -90,7 +89,7 @@ y1 = tf.constant([[2.0], [3.0]])
 b1 = tf.constant(4.0)
 
 orig_value = a_regular_function(x1, y1, b1).numpy()
-# 调用 `Function` 和调用 Python 函数一样
+# `Function` 调用和 Python 函数一样
 tf_function_value = a_function_that_uses_a_graph(x1, y1, b1).numpy()
 assert orig_value == tf_function_value
 ```
