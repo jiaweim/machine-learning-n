@@ -1,43 +1,34 @@
 # tf.linalg.matmul
 
-2022-02-23, 16:58
+Last updated: 2022-10-11, 13:08
 ****
 
 ## 简介
 
 ```python
 tf.linalg.matmul(
-    a, b, transpose_a=False, transpose_b=False, adjoint_a=False, adjoint_b=False,
-    a_is_sparse=False, b_is_sparse=False, output_type=None, name=None
+    a,
+    b,
+    transpose_a=False,
+    transpose_b=False,
+    adjoint_a=False,
+    adjoint_b=False,
+    a_is_sparse=False,
+    b_is_sparse=False,
+    output_type=None,
+    name=None
 )
 ```
 
 矩阵乘法。
 
-输入必须是秩 $\ge 2$ 的张量，且内部的两个维数满足矩阵乘法所需维数，任何外部维数和批量大小匹配。
+输入必须是秩 $\ge 2$ 的张量，且内部的两个维度满足矩阵乘法所需维数，任何外部维数和 batch size 匹配。
 
-两个矩阵类型必须相同。支持类型：bfloat16, float16, float32, float64, int32, int64, complex64, complex128.
+两个矩阵的类型必须相同。支持类型：`bfloat16`, `float16`, `float32`, `float64`, `int32`, `int64`, `complex64`, `complex128`.
 
-通过将对应的标志设置为 `True`，两个矩阵都可以进行转置或临接（共轭+转置）。它们默认为 `False`。
+通过将对应的 flag 设置为 `True`，两个矩阵都可以进行转置或临接（共轭+转置），默认为 `False`。
 
-如果矩阵包含大量的零，将对应的 `a_is_sparse` 或 `b_is_sparse` 设置为 `True` 会启用一个更有效的算法。它们默认都是 `False`。这种优化算法只适用于 bfloat16 和 float32 类型的普通矩阵（二阶矩阵）。
-
-## 参数
-
-|参数|说明|
-|---|---|
-|a|tf.Tensor of type float16, float32, float64, int32, complex64, complex128 and rank > 1.|
-|b|tf.Tensor with same type and rank as a.|
-|transpose_a|If True, a is transposed before multiplication.|
-|transpose_b|If True, b is transposed before multiplication.|
-|adjoint_a|If True, a is conjugated and transposed before multiplication.|
-|adjoint_b|If True, b is conjugated and transposed before multiplication.|
-|a_is_sparse|If True, a is treated as a sparse matrix. Notice, this does not support tf.sparse.SparseTensor, it just makes optimizations that assume most values in a are zero. See tf.sparse.sparse_dense_matmul for some support for tf.sparse.SparseTensor multiplication.|
-|b_is_sparse|If True, b is treated as a sparse matrix. Notice, this does not support tf.sparse.SparseTensor, it just makes optimizations that assume most values in a are zero. See tf.sparse.sparse_dense_matmul for some support for tf.sparse.SparseTensor multiplication.|
-|output_type|The output datatype if needed. Defaults to None in which case the output_type is the same as input type. Currently only works when input tensors are type (u)int8 and output_type can be int32.|
-|name|Name for the operation (optional).|
-
-## 示例
+如果矩阵包含大量的零，将对应的 `a_is_sparse` 或 `b_is_sparse` 设置为 `True` 会使用一个更有效的算法，默认为 `False`。这种优化算法只适用于 `bfloat16` 和 `float32` 类型的普通矩阵（二阶矩阵）。
 
 - 简单的二阶矩阵乘法
 
@@ -60,7 +51,7 @@ array([[ 58,  64],
        [139, 154]])>
 ```
 
-- 批量为 [2] 的批量矩阵乘法
+- batch 为 `[2]` 的批量矩阵乘法
 
 ```python
 >>> a = tf.constant(np.arange(1, 13, dtype=np.int32), shape=[2, 2, 3])
@@ -98,6 +89,30 @@ d = a @ b @ [[10], [11]]
 d = tf.matmul(tf.matmul(a, b), [[10], [11]])
 ```
 
+## 参数
+
+|参数|说明|
+|---|---|
+|a|`tf.Tensor`，类型为 `float16`, `float32`, `float64`, `int32`, `complex64` 或 `complex128`，且 rank > 1|
+|b|`tf.Tensor`，类型同 a|
+|transpose_a|True 表示在乘之前对 a 进行转置|
+|transpose_b|True 表示在乘之前对 b 进行转置|
+|adjoint_a|True 表示在乘之前对 a 进行共轭和转置|
+|adjoint_b|True 表示在乘之前对 b 进行共轭和转置|
+|a_is_sparse|True 表示将 a 视为稀疏矩阵。注意，它不支持 `tf.sparse.SparseTensor`，只是假设 a 中大部分值为 0 来进行优化。`tf.sparse.SparseTensor` 的乘法请参考 [tf.sparse.sparse_dense_matmul](https://tensorflow.google.cn/api_docs/python/tf/sparse/sparse_dense_matmul)|
+|b_is_sparse|True 表示将 b 视为稀疏矩阵。注意，它不支持 `tf.sparse.SparseTensor`，只是假设 a 中大部分值为 0 来进行优化。`tf.sparse.SparseTensor` 的乘法请参考 [tf.sparse.sparse_dense_matmul](https://tensorflow.google.cn/api_docs/python/tf/sparse/sparse_dense_matmul)|
+|output_type|输出数据类型。默认 `None` 表示输出类型和输入类型相同。该参数目前只适用于输入张量类型为 (u)int8 且输出类型为 int32|
+|name|（可选）操作名称|
+
+返回类型与 `a` 和 `b` 相同的 `tf.Tensor`，其中最内部的矩阵是 `a` 和 `b` 中相应矩阵的乘积。例如，如果所有 transpose 和 adjoint 参数都是 `False`，则：
+
+```python
+output[..., i, j] = sum_k (a[..., i, k] * b[..., k, j])
+```
+
+> 注意：这是矩阵乘积，不是逐元素乘积。
+
 ## 参考
 
 - https://www.tensorflow.org/api_docs/python/tf/linalg/matmul
+- https://tensorflow.google.cn/api_docs/python/tf/linalg/matmul

@@ -5,6 +5,7 @@
   - [参数](#参数)
   - [属性](#属性)
   - [方法](#方法)
+    - [compile](#compile)
     - [get_layer](#get_layer)
     - [save](#save)
     - [to_yaml](#to_yaml)
@@ -115,6 +116,47 @@ model = MyModel()
 
 ## 方法
 
+### compile
+
+Last updated: 2022-10-09, 17:27
+
+```python
+compile(
+    optimizer='rmsprop',
+    loss=None,
+    metrics=None,
+    loss_weights=None,
+    weighted_metrics=None,
+    run_eagerly=None,
+    steps_per_execution=None,
+    jit_compile=None,
+    **kwargs
+)
+```
+
+配置模型的训练参数。
+
+例如：
+
+```python
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+              loss=tf.keras.losses.BinaryCrossentropy(),
+              metrics=[tf.keras.metrics.BinaryAccuracy(),
+                       tf.keras.metrics.FalseNegatives()])
+```
+
+|参数|说明|
+|---|---|
+|optimizer|String (optimizer 名称) 或 optimizer 实例。参考 [tf.keras.optimizers](https://tensorflow.google.cn/api_docs/python/tf/keras/optimizers)|
+|loss|损失函数。可以是 string (损失函数名称) 或 [tf.keras.losses.Loss](https://tensorflow.google.cn/api_docs/python/tf/keras/losses/Loss) 实例。参考 [tf.keras.losses](https://tensorflow.google.cn/api_docs/python/tf/keras/losses)。损失函数是签名为 `loss = fn(y_true, y_pred)` 的可调用对象，其中 `y_true` 是真实值，`y_pred` 是模型推理值。`y_true` 的 shape 应为 `(batch_size, d0, ...dN)`（稀疏损失函数除外，如稀疏分类交叉熵，需要 shape 为 `(batch_size, d0, ...dN-1)` 的整数数组）。`y_pred` 的 shape 应为 `(batch_size, d0, .. dN)`。损失函数应返回 float 张量。如果使用自定义 `Loss` 并且 reeduction 设置为 `None`，则返回 shape 为 `(batch_size, d0, .. dN-1)`，即每个样本或每个时间步一个损失值，否则为标量。如果模型有多个输出，可以传入 loss dict 或 list 为每个输出使用不同的损失函数，此时模型最小化的 loss 值为每个单独 loss 的加和，除非使用 `loss_weights`|
+|metrics|训练和测试期间评估模型的 metric 列表。每个 metric 可以是 string（内置函数名称）、函数或 `tf.keras.metrics.Metric` 实例。通常使用 `metrics=['accuracy']`。函数是签名为 `result = fn(y_true, y_pred)` 的任意可调用函数。对多输出模型，可以用 dict 为不同输出设置不同 metrics，例如 `metrics={'output_a':'accuracy', 'output_b':['accuracy', 'mse']}`。也可以用 list 为每个输出指定单个 metric 或 metric 列表，例如 `metrics=[['accuracy'], ['accuracy', 'mse']]` 或 `metrics=['accuracy', ['accuracy', 'mse']]`。当传入字符串 'accuracy' 或 'acc'，则根据使用的损失函数和模型输出 shape 转换为 [tf.keras.metrics.BinaryAccuracy](https://tensorflow.google.cn/api_docs/python/tf/keras/metrics/BinaryAccuracy), [tf.keras.metrics.CategoricalAccuracy](https://tensorflow.google.cn/api_docs/python/tf/keras/metrics/CategoricalAccuracy) 或 [tf.keras.metrics.SparseCategoricalAccuracy](https://tensorflow.google.cn/api_docs/python/tf/keras/metrics/SparseCategoricalAccuracy) 三者之一。对字符串 'crossentropy' 和 'ce' 也进行类似转换。此处传入的 metrics 不使用样本加权进行计算，如果需要样本加权，则应该使用 `weighted_metrics` 参数|
+|loss_weights|（可选）Python float 的 list 或 dict，指定模型不同输出对 loss 的贡献。模型最小化的 loss 值为所有输出 loss 的加权和，加权值为 `loss_weights`。若为 list，则应和模型的输出一一对应；若为 dict，则将名称（string）映射为系数（标量）|
+|weighted_metrics|训练和测试期间根据 `sample_weight` 或 `class_weight` 计算的加权 metric list|
+|run_eagerly|Bool. 默认 `False`。`True` 表示不将模型的逻辑包装在 [tf.function](https://tensorflow.google.cn/api_docs/python/tf/function)。建议将其保留为 `None`，除非模型不能在 `tf.function` 中运行。使用 [tf.distribute.experimental.ParameterServerStrategy](https://tensorflow.google.cn/api_docs/python/tf/distribute/experimental/ParameterServerStrategy) 时不支持 `run_eagerly=True`|
+|steps_per_execution|Int. 默认 1。每次 `tf.function` 调用运行的 batch 数。在单个 `tf.function` 中运行多个 batch 在 TPU 中或小型模型中可以极大提高性能，但 Python 开销更大。每次执行最多运行一个完整的 epoch。如果传入的数字大于 epoch 大小，在执行时将截断为 epoch 的大小。注意，如果 `steps_per_execution` 设置为  N，则 `Callback.on_batch_begin` 和 `Callback.on_batch_end` 方法会每 N 个 batch 调用调用一次（即在每次 `tf.function` 执行前/后调用）|
+|jit_compile|`True` 表示使用 XLA 编译模型的训练步骤。[XLA](https://tensorflow.google.cn/xla) 是一种用于机器学习的优化编译器，默认不启用。设置 `run_eagerly=True` 时无法启用。注意 `jit_compile=True` 不一定适用于所有模型。对 XLA 支持的操作，可参考 [XLA 文档](https://tensorflow.google.cn/xla)|
+|**kwargs|仅用于向后兼容的参数|
+
 ### get_layer
 
 Last updated: 2022-08-09, 14:01
@@ -194,3 +236,4 @@ to_yaml(
 ## 参考
 
 - https://www.tensorflow.org/api_docs/python/tf/keras/Model
+- https://tensorflow.google.cn/api_docs/python/tf/keras/Model

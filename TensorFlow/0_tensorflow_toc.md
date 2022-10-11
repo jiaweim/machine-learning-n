@@ -84,3 +84,4 @@
 ## 参考
 
 - https://www.tensorflow.org/
+- [Intro to TensorFlow for Deep Learning](https://learn.udacity.com/courses/ud187)

@@ -80,7 +80,7 @@ from tensorflow import keras
 - `model.save()` 或 [tf.keras.models.save_model()](https://www.tensorflow.org/api_docs/python/tf/keras/models/save_model)
 - [tf.keras.models.load_model()](https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model)
 
-保存整个模型有两种格式可选：TF SavedModel 格式，以及老的 Keras **H5** 格式。SavedModel 是推荐格式，是使用 `model.save()` 的默认选项。
+保存整个模型有两种格式可选：TF SavedModel 格式，以及老的 Keras **H5** 格式。SavedModel 是推荐格式，为 `model.save()` 的默认选项。
 
 切换到 H5 格式的方法：
 
@@ -89,7 +89,7 @@ from tensorflow import keras
 
 ### SavedModel 格式
 
-SavedModel 是一种全面的格式，可以保存模型架构、权重以及调用函数的 TF subgraph。使得 Keras 能够恢复内置 layer 和自定义对象。例如：
+SavedModel 是一种全面的格式，可以保存模型架构、权重以及函数调用的 TF subgraph。使得 Keras 能够恢复内置 layer 和自定义对象。例如：
 
 ```python
 def get_model():
