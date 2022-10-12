@@ -24,10 +24,32 @@ Last updated: 2022-10-11, 12:39
 
 ## 速览
 
-Graph 优点：
+**Graph 优点**
 
 - 可移植性好
 - 性能更好
+
+**Graph 使用**
+
+使用方法一：函数调用
+
+```python
+a_function_that_uses_a_graph = tf.function(a_regular_function)
+```
+
+使用方法二：装饰器
+
+```python
+@tf.function
+def outer_function(x):
+  y = tf.constant([[2.0], [3.0]])
+  b = tf.constant(4.0)
+```
+
+**多态性**
+
+一个 `Function` 可能包括多个 `ConcreteFunction`，而每个 `ConcreteFunction` 封装一个 `tf.Graph`。
+
 
 ## 简介
 
@@ -94,7 +116,7 @@ tf_function_value = a_function_that_uses_a_graph(x1, y1, b1).numpy()
 assert orig_value == tf_function_value
 ```
 
-从外观看，`Function` 就像使用 TensorFlow 操作编写的普通函数。然而在底层非常不同，一个 `Function` 的一个 API 后面封装了好几个 `tf.Graph`。这是 `Function` 能够利用 graph 优点的原因。
+从外观看，`Function` 就像使用 TF 操作编写的普通函数，然而其底层差别很大。`Function` 的一个 API 可能封装了多个 `tf.Graph`。这是 `Function` 能够利用 graph 优点的原因。
 
 `tf.function` 应用于当前函数，及函数内部调用的其它函数：
 
@@ -112,7 +134,7 @@ def outer_function(x):
 
   return inner_function(x, y, b)
 
-# 该调用会创建一个 graph，该 graph 包括 `inner_function` 和 `outer_function`
+# 创建的 graph 包含 `inner_function` 和 `outer_function`
 outer_function(tf.constant([[1.0, 2.0]])).numpy()
 ```
 
@@ -122,7 +144,7 @@ array([[12.]], dtype=float32)
 
 ### 将 Python 函数转换为 graph
 
-用 TensorFlow 编写的函数都同时包含 TF 内置操作和 Python 逻辑，如 `if` 语句、循环、`break`、`return`、`continue` 等。TF 操作很容易被 `tf.Graph` 捕获，但 Python 逻辑则需要额外步骤才能转换为 graph。`tf.function` 使用 [tf.autograph](https://tensorflow.google.cn/api_docs/python/tf/autograph) 库将 Python 代码转换为生成 graph 的代码。
+用 TensorFlow 编写的函数一般同时包含 TF 内置操作和 Python 逻辑语句，如 `if` 语句、循环、`break`、`return`、`continue` 等。TF 操作很容易被 `tf.Graph` 捕获，而 Python 逻辑语句则需要额外步骤才能转换为 graph。`tf.function` 使用 [tf.autograph](https://tensorflow.google.cn/api_docs/python/tf/autograph) 库将 Python 代码转换为生成 graph 的代码。
 
 ```python
 def simple_relu(x):
@@ -143,10 +165,10 @@ First branch, with graph: 1
 Second branch, with graph: 0
 ```
 
-虽然一般不需要直接查看 graph，但可以检查输出，以检查确切的结果。下面的输出很复杂，不用仔细看：
+虽然一般不需要直接查看 graph，但可以检查输出来确定结果。下面的输出很复杂，不用仔细看：
 
 ```python
-# This is the graph-generating output of AutoGraph.
+# 这是 AutoGraph 的 graph 生成输出
 print(tf.autograph.to_code(simple_relu))
 ```
 
@@ -185,7 +207,7 @@ def tf__simple_relu(x):
 ```
 
 ```python
-# This is the graph itself.
+# 这是 graph 本身
 print(tf_simple_relu.get_concrete_function(tf.constant(1)).graph.as_graph_def())
 ```
 
@@ -213,403 +235,7 @@ node {
     }
   }
 }
-node {
-  name: "Greater/y"
-  op: "Const"
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: 0
-      }
-    }
-  }
-}
-node {
-  name: "Greater"
-  op: "Greater"
-  input: "x"
-  input: "Greater/y"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-}
-node {
-  name: "cond"
-  op: "StatelessIf"
-  input: "Greater"
-  input: "x"
-  attr {
-    key: "Tcond"
-    value {
-      type: DT_BOOL
-    }
-  }
-  attr {
-    key: "Tin"
-    value {
-      list {
-        type: DT_INT32
-      }
-    }
-  }
-  attr {
-    key: "Tout"
-    value {
-      list {
-        type: DT_BOOL
-        type: DT_INT32
-      }
-    }
-  }
-  attr {
-    key: "_lower_using_switch_merge"
-    value {
-      b: true
-    }
-  }
-  attr {
-    key: "_read_only_resource_inputs"
-    value {
-      list {
-      }
-    }
-  }
-  attr {
-    key: "else_branch"
-    value {
-      func {
-        name: "cond_false_23"
-      }
-    }
-  }
-  attr {
-    key: "output_shapes"
-    value {
-      list {
-        shape {
-        }
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "then_branch"
-    value {
-      func {
-        name: "cond_true_22"
-      }
-    }
-  }
-}
-node {
-  name: "cond/Identity"
-  op: "Identity"
-  input: "cond"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
-}
-node {
-  name: "cond/Identity_1"
-  op: "Identity"
-  input: "cond:1"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-}
-node {
-  name: "Identity"
-  op: "Identity"
-  input: "cond/Identity_1"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-}
-library {
-  function {
-    signature {
-      name: "cond_false_23"
-      input_arg {
-        name: "cond_placeholder"
-        type: DT_INT32
-      }
-      output_arg {
-        name: "cond_identity"
-        type: DT_BOOL
-      }
-      output_arg {
-        name: "cond_identity_1"
-        type: DT_INT32
-      }
-    }
-    node_def {
-      name: "cond/Const"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_BOOL
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_BOOL
-            tensor_shape {
-            }
-            bool_val: true
-          }
-        }
-      }
-    }
-    node_def {
-      name: "cond/Const_1"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_BOOL
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_BOOL
-            tensor_shape {
-            }
-            bool_val: true
-          }
-        }
-      }
-    }
-    node_def {
-      name: "cond/Const_2"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_INT32
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_INT32
-            tensor_shape {
-            }
-            int_val: 0
-          }
-        }
-      }
-    }
-    node_def {
-      name: "cond/Const_3"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_BOOL
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_BOOL
-            tensor_shape {
-            }
-            bool_val: true
-          }
-        }
-      }
-    }
-    node_def {
-      name: "cond/Identity"
-      op: "Identity"
-      input: "cond/Const_3:output:0"
-      attr {
-        key: "T"
-        value {
-          type: DT_BOOL
-        }
-      }
-    }
-    node_def {
-      name: "cond/Const_4"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_INT32
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_INT32
-            tensor_shape {
-            }
-            int_val: 0
-          }
-        }
-      }
-    }
-    node_def {
-      name: "cond/Identity_1"
-      op: "Identity"
-      input: "cond/Const_4:output:0"
-      attr {
-        key: "T"
-        value {
-          type: DT_INT32
-        }
-      }
-    }
-    ret {
-      key: "cond_identity"
-      value: "cond/Identity:output:0"
-    }
-    ret {
-      key: "cond_identity_1"
-      value: "cond/Identity_1:output:0"
-    }
-    attr {
-      key: "_construction_context"
-      value {
-        s: "kEagerRuntime"
-      }
-    }
-    arg_attr {
-      key: 0
-      value {
-        attr {
-          key: "_output_shapes"
-          value {
-            list {
-              shape {
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  function {
-    signature {
-      name: "cond_true_22"
-      input_arg {
-        name: "cond_identity_1_x"
-        type: DT_INT32
-      }
-      output_arg {
-        name: "cond_identity"
-        type: DT_BOOL
-      }
-      output_arg {
-        name: "cond_identity_1"
-        type: DT_INT32
-      }
-    }
-    node_def {
-      name: "cond/Const"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_BOOL
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_BOOL
-            tensor_shape {
-            }
-            bool_val: true
-          }
-        }
-      }
-    }
-    node_def {
-      name: "cond/Identity"
-      op: "Identity"
-      input: "cond/Const:output:0"
-      attr {
-        key: "T"
-        value {
-          type: DT_BOOL
-        }
-      }
-    }
-    node_def {
-      name: "cond/Identity_1"
-      op: "Identity"
-      input: "cond_identity_1_x"
-      attr {
-        key: "T"
-        value {
-          type: DT_INT32
-        }
-      }
-    }
-    ret {
-      key: "cond_identity"
-      value: "cond/Identity:output:0"
-    }
-    ret {
-      key: "cond_identity_1"
-      value: "cond/Identity_1:output:0"
-    }
-    attr {
-      key: "_construction_context"
-      value {
-        s: "kEagerRuntime"
-      }
-    }
-    arg_attr {
-      key: 0
-      value {
-        attr {
-          key: "_output_shapes"
-          value {
-            list {
-              shape {
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+......
 versions {
   producer: 1205
   min_consumer: 12
@@ -622,7 +248,7 @@ versions {
 
 `tf.Graph` 用于特定类型输入，如特定 `dtype` 的张量，或具有相同 [id()](https://docs.python.org/3/library/functions.html#id%5D) 的对象。
 
-每次用新的 `dtype` 或 shape 调用 `Function`时，`Function` 都会根据参数创建一个新的 `tf.Graph`。`tf.Graph` 输入 `dtype` 和 shape 称为输入签名（input signature），或简称签名（**signature**）。
+每次使用新的 `dtype` 或 shape 调用 `Function`时，`Function` 都会根据参数创建一个新的 `tf.Graph`。`tf.Graph` 输入 `dtype` 和 shape 称为输入签名（input signature），或简称签名（**signature**）。
 
 `Function` 将和签名对应的 `tf.Graph` 存储在 `ConcreteFunction`。`ConcreteFunction` 是对 `tf.Graph` 的封装。
 
@@ -631,8 +257,7 @@ versions {
 def my_relu(x):
     return tf.maximum(0., x)
 
-
-# `my_relu` creates new graphs as it observes more signatures.
+# `my_relu` 在看到更多签名时创建新的 graph
 print(my_relu(tf.constant(5.5)))
 print(my_relu([1, -1]))
 print(my_relu(tf.constant([3., -3.])))
@@ -644,12 +269,12 @@ tf.Tensor([1. 0.], shape=(2,), dtype=float32)
 tf.Tensor([3. 0.], shape=(2,), dtype=float32)
 ```
 
-如果已经使用相同签名调用过 `Function`，则 `Function` 不会创建新 `tf.Graph`：
+如果已经使用相同签名调用过 `Function`，则不再创建新的 `tf.Graph`：
 
 ```python
-# These two calls do *not* create new graphs.
-print(my_relu(tf.constant(-2.5)))  # Signature matches `tf.constant(5.5)`.
-print(my_relu(tf.constant([-1., 1.])))  # Signature matches `tf.constant([3., -3.])`.
+# 这两次调用不创建新的 graph
+print(my_relu(tf.constant(-2.5)))  # 签名和 `tf.constant(5.5)`.匹配
+print(my_relu(tf.constant([-1., 1.])))  # 签名和 `tf.constant([3., -3.])` 匹配
 ```
 
 ```txt
@@ -657,11 +282,11 @@ tf.Tensor(0.0, shape=(), dtype=float32)
 tf.Tensor([0. 1.], shape=(2,), dtype=float32)
 ```
 
-因为由多个 graph 支持，所以 `Function` 是多态的。这使得 `Function` 比单个 `tf.Graph` 支持更多的输入类型，同时也可以优化每个 `tf.Graph` 以获得更好的性能。
+因为包含多个 graph，所以 `Function` 是多态的。这使 `Function` 比单个 `tf.Graph` 支持更多的输入类型，同时也可以优化每个 `tf.Graph` 以获得更好的性能。
 
 ```python
-# There are three `ConcreteFunction`s (one for each graph) in `my_relu`.
-# The `ConcreteFunction` also knows the return type and shape!
+# `my_relu` 包含三个 `ConcreteFunction`s (每个 graph 一个)
+# `ConcreteFunction` 还知道返回的类型和 shape
 print(my_relu.pretty_printed_concrete_signatures())
 ```
 
@@ -689,7 +314,7 @@ my_relu(x)
 
 ### graph 执行和即时执行
 
-`Function` 中代码可以即时执行，也可以作为 graph 执行。`Function` 默认以 graph 执行：
+`Function` 中代码可以即时执行，也可以作为 graph 执行，默认以 graph 执行：
 
 ```python
 @tf.function
@@ -718,7 +343,7 @@ get_MSE(y_true, y_pred)
 <tf.Tensor: shape=(), dtype=int32, numpy=3>
 ```
 
-要验证 `Function` 的 graph 是否与等效的 Python 函数执行相同的计算，可以设置 `tf.config.run_functions_eagerly(True)` 来即时执行。该设置关闭 `Function` 创建和运行 graph 的功能，作为常规模型执行代码。
+要验证 `Function` 的 graph 与等效的 Python 函数执行相同的计算是否相同，可以设置 `tf.config.run_functions_eagerly(True)` 来 eager 执行。该设置关闭 `Function` 创建和运行 graph 的功能，以作为常规模型执行代码。
 
 ```python
 tf.config.run_functions_eagerly(True)
@@ -733,7 +358,7 @@ get_MSE(y_true, y_pred)
 ```
 
 ```python
-# Don't forget to set it back when you are done.
+# 测试后记得转回原设置
 tf.config.run_functions_eagerly(False)
 ```
 
@@ -761,17 +386,17 @@ Calculating MSE!
 
 可以看到，虽然调用了三次 `get_MSE`，但是只输出了一次。
 
-原因是，`Function` 通过 "tracing" 过程先运行一次原始代码以创建 graph，`print` 语句在此时执行。tracing 将 TF 操作捕获到 graph，但不会捕获 `print`。随后三次调用都运行次 graph，不再运行原始 Python 代码。
+原因是，`Function` 通过 "tracing" 过程先运行一次原始代码以创建 graph，`print` 语句在此时执行。tracing 将 TF 操作捕获到 graph，但不会捕获 `print`。随后三次调用都运行捕获的 graph，不再运行原始 Python 代码。
 
 关闭 graph 执行来比较一下：
 
 ```python
-# Now, globally set everything to run eagerly to force eager execution.
+# 开启全局 eager 执行
 tf.config.run_functions_eagerly(True)
 ```
 
 ```python
-# Observe what is printed below.
+# 查看下面的输出
 error = get_MSE(y_true, y_pred)
 error = get_MSE(y_true, y_pred)
 error = get_MSE(y_true, y_pred)
@@ -789,7 +414,7 @@ tf.config.run_functions_eagerly(False)
 
 `print` 是 Python 的一个副作用，在将函数转换为 `Function` 时，还有其它需要注意的项。更多细节可以参考 [tf.function 性能](https://tensorflow.google.cn/guide/function)。
 
-> **Note** 如果想在 eager 执行和 graph 执行中都能打印值，可以使用 `tf.print`。
+> **Note** 要想在 eager 执行和 graph 执行中都能打印值，可以使用 `tf.print`。
 
 ### non-strict 执行
 
@@ -813,7 +438,6 @@ def unused_return_eager(x):
     tf.gather(x, [1])  # unused
     return x
 
-
 try:
     print(unused_return_eager(tf.constant([0.0])))
 except tf.errors.InvalidArgumentError as e:
@@ -830,7 +454,6 @@ tf.Tensor([0.], shape=(1,), dtype=float32)
 def unused_return_graph(x):
     tf.gather(x, [1])  # unused
     return x
-
 
 # Only needed operations are run during graph execution. The error is not raised.
 print(unused_return_graph(tf.constant([0.0])))
