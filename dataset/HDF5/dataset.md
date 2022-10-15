@@ -16,9 +16,13 @@
     - [Fletcher32 过滤器](#fletcher32-过滤器)
   - [Multi-Block 选择](#multi-block-选择)
   - [Fancy indexing](#fancy-indexing)
+  - [创建和读取空 datasets 和 attributes](#创建和读取空-datasets-和-attributes)
+  - [API](#api)
   - [参考](#参考)
 
-***
+Last updated: 2022-10-16, 01:32
+@author Jiawei Mao
+****
 
 ## 简介
 
@@ -292,7 +296,60 @@ array([ 1,  2,  5,  6,  9, 10])
 存在如下限制：
 
 - 选择坐标必须按递增顺序给出；
-- 
+- 重复的选择被忽略；
+- 非常长的列表（>1000 个元素）会导致性能较差。
+
+也可以使用 NumPy boolean mask 数组来选择，返回的结果是按照标准 NumPy（C 样式）顺序排列的一维数组元素。底层实现会生成 一个待选择数据点的 list，因此在使用大型 mask 时要小新：
+
+```python
+>>> arr = numpy.arange(100).reshape((10,10))
+>>> dset = f.create_dataset("MyDataset", data=arr)
+>>> result = dset[arr > 50]
+>>> result.shape
+(49,)
+```
+
+版本 2.10 修改：允许使用空 list 进行选择。将返回相关维度中长度为 0 的数组。
+
+## 创建和读取空 datasets 和 attributes
+
+HDF5 具有空数据集或空属性的概念。不同于 shape 为 `()` 的数组，也不同于 HDF5 属于中的标量数据空间，相反，它是具有关联类型，没有 data 和 shape 的数据集。在 h5py 中，将其表示为 shape 为 `None` 的 dataset，或 `h5py.Empty` 实例。不能对空 dataset 和 attribute 进行切片。
+
+根据属性使用 h5py.Empty 创建空属性：
+
+```python
+obj.attrs["EmptyAttr"] = h5py.Empty("f")
+```
+
+读取空属性返回 `h5py.Empty`：
+
+```python
+>>> obj.attrs["EmptyAttr"]
+h5py.Empty(dtype="f")
+```
+
+也可以在 `create_dataset` 中定义 `dtype` 但不定义 `shape` 来创建空 dataset:
+
+```python
+grp.create_dataset("EmptyDataset", dtype="f")
+```
+
+或者将 `data` 参数设置为 `h5py.Empty` 实例：
+
+```python
+grp.create_dataset("EmptyDataset", data=h5py.Empty("f"))
+```
+
+空 dataset 的 shape 为 `None`，这是确定数据集是否为空的最佳方法。空 dataset 可以以类似标量 dataset 的方式读取，即，如果 `empty_dataset` 是空 dataset:
+
+```python
+>>> empty_dataset[()]
+h5py.Empty(dtype="f")
+```
+
+数据集的 dtype 可以通过 `<dset>.dtype` 访问。空数据集不能切片，且在空数据集上调用数据集的部分方法，如 `read_direct` 会抛出 `TypeError`。 
+
+## API
 
 ## 参考
 
