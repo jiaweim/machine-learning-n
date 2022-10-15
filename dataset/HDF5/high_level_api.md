@@ -1,59 +1,62 @@
 # 高级 API
 
 - [高级 API](#高级-api)
-  - [File Objects](#file-objects)
+  - [文件对象](#文件对象)
     - [打开或创建文件](#打开或创建文件)
     - [File drivers](#file-drivers)
     - [Python file-like objects](#python-file-like-objects)
     - [Version bounding](#version-bounding)
-    - [Closing files](#closing-files)
+    - [关闭文件](#关闭文件)
     - [User block](#user-block)
     - [Filenames on different systems](#filenames-on-different-systems)
     - [Chunk cache](#chunk-cache)
-  - [Groups](#groups)
-  - [Datasets](#datasets)
-    - [Chunked](#chunked)
+    - [文件参考](#文件参考)
   - [Filter](#filter)
+  - [参考](#参考)
 
-## File Objects
+## 文件对象
 
 文件对象是 HDF5 的入口。除了文件相关功能，每个文件对象也是 HDF5 文件的 root group。
 
 ### 打开或创建文件
 
+HDF5 文件的工作方式与标准 Python 文件对象相似。支持 r/w/a 这样的标准模式，不再使用时应关闭。
+
 ```python
 f = h5py.File('myfile.hdf5','r')
 ```
 
+文件名为 byte string 或 unicode string。
+
 |模式|说明|
 |---|---|
-|r|Readonly, file must exist (default)|
-|r+|Read/write, file must exist|
-|w|Create file, truncate if exists|
-|w- or x|Create file, fail if exists|
-|a|Read/write if exists, create otherwise|
+|r|只读，文件必须存在（默认）|
+|r+|读/写，文件必须存在|
+|w|创建文件，已有同名文件被覆盖|
+|w- or x|创建文件，已有同名文件则失败|
+|a|读/写文件，不存在则创建一个新的|
 
 ### File drivers
 
-HDF5 提供各种不同的底层驱动，它们将逻辑 HDF5 地址空间映射到不同的存储机制。可以在打开文件时指定使用的驱动：
+HDF5 提供各种不同的底层驱动，将逻辑 HDF5 地址空间映射到不同的存储机制。在打开文件时可以指定驱动：
 
 ```python
 f = h5py.File('myfile.hdf5', driver=<driver name>, <driver_kwds>)
 ```
 
-例如，HDF5 "core" driver 可用于创建纯内存的 HDF5 文件，在关闭时可以选择写入 disk。下面是支持的 drivers。
+例如，HDF5 "core" driver 可用于创建纯内存中的 HDF5 文件，在关闭时可以选择写入 disk。下面是支持的 drivers。
 
 - **None**
 
-**Strongly recommended**. Use the standard HDF5 driver appropriate for the current platform. On UNIX, this is the H5FD_SEC2 driver; on Windows, it is H5FD_WINDOWS.
+**强烈推荐**，选择适合当前平台的标准 HDF5 驱动。在 UNIX 上为 H5FD_SEC2 driver，在 Windows 为 H5FD_WINDOWS。
 
 - ‘sec2’
 
-Unbuffered, optimized I/O using standard POSIX functions.
+使用标准 POSIX 函数实现的无缓存 I/O。
 
 - ‘stdio’
 
-Buffered I/O using functions from stdio.h.
+使用 stdio.h 中的函数实现的缓存 I/O。
 
 - ‘core’
 
@@ -103,7 +106,7 @@ The argument values must be bytes objects.
 
 ### Python file-like objects
 
-`File` 的第一个参数可能是 file-like 对象，如 `io.BytesIO` 或 `tempfile.TemporaryFile`。这是创建临时 HDF5 文件的便捷方法，可用于测试或通过网络发送中。
+`File` 的第一个参数可以是 file-like 对象，如 `io.BytesIO` 或 `tempfile.TemporaryFile`。这是创建临时 HDF5 文件的便捷方法，可用于测试或通过网络发送中。
 
 file-like 对象必须以 binary I/O 打开，且包含方法 `read()`, `write()`, `seek()`, `tell()`, `truncate()` 和 `flush()`。
 
@@ -166,7 +169,7 @@ f = h5py.File('name.hdf5', libver=('earliest', 'v108'))
 
 表示向后完全兼容到 HDF5 1.8。使用任何新的 HDF5 特征会抛出错误。
 
-### Closing files
+### 关闭文件
 
 调用 `File.close()` 或使用 `with h5py.File(...)` block 关闭文件后，文件相关的任何对象（groups, datasets）不可用。HDF5 称其为 'strong' closing。
 
@@ -182,6 +185,7 @@ ds[0]
 def get_dataset():
     f2 = h5py.File('f2.h5', 'r')
     return f2['dataset']
+
 ds = get_dataset()
 
 # OK - f2 is out of scope, but the dataset reference keeps it open:
@@ -217,40 +221,35 @@ Unix-like 系统使用 native bytes。
 
 ### Chunk cache
 
-## Groups
+### 文件参考
 
-Group 是 HDF5 文件使用的容器机制。从 Python 角度看，有点像 dict，"keys" 为 group 的名称，"values" 是其成员对象。
-
-## Datasets
-
-### Chunked
-
-分块存储，数据集被分成规则大小的片段，随机存储在磁盘上，并使用 B 树进行索引。分块存储使得调整数据集大小很方便，并且由于数据存储在固定大小的分块中，所以可以使用压缩过滤器。
-
-使用 `chunks` 关键字指定 chunk shape 并启用分块存储：
+> **Note:** 与 Python 文件对象不同，`File.name` 属性给出的是 root group `/`。访问磁盘上的名称，使用 `File.filename`。
 
 ```python
-dset = f.create_dataset("chunked", (1000, 1000), chunks=(100, 100))
+class h5py.File(name,
+               mode='r',
+               driver=None,
+               libver=None,
+               userblock_size=None,
+               swmr=False,
+               rdcc_nslots=None,
+               rdcc_nbytes=None,
+               rdcc_w0=None,
+               track_order=None,
+               fs_strategy=None,
+               fs_persist=False,
+               fs_threshold=1,
+               fs_page_size=None,
+               page_buf_size=None,
+               min_meta_keep=0,
+               min_raw_keep=0,
+               locking=None,
+               alignment_threshold=1,
+               alignment_interval=1,
+               **kwds)
 ```
 
-数据将以 shape (100, 100) 的 block 进行读写；例如，数据 `dset[0:100,0:100]` 在文件中存储在一起。
-
-Chunk 对性能有影响。建议将 chunk 大小保持在 10 kb 到 1MB 之间，数据集大的设置更大的 chunk。当访问 chunk 中的任意元素，整个 chunk 被读入内存。
-
-因为 chunk shape 并不好选择，所以可以让 h5py 为了选择一个 shape：
-
-```python
-dset = f.create_dataset("autochunk", (1000, 1000), chunks=True)
-```
-
-当使用 compression 或 `maxshape` 且没有指定 chunk shape，auto-chunking 自动启用。
-
-`iter_chunks` 可以迭代 chunk：
-
-```python
-for s in dset.iter_chunks():
-     arr = dset[s]  # get numpy array for chunk
-```
+打开或创建文件。
 
 ## Filter
 
@@ -309,3 +308,8 @@ def run():
 if __name__ == "__main__":
     run()
 ```
+
+
+## 参考
+
+- https://docs.h5py.org/en/stable/index.html
