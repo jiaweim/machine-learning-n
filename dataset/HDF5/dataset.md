@@ -351,6 +351,12 @@ h5py.Empty(dtype="f")
 
 ## API
 
+```python
+class h5py.Dataset(identifier)
+```
+
+
+
 ## 参考
 
 - https://docs.h5py.org/en/stable/high/dataset.html

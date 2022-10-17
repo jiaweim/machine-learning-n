@@ -885,7 +885,7 @@ feat_extraction_model = keras.Model(inputs=vgg19.xs, outputs=features_list)
 
 **不支持动态体系结构**
 
-函数 API 将模型视为 layer 的 DAG 图，对大多数深度学习结构确实如此，但不是全部，例如递归网络和 Tree-RNN 就不是 DAG 图，无法使用函数 API 中实现。
+函数 API 将模型视为 layer 的 DAG 图，对大多数深度学习结构确实如此，但不是全部，例如递归网络和 Tree-RNN 就不是 DAG 图，无法使用函数 API 实现。
 
 ## 12. API 混搭
 

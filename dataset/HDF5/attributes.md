@@ -11,7 +11,7 @@ Last updated: 2022-10-16, 15:58
 
 ## 简介
 
-属性（Attributes）是使 HDF5 成为“自我描述”格式的关键部分。它们是直接连接到 `Group` 和 `Dataset` 对象的命名数据片段。这是 HDF5 存储元数据的标准方式。
+属性（Attributes）是使 HDF5 成为“自我描述”格式的关键部分。它们直接连接到 `Group` 和 `Dataset` 对象，包含命名数据片段。这是 HDF5 存储元数据的标准方式。
 
 每个 Group 或 Dataset 都有一个小的代理对象 `<obj>.attrs`。属性具有如下特征：
 

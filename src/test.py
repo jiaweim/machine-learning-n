@@ -1,21 +1,10 @@
-class h5py.File(name,
-               mode='r',
-               driver=None,
-               libver=None,
-               userblock_size=None,
-               swmr=False,
-               rdcc_nslots=None,
-               rdcc_nbytes=None,
-               rdcc_w0=None,
-               track_order=None,
-               fs_strategy=None,
-               fs_persist=False,
-               fs_threshold=1,
-               fs_page_size=None,
-               page_buf_size=None,
-               min_meta_keep=0,
-               min_raw_keep=0,
-               locking=None,
-               alignment_threshold=1,
-               alignment_interval=1,
-               **kwds)
+classMyModel(Model):
+    def __init__(self):
+        # 定义网络结构块
+        super(MyModel, self).__init__()
+
+    def call(self, x):
+        # 调用网络结构块，实现前向传播
+        return y
+
+model= MyModel()
