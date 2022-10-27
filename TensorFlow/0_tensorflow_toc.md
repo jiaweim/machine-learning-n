@@ -85,3 +85,5 @@
 
 - https://www.tensorflow.org/
 - [Intro to TensorFlow for Deep Learning](https://learn.udacity.com/courses/ud187)
+- [10 天吃掉那只 TensorFlow2](https://github.com/lyhue1991/eat_tensorflow2_in_30_days)
+- [Tensorflow tutorials](https://github.com/Tensorflow-Tutorials)
