@@ -327,3 +327,4 @@ self-attention 有各种变形形式，"Long Range Arena: A Benchmark for Effici
 - https://github.com/datawhalechina/leeml-notes
 - https://www.bilibili.com/video/BV1JA411c7VT
 - https://speech.ee.ntu.edu.tw/~hylee/ml/2021-spring.php
+- http://nlp.seas.harvard.edu/2018/04/03/attention.html
