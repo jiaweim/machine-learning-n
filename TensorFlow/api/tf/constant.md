@@ -12,15 +12,15 @@ tf.constant(
 )
 ```
 
-使用 tensor-like 对象创建常量 tensor。
+使用 tensor-like 对象创建 constant 张量。
 
-> **Note:** 所有 eager `tf.Tensor` 的值不可变（与 `tf.Variable` 相反）。从 `tf.constant` 返回的 tensor 没有特别的地方，与 tf.convert_to_tensor 本质上没有区别。之所以称为 `tf.constant` 是因为 `value` 嵌入到 `tf.Graph` 的 Const node。`tf.constant` 用于断言 value 能以这种方式嵌入。
+> **Note:** 所有 eager `tf.Tensor` 的值不可变（与 `tf.Variable` 相反）。从 `tf.constant` 返回的张量没有特别的地方，与 tf.convert_to_tensor 本质上没有区别。之所以称为 `tf.constant` 是因为它将 `value` 嵌入到 `tf.Graph` 的 Const node。`tf.constant` 用于断言 value 能以这种方式嵌入。
 
-- 如果没有指定参数 `dtype`，则从 `value` 的类型推断：
+- 如果没有指定参数 `dtype`，则从 `value` 的类型推断张量类型：
 
 ```python
 # 从 list 创建 1-D 常量 tensor
->>> tf.constant([1, 2, 3, 4, 5, 6])
+>>> tf.constant([1, 2, 3, 4, 5, 6]) # int32
 <tf.Tensor: shape=(6,), dtype=int32, numpy=array([1, 2, 3, 4, 5, 6])>
 >>> 从 numpy 数组创建 2-D 常量 tensor
 >>> a = np.array([[1, 2, 3], [4, 5, 6]])
@@ -30,7 +30,7 @@ array([[1, 2, 3],
        [4, 5, 6]])>
 ```
 
-- 如果指定了 `dtype`，则生成的 tensor 值被强制转换为 `dtype`
+- 如果指定了 `dtype`，则张量值被强制转换为 `dtype`
 
 ```python
 >>> tf.constant([1, 2, 3, 4, 5, 6], dtype=tf.float64)
@@ -52,7 +52,7 @@ array([[1, 2, 3],
 
 > 从该示例可以看出，`shape` 支持 tuple 和 list 类型
 
-- 将 eager tensor 传入 `value` 没有效果，甚至还可以传递梯度
+- 将 eager 张量传入 `value` 没有效果，甚至还可以传递梯度
 
 ```python
 >>> v = tf.Variable([0.0])

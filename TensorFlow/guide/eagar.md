@@ -1,8 +1,7 @@
-# 即时执行
+# eager 执行
 
-- [即时执行](#即时执行)
+- [eager 执行](#eager-执行)
   - [简介](#简介)
-  - [AutoGraph](#autograph)
   - [设置和基本用法](#设置和基本用法)
   - [动态控制流](#动态控制流)
   - [参考](#参考)
@@ -14,27 +13,15 @@
 
 TensorFlow 1.x 定义静态计算图，这种描述式编程让很多人不习惯。Pytorch，另一个受欢迎的深度学习包，使用命令式编程和动态的方式定义计算图，可以随时定义、修改以及执行 graph node，不需要特殊的 session 接口或 placeholder。这就是所谓的**即时执行**（eager execution），此时模型定义是动态的，并且立即执行。
 
-TensorFlow 2.x 支持即时执行。因此不再需要先定义静态计算图再执行。所有模型都可以动态定义并立即执行。所有的 `tf.keras` API 都和即时执行兼容。
+TensorFlow 2.x 支持 eager 执行。因此不再需要先定义静态计算图再执行。所有模型都可以动态定义并立即执行。所有的 `tf.keras` API 都和 eager 执行兼容。
 
-TensorFlow 的即时执行是一个命令式的编程环境，不需要构建图就可以直接计算操作结果。Eager 执行使得 TensorFlow 的学习以及模型调试更为容易，也减少了样板代码。
+TensorFlow 的 eager 执行是一个命令式的编程环境，不需要构建 graph 就可以直接计算操作结果。Eager 执行使得 TensorFlow 的学习以及模型调试更为容易，也减少了样板代码。
 
 Eager 执行是一个用于研究和实验的机器学习平台，提供了如下工具：
 
 - 直观的界面，自然地使用 Python 数据结构构造代码，快速迭代小型模型和数据；
 - 简化调试，可以直接调用 ops 检查正在运行的模型并测试更改。使用标准 Python 调试工具进行即时错误报告；
 - 自然控制流，使用 Python 控制流代替图形控制流，从而简化了动态模型的构建。
-
-## AutoGraph
-
-TensorFlow 2.x 支持 Python 代码，包括控制流 `if-while`, `print()` 等 Python 原生特性，并将其转换为 TensorFlow graph 代码。该特性十分重要，因为 Python 编码非常直观，习惯 Python 不一定适应将代码转换为 graph 格式。
-
-AutoGraph 的功能就是将 eager-style 的 Python 代码自动转换为 graph code。
-
-使用 `AutoGraph` 十分简单：将 Python 代码使用 `tf.function` 装饰器注释即可：
-
-```py
-
-```
 
 ## 设置和基本用法
 
@@ -156,3 +143,4 @@ fizzbuzz(15)
 ## 参考
 
 - https://tensorflow.google.cn/guide/eager
+- https://github.com/tensorflow/docs/blob/master/site/en/r1/guide/eager.ipynb

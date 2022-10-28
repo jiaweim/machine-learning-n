@@ -1,9 +1,8 @@
 # Graph 和 tf.function 简介
 
 - [Graph 和 tf.function 简介](#graph-和-tffunction-简介)
-  - [速览](#速览)
   - [简介](#简介)
-    - [什么是 graph](#什么是-graph)
+    - [什么是 Graph](#什么是-graph)
     - [graph 的优点](#graph-的优点)
   - [配置](#配置)
   - [graph 的使用](#graph-的使用)
@@ -22,44 +21,15 @@ Last updated: 2022-10-11, 12:39
 @author Jiawei Mao
 ****
 
-## 速览
-
-**Graph 优点**
-
-- 可移植性好
-- 性能更好
-
-**Graph 使用**
-
-使用方法一：函数调用
-
-```python
-a_function_that_uses_a_graph = tf.function(a_regular_function)
-```
-
-使用方法二：装饰器
-
-```python
-@tf.function
-def outer_function(x):
-  y = tf.constant([[2.0], [3.0]])
-  b = tf.constant(4.0)
-```
-
-**多态性**
-
-一个 `Function` 可能包括多个 `ConcreteFunction`，而每个 `ConcreteFunction` 封装一个 `tf.Graph`。
-
-
 ## 简介
 
 下面介绍 TensorFlow 和 Keras 的工作原理。包括如何使用 `tf.function` 从 eager 执行切换到 graph 执行。
 
-### 什么是 graph
+### 什么是 Graph
 
-在前面的三个指南中，TF 都是 eager 执行，即 TF 操作由 Python 逐个执行的，执行结果也返回到 Python.
+在前面的三个指南中，TF 都是 eager 执行，即 TF 操作由 Python 逐个执行，执行结果返回到 Python。
 
-eager 执行有其独特优势，但是 graph 执行的可移植性更好、性能更佳。Graph 执行将张量计算作为 TF 图（TensorFlow graph）执行，下面将 `tf.Graph` 简称为 "graph"。
+Eager 执行有其独特优势，但是 graph 执行的可移植性更好、性能更佳。Graph 执行将张量计算作为 TF 图（TensorFlow graph）执行，下面将 `tf.Graph` 简称为 "graph"。
 
 graph 是一个数据结构，包含一组基本计算单元 `tf.Operation` 和一组基本数据单元 `tf.Tensor`。这些对象在 [tf.Graph](https://tensorflow.google.cn/api_docs/python/tf/Graph) context 中定义。由于 graph 是数据结构，因此即使没有原始 Python 代码，也可以保存、运行和恢复 graph。
 
