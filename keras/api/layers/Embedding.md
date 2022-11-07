@@ -32,7 +32,7 @@ tf.keras.layers.Embedding(
 
 将正整数（索引）转换为固定大小的密集向量。例如：`[[4], [20]] -> [[0.25, 0.1], [0.6, -0.2]]`。
 
-该 layer 只能用于固定范围的正整数输入。[tf.keras.layers.TextVectorization](TextVectorization.md), [tf.keras.layers.StringLookup](StringLookup.md) 和 [tf.keras.layers.IntegerLookup](IntegerLookup.md) 预处理层可以辅助准备 `Embedding` 的输入。
+该 layer 只能用于固定范围的正整数输入。`tf.keras.layers.TextVectorization`, `tf.keras.layers.StringLookup` 和 `tf.keras.layers.IntegerLookup` 预处理层可以辅助准备 `Embedding` 的输入。
 
 该层接受 [tf.Tensor](../../Tensor.md) 和 [tf.RaggedTensor](../../RaggedTensor.md) 输入，不支持 [tf.SparseTensor](../../sparse/SparseTensor.md)。
 
@@ -96,3 +96,4 @@ with tf.device('cpu:0'):
 
 - https://keras.io/api/layers/core_layers/embedding/
 - https://www.tensorflow.org/api_docs/python/tf/keras/layers/Embedding
+- https://tensorflow.google.cn/api_docs/python/tf/keras/layers/Embedding

@@ -26,17 +26,19 @@
 
 ## 简介
 
-TF 2 默认启用 eager 执行。用户接口直观灵活，运行一次性操作更容易、快捷，但这可能牺牲性能和可部署性。
+TF 2 默认启用 eager 执行，eager 执行用户接口直观灵活，运行一次性操作更容易、快捷，但这可能牺牲**性能**和**可部署性**。
 
-可以使用 `tf.function` 将程序转换为 graph。这是一个转换工具，将 Python 代码转换为独立于 Python 数据流 graph。辅助创建高性能的可移植模型，是使用 `SavedModel` 的基础。
+> eager 执行使用简单，但性能和可部署性较差
 
-下面介绍 `tf.function` 工作机制，从而帮助更有效地使用它。
+可以使用 `tf.function` 将 Python 函数转换为 graph。即 `tf.function` 是一个转换工具，将 Python 代码转换为不依赖于 Python 的数据流 graph。这有助于创建高性能的可移植模型，是使用 `SavedModel` 的基础。
+
+下面介绍 `tf.function` 的概念和工作机制，从而可以更有效地使用它。
 
 主要建议：
 
 - 在 eager 模型下调试，然后使用 `@tf.function` 进行装饰；
 - 不要依赖于 Python 副作用，如对象 mutation 或 list append 操作；
-- `tf.function` 与 TF 操作运行时效果最好，NumPy 和 Python 调用被转换为常量。
+- `tf.function` 与 TF 操作运行时效果最好，NumPy 和 Python 调用被转换为**常量**。
 
 ## 设置
 
@@ -44,7 +46,7 @@ TF 2 默认启用 eager 执行。用户接口直观灵活，运行一次性操�
 import tensorflow as tf
 ```
 
-定义一个辅助函数来展示可能遇到的各种错误：
+定义一个辅助函数来演示可能遇到的各种错误类型：
 
 ```python
 import traceback
@@ -70,13 +72,12 @@ def assert_raises(error_class):
 
 ### 使用
 
-定义 `Function`（如使用 `@tf.function` 装饰器）就像 TF 核心操作，可以 eager 执行，可以计算梯度等。
+定义的 `Function`（如使用 `@tf.function` 装饰器）就像 TF 核心操作，可以 eager 执行，也可以计算梯度等。
 
 ```python
-@tf.function  # The decorator converts `add` into a `Function`.
+@tf.function  # tf.function 装饰器将 `add` 转换为 `Function`.
 def add(a, b):
     return a + b
-
 
 add(tf.ones([2, 2]), tf.ones([2, 2]))  #  [[2., 2.], [2., 2.]]
 ```

@@ -1,14 +1,14 @@
 # 函数 API
 
 - [函数 API](#函数-api)
-  - [1. 配置](#1-配置)
-  - [2. 简介](#2-简介)
-  - [3. 训练、评估和推断](#3-训练评估和推断)
-  - [4. 保存和序列化](#4-保存和序列化)
-  - [5. 使用相同 layers 定义多个模型](#5-使用相同-layers-定义多个模型)
-  - [6. 模型是可调用的](#6-模型是可调用的)
-  - [7. 复杂拓扑图形结构](#7-复杂拓扑图形结构)
-    - [7.1 多输入输出](#71-多输入输出)
+  - [配置](#配置)
+  - [简介](#简介)
+  - [训练、评估和推断](#训练评估和推断)
+  - [保存和序列化](#保存和序列化)
+  - [使用相同 layers 定义多个模型](#使用相同-layers-定义多个模型)
+  - [模型是可调用对象](#模型是可调用对象)
+  - [复杂拓扑图形结构](#复杂拓扑图形结构)
+    - [多输入输出](#多输入输出)
     - [7.2 A toy ResNet model](#72-a-toy-resnet-model)
   - [8. 共享层](#8-共享层)
   - [9. 提取和重用 graph 节点](#9-提取和重用-graph-节点)
@@ -23,7 +23,7 @@ Last updated: 2022-06-30, 15:36
 @author Jiawei Mao
 ****
 
-## 1. 配置
+## 配置
 
 ```python
 import numpy as np
@@ -32,9 +32,9 @@ from tensorflow import keras
 from tensorflow.keras import layers
 ```
 
-## 2. 简介
+## 简介
 
-Keras 函数（functional）API 是一种比 [tf.keras.Sequential](sequential_model.md) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，以及包含多个输入或多个输出的模型。
+Keras 函数（functional）API 是一种比 [tf.keras.Sequential](https://tensorflow.google.cn/guide/keras/sequential_model) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，以及包含多个输入或多个输出的模型。
 
 其主要思想是，深度学习模型是由神经网络 layer 组成的有向无环图（directed acyclic graph, DAG），函数式 API 提供构建这种图的方法。
 
@@ -52,21 +52,19 @@ Keras 函数（functional）API 是一种比 [tf.keras.Sequential](sequential_mo
 (output: logits of a probability distribution over 10 classes)
 ```
 
-该模型包含三层。使用函数 API 创建该模型，首先创建输入节点：
+该模型包含三层，使用函数 API 创建该模型，首先创建输入节点：
 
 ```python
 inputs = keras.Input(shape=(784,))
 ```
 
-输入向量 shape 设置为 784。此处一般只指定样本 shape，忽略 batch size。
-
-假如输入 shape 为 `(32, 32, 3)` 的图片。此时可定义输入为：
+输入向量 shape 为 784。此处一般只指定样本 shape，忽略 batch size。假如输入 shape 为 `(32, 32, 3)` 的图片。此时可定义输入为：
 
 ```python
 img_inputs = keras.Input(shape=(32, 32, 3))
 ```
 
-`keras.Input` 返回的 `inputs` 包含输入数据的 shape 和 `dtype`：
+`keras.Input` 返回的 `inputs` 包含输入数据的 `shape` 和 `dtype`：
 
 ```python
 >>> inputs.shape
@@ -75,7 +73,7 @@ TensorShape([None, 784])
 tf.float32
 ```
 
-定义 DAG 图的下一个节点，将 `inputs` 对象作为输入：
+定义 DAG 的下一个节点，`inputs` 对象作为输入：
 
 ```python
 dense = layers.Dense(64, activation="relu")
@@ -84,7 +82,7 @@ x = dense(inputs)
 
 层调用（layer call）就像从 "inputs" 到这个 dense 层画了个箭头。将 `inputs` 传入 `dense` 层，获得输出 `x`。
 
-继续创建图中余下两层：
+继续创建 graph 的余下两层：
 
 ```python
 x = layers.Dense(64, activation="relu")(x)
@@ -141,13 +139,13 @@ keras.utils.plot_model(model, "my_first_model_with_shape_info.png", show_shapes=
 
 ![](images/2022-02-16-12-31-53.png)
 
-这个图和创建该图的代码几乎相同。只是将连接箭头用方法调用替换了。
+这个图和创建该图的代码几乎相同，只是将连接箭头用方法调用替换了。
 
-## 3. 训练、评估和推断
+## 训练、评估和推断
 
-使用函数 API 构建的模型，在训练、评估和推断方面与 [Sequential](sequential_model.md) 模型完全相同。
+使用函数 API 构建的模型，在训练、评估和推断方面与 [Sequential](https://tensorflow.google.cn/guide/keras/sequential_model) 模型完全相同。
 
-`Model` 类内置有训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的训练流程，如 GAN。
+`Model` 类内置训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的训练流程，如 GAN。
 
 下面，加载 MNIST 数据集，reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
 
@@ -180,7 +178,7 @@ Test loss: 0.15118415653705597
 Test accuracy: 0.9559999704360962
 ```
 
-## 4. 保存和序列化
+## 保存和序列化
 
 使用函数式 API 创建的模型的保存与序列化方式与使用 [Sequential](sequential_model.md) 创建的模型相同。保存函数式 API 创建的模型的标准方法是调用 `model.save()` 将整个模型保存为单个文件。随后可以用该文件重新创建完全相同的模型。
 
@@ -209,9 +207,9 @@ del model
 model = keras.models.load_model(model_path)
 ```
 
-## 5. 使用相同 layers 定义多个模型
+## 使用相同 layers 定义多个模型
 
-在函数 API 中，通过指定图的输入和输出创建模型。这意味着单个 graph of layers 可用来生成多个模型。
+在函数 API 中，通过指定 graph 的输入和输出创建模型。这意味着单个 graph of layers 可用来生成多个模型。
 
 下面演示使用相同的 layers 堆栈实例化两个模型：
 
@@ -320,9 +318,9 @@ _________________________________________________________________
 
 `Conv2D` layer 的逆操作是 `Conv2DTranspose` layer，`MaxPooling2D` 的逆操作是 `UpSampling2D` 层。
 
-## 6. 模型是可调用的
+## 模型是可调用对象
 
-模型和 layer 一样，都是可调用的。通过调用模型，不仅可以重用模型结构，还可以重用它的权重。
+模型和 layer 一样可调用，通过调用模型，不仅可以重用模型结构，还可以重用它的权重。
 
 为了演示模型调用的效果，下面用另一个 autoencoder 示例演示：创建一个 encoder 模型和一个 decoder 模型，然后通过两次调用将它们连接起来获得最终的 autoencoder 模型：
 
@@ -448,9 +446,9 @@ outputs = layers.average([y1, y2, y3])
 ensemble_model = keras.Model(inputs=inputs, outputs=outputs)
 ```
 
-## 7. 复杂拓扑图形结构
+## 复杂拓扑图形结构
 
-### 7.1 多输入输出
+### 多输入输出
 
 函数 API 可以创建包含多个输入和输出的模型，[Sequential](sequential_model.md) API 就不行。
 
