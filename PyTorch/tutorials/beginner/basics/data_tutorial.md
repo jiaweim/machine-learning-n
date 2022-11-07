@@ -12,23 +12,24 @@
   - [遍历 DataLoaderr](#遍历-dataloaderr)
   - [参考](#参考)
 
-***
+Last updated: 2022-11-07, 18:29
+****
 
 ## 简介
 
-数据预处理的代码容易变得胡乱以至于难以维护，理想情况下，我们希望数据集代码与模型训练代码分离，以获得更好的可读性和模块化。PyTorch 提供了两个数据类：`torch.utils.data.DataLoader` 和 `torch.utils.data.Dataset` 用来加载数据。`Dataset` 存储样本及其标签，`DataLoader` 将 `Dataset` 封装为可迭代对象，包括访问数据。
+数据预处理的代码容易变得混乱而难以维护，理想情况下，数据集代码与模型训练代码应该分离，以获得更好的可读性和模块化。PyTorch 提供了两个数据类：`torch.utils.data.DataLoader` 和 `torch.utils.data.Dataset` 用来加载数据。`Dataset` 存储样本及其标签，`DataLoader` 将 `Dataset` 封装为可迭代对象，包括访问数据。
 
-PyTorch 特定领域库提供了许多预加载的数据集（如 FashionMNIST），这些数据集扩展 `torch.utils.data.Dataset` 并实现了特定于数据的函数。它们可以用于模型的原型和基准测试。数据集位置：[图像数据集](https://pytorch.org/vision/stable/datasets.html)，[文本数据集](https://pytorch.org/text/stable/datasets.html)，[音频数据集](https://pytorch.org/audio/stable/datasets.html)。
+PyTorch 特定领域库提供了许多预加载的数据集（如 FashionMNIST），这些数据集扩展 `torch.utils.data.Dataset` 并实现了特定于数据的函数。它们可用于模型的原型和基准测试。数据集位置：[图像数据集](https://pytorch.org/vision/stable/datasets.html)，[文本数据集](https://pytorch.org/text/stable/datasets.html)，[音频数据集](https://pytorch.org/audio/stable/datasets.html)。
 
 ## 加载数据集
 
-下面演示如何从 TorchVision 加载 [Fashion-MNIST](https://github.com/zalandoresearch/) 数据集。Fashion-MNIST 数据集是 Zalando 文章中的一个图像数据集，包含 6 万个训练样本和 1 万个测试样本。每个样本包含一个 28x28 灰度图像和 10 分类中的一个标签。
+下面演示如何从 TorchVision 加载 [Fashion-MNIST](https://github.com/zalandoresearch/) 数据集。Fashion-MNIST 数据集是 Zalando 文章中的一个图像数据集，包含 6 万个训练样本和 1 万个测试样本。每个样本包含一个 28x28 灰度图像和 10 分类标签。
 
 使用以下参数加载 [FashionMNIST 数据集](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)：
 
 - `root` 是保存 train/test 数据的路径；
 - `train` 指定是训练集还是测试集；
-- `download=True` 表示如果 `root` 目录没有该数据，就从网上下载；
+- `download=True` 表示如果 `root` 目录没有该数据，是否从网上下载；
 - `transform` 和 `target_transform` 指定对特征和标签的转换操作。
 
 ```python
