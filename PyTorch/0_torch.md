@@ -6,7 +6,5 @@
 ## PyTorch 入门
 
 - [快速入门](tutorials/beginner/basics/quickstart_tutorials.md)
+- [张量](tutorials/beginner/basics/tensorqs_tutorial.md)
 
-## 使用
-
-- [张量](tensor.ipynb)
