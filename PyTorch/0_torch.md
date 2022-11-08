@@ -11,3 +11,4 @@
 - [转换](tutorials/beginner/basics/transforms_tutorial.md)
 - [构建模型](tutorials/beginner/basics/buildmodel_tutorial.md)
 - [自动微分](tutorials/beginner/basics/autogradqs_tutorial.md)
+- [优化模型参数](tutorials/beginner/basics/optimization_tutorial.md)
