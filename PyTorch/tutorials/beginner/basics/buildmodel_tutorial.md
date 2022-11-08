@@ -1,5 +1,21 @@
 # 构建模型
 
+- [构建模型](#构建模型)
+  - [简介](#简介)
+  - [训练设备](#训练设备)
+  - [定义类](#定义类)
+  - [Model Layers](#model-layers)
+    - [nn.Flatten](#nnflatten)
+    - [nn.Linear](#nnlinear)
+    - [nn.ReLU](#nnrelu)
+    - [nn.Sequential](#nnsequential)
+    - [nn.Softmax](#nnsoftmax)
+  - [模型参数](#模型参数)
+  - [参考](#参考)
+
+Last updated: 2022-11-08, 10:44
+****
+
 ## 简介
 
 神经网络由执行数据操作的 layers/modules 组成。[torch.nn](https://pytorch.org/docs/stable/nn.html) 命名空间提供了构建神经网络所需的模块。PyTorch 中的所有 module 都继承自 [nn.Module](https://pytorch.org/docs/stable/generated/torch.nn.Module.html)。神经网络是包含其它 modules 的 module。这种嵌套结构方便构建和管理复杂的体系结构。
