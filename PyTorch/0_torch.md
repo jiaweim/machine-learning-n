@@ -1,8 +1,5 @@
 # PyTorch
 
-- [安装](install.ipynb)
-- [自动微分](autograd_torch.md)
-
 ## PyTorch 入门
 
 - [快速入门](tutorials/beginner/basics/quickstart_tutorials.md)
@@ -12,3 +9,7 @@
 - [构建模型](tutorials/beginner/basics/buildmodel_tutorial.md)
 - [自动微分](tutorials/beginner/basics/autogradqs_tutorial.md)
 - [优化模型参数](tutorials/beginner/basics/optimization_tutorial.md)
+- [保存和加载模型](tutorials/beginner/basics/saveloadrun_tutorial.md)
+
+## PyTorch 学习
+
