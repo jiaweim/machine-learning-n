@@ -68,3 +68,5 @@ Boyd, S., & Vandenberghe, L. (2004). Cambridge university press.
 ## 实例
 
 - [图片分类效果](http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html)
+- https://developer.nvidia.com/deep-learning-examples
+- 

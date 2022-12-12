@@ -14,3 +14,7 @@
 
 这种问题一般是 vscode 中 Python 环境没有配置好。
 
+## 云服务
+
+云服务商，如 Amazon Web Services, Google Cloud Platform, Microsoft Azure 都提供基于 GPU 的实例（也称为虚拟机或 VM）。
+
