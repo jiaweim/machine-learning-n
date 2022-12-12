@@ -123,7 +123,26 @@ class torch.Tensor
 
 创建张量的方法，主要有如下几种：
 
-- 
+- 使用已有数据数据创建张量：`torch.tensor()`
+- 创建指定 size 的张量：`torch.*`
+- 创建与另一个张量相同 size 的张量：`torch.*_like`
+- 创建于另一个张量相同 dtype 的张量：`tensor.new_*`
+
+```python
+Tensor.T
+```
+
+返回张量转置视图。
+
+如果 `x` 的维度数为 `n`，则 `x.T` 等价于 `x.permute(n-1, n-2, ..., 0)`。
+
+> **WARNING**：不推荐对维度不是 2 的张量使用 `Tensor.T()`，在未来版本会抛出错误。对批量矩阵的转置推荐使用 `mT`；反转矩阵维度推荐使用 `x.permute(*torch.arange(x.ndim - 1, -1, -1))`
+
+```python
+Tensor.H
+```
+
+
 
 ## 方法
 
