@@ -5,9 +5,11 @@
   - [数据类型](#数据类型)
   - [初始化和基础操作](#初始化和基础操作)
   - [Tensor 类 API](#tensor-类-api)
-  - [方法](#方法)
+  - [操作](#操作)
     - [detach](#detach)
     - [numpy](#numpy)
+    - [to](#to)
+    - [torch.Tensor.view](#torchtensorview)
   - [参考](#参考)
 
 ***
@@ -142,13 +144,16 @@ Tensor.T
 Tensor.H
 ```
 
-
-
-## 方法
+## 操作
 
 |方法|说明|
 |---|---|
+|`Tensor.bfloat16`|`self.bfloat16()` 等价于 `self.to(torch.bfloat16)`|
 |[Tensor.detach](#detach) |返回一个从当前 graph 中分离出来的新的张量|
+|`Tensor.t`|转置，参考 [torch.t()](torch.md#torcht)|
+|`Tensor.unsqueeze`|See torch.unsqueeze()|
+|`Tensor.unsqueeze_`|`unsqueeze()` 的原位操作|
+|Tensor.view|返回一个数据与 `self` 张量相同但 shape 不同的张量|
 
 ### detach
 
@@ -171,6 +176,29 @@ Tensor.numpy(*, force=False) → numpy.ndarray
 如果 `force` 为 `True`，则等价于 `t.detach().cpu().resolve_conj().resolve_neg().numpy()`。如果 tensor 不在 CPU，或者设置了共轭位或负位，则张量与 ndarray 不共享内存。将 `force` 设置为 `True` 是一种获得张量 ndarray 形式的简单方法。
 
 即设置 `force=True` 返回的 ndarray 可以与张量不共享内存。
+
+### to
+
+转换类型。
+
+```python
+>>> long_tensor = torch.tensor([[0, 0, 1], [1, 1, 1], [0, 0, 0]])
+>>> long_tensor.type()
+'torch.LongTensor'
+>>> float_tensor = long_tensor.to(dtype=torch.float32)
+>>> float_tensor.type()
+'torch.FloatTensor'
+```
+
+### torch.Tensor.view
+
+```python
+Tensor.view(*shape) → Tensor
+```
+
+返回一个与 `self` 张量具有相同数据是 shape 不同的张量。
+
+要张量视图，新的视图尺寸与原始张量的尺寸和步长必须兼容，即新的视图维度要么是原始维度的子空间，要么
 
 ## 参考
 
