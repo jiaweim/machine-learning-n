@@ -1,6 +1,6 @@
 # DATASETS & DATALOADERS
 
-- [DATASETS & DATALOADERS](#datasets--dataloaders)
+- [DATASETS \& DATALOADERS](#datasets--dataloaders)
   - [简介](#简介)
   - [加载数据集](#加载数据集)
   - [迭代和可视化数据集](#迭代和可视化数据集)
@@ -23,7 +23,7 @@ PyTorch 特定领域库提供了许多预加载的数据集（如 FashionMNIST�
 
 ## 加载数据集
 
-下面演示如何从 TorchVision 加载 [Fashion-MNIST](https://github.com/zalandoresearch/) 数据集。Fashion-MNIST 数据集是 Zalando 文章中的一个图像数据集，包含 6 万个训练样本和 1 万个测试样本。每个样本包含一个 28x28 灰度图像和 10 分类标签。
+下面演示如何从 TorchVision 加载 [Fashion-MNIST](https://github.com/zalandoresearch/) 数据集。Fashion-MNIST 数据集是 Zalando 文章中的一个图像数据集，包含 6 万训练样本和 1 万测试样本。每个样本包含一个 28x28 灰度图像和 10 分类标签。
 
 使用以下参数加载 [FashionMNIST 数据集](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)：
 
