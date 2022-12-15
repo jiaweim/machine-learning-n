@@ -3,8 +3,10 @@
 - [图像变换和增强](#图像变换和增强)
   - [简介](#简介)
   - [Compositions of transforms](#compositions-of-transforms)
+  - [Transforms on Tensor only](#transforms-on-tensor-only)
   - [总结](#总结)
     - [Compose](#compose)
+    - [Normalize](#normalize)
   - [参考](#参考)
 
 ***
@@ -35,6 +37,10 @@
 
 ## Compositions of transforms
 
+## Transforms on Tensor only
+
+
+
 ## 总结
 
 ### Compose
@@ -45,6 +51,15 @@ torchvision.transforms.Compose(transforms)
 
 将多个变换组合在一起。该变换不支持
 
+### Normalize
+
+```python
+torchvision.transforms.Normalize(mean, std, inplace=False)
+```
+
+根据均值和方差归一化张量图像。该变换不支持 PIL 图像。对 `n` 个通道的均值 `(mean[1],...,mean[n])` 和标准差 `(std[1],..,std[n])`，该变换对每个通道依次进行归一化，即 `output[channel] = (input[channel] - mean[channel]) / std[channel]`。
+
+> **NOTE**：该变换不是原地操作，即不改变输入张量。
 
 ## 参考
 
