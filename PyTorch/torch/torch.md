@@ -4,7 +4,8 @@
   - [Tensors](#tensors)
     - [创建操作](#创建操作)
     - [索引、切片、连接和突变](#索引切片连接和突变)
-  - [随机抽样](#随机抽样)
+  - [Random sampling](#random-sampling)
+    - [torch.manual\_seed](#torchmanual_seed)
   - [Math operations](#math-operations)
     - [Pointwise Ops](#pointwise-ops)
     - [Reduction Ops](#reduction-ops)
@@ -12,6 +13,7 @@
     - [Spectral Ops](#spectral-ops)
     - [Other Operations](#other-operations)
     - [BLAS and LAPACK Operations](#blas-and-lapack-operations)
+      - [torch.mm](#torchmm)
   - [Utilities](#utilities)
   - [Operator Tags](#operator-tags)
   - [操作](#操作)
@@ -364,7 +366,21 @@ where
 
 Return a tensor of elements selected from either x or y, depending on condition.
 
-## 随机抽样
+## Random sampling
+
+### torch.manual_seed
+
+```python
+torch.manual_seed(seed)
+```
+
+设置生成随机数的种子。返回 `torch.Generator` 对象。
+
+参数：
+
+- **seed** (`int`)
+
+期望 seed。取值范围 [-0x8000_0000_0000_0000, 0xffff_ffff_ffff_ffff]。负数按公式 0xffff_ffff_ffff_ffff + seed 重新映射到正数。
 
 ## Math operations
 
@@ -932,6 +948,20 @@ Counts the number of non-zero values in the tensor input along the given dim.
 ### Other Operations
 
 ### BLAS and LAPACK Operations
+
+#### torch.mm
+
+```python
+torch.mm(input, mat2, *, out=None) → Tensor
+```
+
+计算矩阵 `input` 和 `mat2` 的矩阵乘法。
+
+如果 `input` 是 $(n\times m)$ 张量，mat2 是 $(m\times p)$ 张量，则输出 `out` 为 $(n\times p)$ 张量。
+
+> **NOTE** 该函数不支持广播，对广播矩阵乘法，使用 `torch.matmul()`
+
+
 
 ## Utilities
 
