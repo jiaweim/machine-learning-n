@@ -1,5 +1,20 @@
 # torch.nn.functional
 
+- [torch.nn.functional](#torchnnfunctional)
+  - [卷积函数](#卷积函数)
+  - [池化函数](#池化函数)
+  - [非线性激活函数](#非线性激活函数)
+  - [线性函数](#线性函数)
+  - [Dropout 函数](#dropout-函数)
+  - [Sparse 函数](#sparse-函数)
+  - [Loss functions](#loss-functions)
+    - [l1\_loss](#l1_loss)
+  - [操作](#操作)
+    - [one\_hot](#one_hot)
+  - [参考](#参考)
+
+***
+
 ## 卷积函数
 
 ## 池化函数
@@ -11,6 +26,19 @@
 ## Dropout 函数
 
 ## Sparse 函数
+
+## Loss functions
+
+### l1_loss
+
+```python
+torch.nn.functional.l1_loss(input, target, 
+    size_average=None, 
+    reduce=None, 
+    reduction='mean') → Tensor
+```
+
+
 
 ## 操作
 
