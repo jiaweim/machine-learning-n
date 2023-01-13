@@ -6,6 +6,8 @@
   - [逻辑回归](#逻辑回归)
   - [参考](#参考)
 
+***
+
 ## 简介
 
 下面介绍一系列用于线性回归分析的方法，其目标值是一系列特征的线性组合，即广义的线性模型。在数学中，如果 $\hat{y}$ 是预测值，线性组合可以表示为：
@@ -39,6 +41,7 @@ array([0.5, 0.5])
 
 ## 逻辑回归
 
+逻辑回归实现为 [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)。虽然叫逻辑回归，但是它是一个线性模型，
 
 ## 参考
 
