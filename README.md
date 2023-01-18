@@ -6,12 +6,12 @@
 
 ## 深度学习笔记
 
-- [循环神经网络](RNN/rnn.md)
-  - [门控循环单元（GRU）](RNN/rnn_gru.md)
-  - [长短期记忆网络（LSTM）](RNN/rnn_LSTM.md)
-  - [深度循环神经网络](RNN/rnn_deep.md)
-  - [双向 RNN](RNN/rnn_bidirection.md)
-  - [编码器-解码器](RNN/encoder-decoder.md)
+- [循环神经网络](basic/rnn/rnn.md)
+  - [门控循环单元（GRU）](basic/rnn/rnn_gru.md)
+  - [长短期记忆网络（LSTM）](basic/rnn/rnn_LSTM.md)
+  - [深度循环神经网络](basic/rnn/rnn_deep.md)
+  - [双向 RNN](basic/rnn/rnn_bidirection.md)
+  - [编码器-解码器](basic/rnn/encoder-decoder.md)
 
 ## 深度学习教程
 
@@ -69,4 +69,3 @@ Boyd, S., & Vandenberghe, L. (2004). Cambridge university press.
 
 - [图片分类效果](http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html)
 - https://developer.nvidia.com/deep-learning-examples
-- 

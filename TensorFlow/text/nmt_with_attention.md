@@ -381,7 +381,7 @@ class Encoder(tf.keras.layers.Layer):
         # The embedding layer converts tokens to vectors
         self.embedding = tf.keras.layers.Embedding(self.input_vocab_size, embedding_dim)
 
-        # The GRU RNN layer processes those vectors sequentially.
+        # The GRU rnn layer processes those vectors sequentially.
         self.gru = tf.keras.layers.GRU(
             self.enc_units,
             # Return the sequence and state

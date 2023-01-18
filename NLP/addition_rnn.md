@@ -192,10 +192,10 @@ model = keras.Sequential()
 # Encoder 使用单层 LSTM，HN 为 128
 # 对变长输入序列，使用 input_shape=(None, num_feature)
 model.add(layers.LSTM(128, input_shape=(MAXLEN, len(chars))))
-# 解码 RNN 输入，为每个时间步提供最后的 hidden state
+# 解码 rnn 输入，为每个时间步提供最后的 hidden state
 # 重复 'DIGITS+1' 次，对应输出的最大长度，例如当 DIGITS=3，最大输出为 999+999=1998
 model.add(layers.RepeatVector(DIGITS + 1))
-# 解码 RNN 可以包含多层，也可以是单层
+# 解码 rnn 可以包含多层，也可以是单层
 for _ in range(num_layers):
     # 将 `return_sequences` 设置为 True，返回完整隐状态，输出 shape 为
     # (num_samples, timesteps, output_dim).

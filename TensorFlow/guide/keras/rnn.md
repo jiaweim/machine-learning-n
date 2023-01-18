@@ -349,16 +349,16 @@ input_dim = 28
 units = 64
 output_size = 10  # 输出标签 0 to 9
 
-# 构建 RNN 模型
+# 构建 rnn 模型
 def build_model(allow_cudnn_kernel=True):
     # CuDNN 只能在 layer 层次使用，cell 层次不能
     # 即 `LSTM(units)` 可以使用 CuDNN 内核
-    # 而 `RNN(LSTMCell(units))` 只能在 non-CuDNN 内核运行
+    # 而 `rnn(LSTMCell(units))` 只能在 non-CuDNN 内核运行
     if allow_cudnn_kernel:
         # 使用默认参数的 LSTM 才能用 CuDNN
         lstm_layer = keras.layers.LSTM(units, input_shape=(None, input_dim))
     else:
-        # 使用 RNN 层包装的 LSTMCell 不能用 CuDNN
+        # 使用 rnn 层包装的 LSTMCell 不能用 CuDNN
         lstm_layer = keras.layers.RNN(
             keras.layers.LSTMCell(units), input_shape=(None, input_dim)
         )

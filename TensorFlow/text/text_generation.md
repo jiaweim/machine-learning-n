@@ -378,7 +378,7 @@ vocab_size = len(vocab)
 # 嵌入维度
 embedding_dim = 256
 
-# RNN 单元数
+# rnn 单元数
 rnn_units = 1024
 ```
 

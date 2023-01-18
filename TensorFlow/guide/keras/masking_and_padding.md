@@ -1,23 +1,23 @@
-# 用 Keras 屏蔽和填充序列
+# 屏蔽和填充序列（Keras）
 
-- [用 Keras 屏蔽和填充序列](#用-keras-屏蔽和填充序列)
-  - [导入包](#导入包)
-  - [简介](#简介)
-  - [填充序列数据](#填充序列数据)
-  - [屏蔽](#屏蔽)
-  - [屏蔽生成层：Embedding 和 Masking](#屏蔽生成层embedding-和-masking)
-  - [函数 API 和串联 API 的mask传播](#函数-api-和串联-api-的mask传播)
-  - [直接将屏蔽张量传递给 layer](#直接将屏蔽张量传递给-layer)
-  - [自定义 mask 生成层](#自定义-mask-生成层)
-  - [自定义 mask 传播层](#自定义-mask-传播层)
-  - [自定义 mask 使用层](#自定义-mask-使用层)
-  - [总结](#总结)
-  - [参考](#参考)
+- [屏蔽和填充序列（Keras）](#屏蔽和填充序列keras)
+  - [1. 导入包](#1-导入包)
+  - [2. 简介](#2-简介)
+  - [3. 填充序列数据](#3-填充序列数据)
+  - [4. 屏蔽](#4-屏蔽)
+  - [5. 屏蔽生成层：Embedding 和 Masking](#5-屏蔽生成层embedding-和-masking)
+  - [6. Functional API 和 Sequential API 中 mask 的传播](#6-functional-api-和-sequential-api-中-mask-的传播)
+  - [7. 直接将 mask 张量传递给 layer](#7-直接将-mask-张量传递给-layer)
+  - [8. 自定义 mask 生成层](#8-自定义-mask-生成层)
+  - [9. 自定义 mask 传播层](#9-自定义-mask-传播层)
+  - [10. 自定义 mask 使用层](#10-自定义-mask-使用层)
+  - [11. 总结](#11-总结)
+  - [12. 参考](#12-参考)
 
-2022-02-15, 13:55
+Last updated: 2023-01-18, 10:05
 ****
 
-## 导入包
+## 1. 导入包
 
 ```python
 import numpy as np
@@ -26,15 +26,15 @@ from tensorflow import keras
 from tensorflow.keras import layers
 ```
 
-## 简介
+## 2. 简介
 
-**屏蔽**（Masking）是告诉序列处理层输入数据缺少某些时间步，在处理时应该跳过这些时间步。
+**屏蔽**（Masking）是告诉序列处理层输入数据缺少某些时间步，因此在处理数据时应该跳过这些时间步。
 
-**填充**（Padding）是一种特殊的屏蔽，其屏蔽的时间步位于序列的开头或结尾。填充是为了支持批处理，为了使同一批次的所有序列长度相同，需要填充或裁剪部分序列。
+**填充**（Padding）是一种特殊的屏蔽，其屏蔽的时间步位于序列的开头或结尾。填充是为了支持批处理：使同一批次的所有序列长度相同，需要填充或裁剪部分序列。
 
-## 填充序列数据
+## 3. 填充序列数据
 
-在处理序列数据时，样本序列的长度不同很常见。例如，下面是按单词标记化后的文本：
+序列数据不同样本长度不同很常见。例如，下面是按单词标记化后的文本：
 
 ```python
 [
@@ -44,9 +44,9 @@ from tensorflow.keras import layers
 ]
 ```
 
-使用词汇表转换为整数向量：
+使用 vocabulary 转换为整数向量：
 
-```py
+```python
 [
   [71, 1331, 4231]
   [73, 8, 3215, 55, 927],
@@ -56,9 +56,9 @@ from tensorflow.keras import layers
 
 此时数据是一个嵌套列表，样本长度分别为 3, 5 和 6。由于深度学习模型要求输入数据为单个张量（本例中 shape 为 `(batch_size, 6, vocab_size)`），对长度小于最长样本的样本，需要填充占位符（也可以在填充短样本前截断长样本）。
 
-Keras 使用 [tf.keras.utils.pad_sequences](../../api/tf/keras/utils/pad_sequences.md) 裁剪和填充 Python 列表到指定长度。例如：
+Keras 使用 `tf.keras.utils.pad_sequences` 裁剪和填充 Python 列表到指定长度。例如：
 
-```py
+```python
 raw_inputs = [
     [711, 632, 71],
     [73, 8, 3215, 55, 927],
@@ -67,32 +67,32 @@ raw_inputs = [
 
 # 默认填充 0，可以使用 `value` 参数设置填充值
 # `padding` 为 "pre" (在开头填充) 或 "post" (在末尾填充)
-# 在 RNN 中推荐使用 "post" 填充，这样才能使用 CuDNN 实现的 layers
+# 在 rnn 中推荐使用 "post" 填充，这样才能使用 CuDNN 实现的 layers
 padded_inputs = tf.keras.preprocessing.sequence.pad_sequences(
     raw_inputs, padding="post"
 )
 print(padded_inputs)
 ```
 
-```sh
+```txt
 [[ 711  632   71    0    0    0]
  [  73    8 3215   55  927    0]
  [  83   91    1  645 1253  927]]
 ```
 
-## 屏蔽
+## 4. 屏蔽
 
-统一样本长度后，需要告诉模型部分数据是填充值，不是真实数据，应该忽略，该机制就是**屏蔽**（masking）。
+统一样本长度后，需要告诉模型哪些数据是填充值应该忽略，该机制就是**屏蔽**（masking）。
 
 在 Keras 模型中设置屏蔽的方法有三种：
 
-1. 添加 [keras.layers.Masking](../../api/tf/keras/layers/Masking.md) layer
-2. 为 [keras.layers.Embedding](../../api/tf/keras/layers/Embedding.md) layer 添加设置 `mask_zero=True`
-3. 对支持 `mask` 参数的 layer 手动传入该参数，例如 RNN layer
+1. 添加 `keras.layers.Masking` layer
+2. 为 `keras.layers.Embedding` layer 添加设置 `mask_zero=True`
+3. 对支持 `mask` 参数的 layer 手动传入该参数，如 RNN layer
 
-## 屏蔽生成层：Embedding 和 Masking
+## 5. 屏蔽生成层：Embedding 和 Masking
 
-`Embedding` 和 `Masking` 通过将一个 shape 为 `(batch, sequence_length)` 的 2D 张量放在 layer 的输出后面实现屏蔽，两者的屏蔽张量均保存在 `_keras_mask` 字段中。
+`Embedding` 和 `Masking` 生成一个 shape 为 `(batch, sequence_length)` 的 2D mask 张量并将其放在 layer 的输出后面实现屏蔽，两者的屏蔽张量均保存在 `_keras_mask` 字段中。
 
 ```py
 embedding = layers.Embedding(input_dim=5000, output_dim=16, mask_zero=True)
@@ -125,19 +125,20 @@ tf.Tensor(
 
 > 下面屏蔽张量简称屏蔽，以 mask 表示。
 
-## 函数 API 和串联 API 的mask传播
+## 6. Functional API 和 Sequential API 中 mask 的传播
 
-当使用函数 API (Functional API)或串联 API (Sequential API)，由 `Embedding` 或 `Masking` layer 生成的 mask 将通过网络传播给能处理 mask 的 layer，如 RNN layer。Keras 会自动获取与输入对应的 mask，并将其传递给能处理的 layer。
+在 Functional API 或 Sequential API 中，由 `Embedding` 或 `Masking` layer 生成的 mask 会通过网络传播给任何能处理 mask 的 layer，如 RNN layer。Keras 会自动获取与输入对应的 mask，并将其传递给能处理的 layer。
 
-例如，在串联模型中，`LSTM` 会自动接收 mask，即它能忽略填充值：
+例如，在 Sequential 模型中，`LSTM` 会自动接收 mask，即它能忽略填充值：
 
 ```py
 model = keras.Sequential(
-    [layers.Embedding(input_dim=5000, output_dim=16, mask_zero=True), layers.LSTM(32),]
+    [layers.Embedding(input_dim=5000, output_dim=16, mask_zero=True),
+     layers.LSTM(32),]
 )
 ```
 
-在函数 API 模型中也是如此：
+在 Functional 模型中也是如此：
 
 ```py
 inputs = keras.Input(shape=(None,), dtype="int32")
@@ -147,7 +148,7 @@ outputs = layers.LSTM(32)(x)
 model = keras.Model(inputs, outputs)
 ```
 
-## 直接将屏蔽张量传递给 layer
+## 7. 直接将 mask 张量传递给 layer
 
 能处理 mask 的 layer（如 `LSTM`）的 `__call__` 方法包含一个 `mask` 参数。
 
@@ -164,7 +165,7 @@ class MyLayer(layers.Layer):
 
     def call(self, inputs):
         x = self.embedding(inputs)
-        # 也可以自己创建屏蔽张量，只需要是 shape 为 
+        # 也可以手动创建屏蔽张量，只要求 shape 为 
         # (batch_size, timesteps) 的 boolean 张量
         mask = self.embedding.compute_mask(inputs)
         output = self.lstm(x, mask=mask)  # lstm 会忽略屏蔽的值
@@ -176,7 +177,7 @@ x = x.astype("int32")
 layer(x)
 ```
 
-```sh
+```txt
 <tf.Tensor: shape=(32, 32), dtype=float32, numpy=
 array([[ 2.0880729e-03,  2.6909247e-04, -4.2011710e-03, ...,
         -5.1532323e-03,  1.9728949e-03, -3.6257019e-03],
@@ -193,20 +194,19 @@ array([[ 2.0880729e-03,  2.6909247e-04, -4.2011710e-03, ...,
         -4.6893870e-03, -1.1392428e-02, -6.2933145e-03]], dtype=float32)>
 ```
 
-## 自定义 mask 生成层
+## 8. 自定义 mask 生成层
 
-有可能需要自己生成 mask，或者需要修改当前 mask。
+有时需要自己生成 mask，或者需要修改当前 mask。
 
-例如，输出时间维度和输入的时间维度不同的 layer，如在时间维度上串联的 `Concatenate` layer，就需要修改当前 mask，以便下游 layer 能正确处理 mask。
+例如，输出时间维度和输入时间维度不同的 layer，如在时间维度上串联的 `Concatenate` layer，需要修改当前 mask，以便下游 layer 能正确处理 mask。
 
-为此，应该在自定义 layer 中根据当前输入和 mask 实现 `layer.compute_mask()` 方法，生成新的 mask。
+为此，需要在自定义 layer 中根据当前输入和 mask 实现 `layer.compute_mask()` 方法，生成新的 mask。
 
 下面是一个需要修改当前 mask 的 `TemporalSplit` layer:
 
-```py
+```python
 class TemporalSplit(keras.layers.Layer):
     """沿时间维度将输入张量拆分成两个张量"""
-
     def call(self, inputs):
         # 预计输入为 3D，mask 为 2D，将输入张量沿着时间轴（axis 1）
         # 拆分为 2 个子张量
@@ -224,7 +224,7 @@ print(first_half._keras_mask)
 print(second_half._keras_mask)
 ```
 
-```sh
+```txt
 tf.Tensor(
 [[ True  True  True]
  [ True  True  True]
@@ -235,9 +235,9 @@ tf.Tensor(
  [ True  True  True]], shape=(3, 3), dtype=bool)
 ```
 
-下面是另一个需要根据输入值生成 mask 的 layer `CustomEmbedding`:
+另一个根据输入值生成 mask 的 layer `CustomEmbedding`:
 
-```py
+```python
 class CustomEmbedding(keras.layers.Layer):
     def __init__(self, input_dim, output_dim, mask_zero=False, **kwargs):
         super(CustomEmbedding, self).__init__(**kwargs)
@@ -278,7 +278,7 @@ tf.Tensor(
  [ True  True  True  True  True  True  True  True False  True]], shape=(3, 10), dtype=bool)
 ```
 
-## 自定义 mask 传播层
+## 9. 自定义 mask 传播层
 
 大多数 layer 不修改时间维度，因此也不需要修改 mask，但是它们可能需要将当前的 mask 传播到下一层。自定义层默认会销毁 mask，因为框架无法判断传播的 mask 是否安全。
 
@@ -311,7 +311,7 @@ model = keras.Model(inputs, outputs)
 Mask found: KerasTensor(type_spec=TensorSpec(shape=(None, None), dtype=tf.bool, name=None), name='Placeholder_1:0')
 ```
 
-## 自定义 mask 使用层
+## 10. 自定义 mask 使用层
 
 mask 使用层在 `call` 方法中接收 `mask` 参数，并使用 mask 信息确定是否跳过某些时间步。
 
@@ -339,7 +339,7 @@ model = keras.Model(inputs, outputs)
 y = model(np.random.randint(0, 10, size=(32, 100)), np.random.random((32, 100, 1)))
 ```
 
-## 总结
+## 11. 总结
 
 以上是 Keras 中需要了解的所有填充和屏蔽内容。总结一下：
 
@@ -350,6 +350,6 @@ y = model(np.random.randint(0, 10, size=(32, 100)), np.random.random((32, 100, 1
 - 当单独使用 layers 时，可以手动传递 `mask` 参数；
 - 可以自定义 layer，实现 mask 的生成、修改和使用。
 
-## 参考
+## 12. 参考
 
 - https://www.tensorflow.org/guide/keras/masking_and_padding

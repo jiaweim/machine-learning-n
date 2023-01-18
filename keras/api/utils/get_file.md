@@ -1,7 +1,6 @@
-# get_file
+# tf.keras.utils.get_file
 
-Last updated: 2022-07-21, 10:29
-@author Jiawei Mao
+Last updated: 2023-01-17, 19:11
 *****
 
 ## 简介
@@ -33,7 +32,7 @@ tf.keras.utils.get_file(
 
 |参数|说明|
 |---|---|
-|fname|文件名。対绝对路径，如 `/path/to/file.txt`，则文件直接保存到该位置；対 `None`，则使用 `origin` 处文件名称|
+|fname|文件名。对绝对路径，如 `/path/to/file.txt`，文件直接保存到该位置；対 `None` 则使用 `origin` 处文件名称|
 |origin|文件的 URL|
 |untar|*不推荐*，推荐使用 `extract` 参数。boolean, 是否解压文件|
 |md5_hash|*不推荐*，推荐使用 `file_hash` 参数。用于验证文件的 md5 hash 值|

@@ -700,7 +700,7 @@ def load_data_time_machine(batch_size, num_steps,
 
 
 class RNNModelScratch:
-    """A RNN Model implemented from scratch."""
+    """A rnn Model implemented from scratch."""
 
     def __init__(self, vocab_size, num_hiddens, device,
                  get_params, init_state, forward_fn):
@@ -809,7 +809,7 @@ def train_ch8(net, train_iter, vocab, lr, num_epochs, device,
 
 
 class RNNModel(nn.Module):
-    """The RNN model.
+    """The rnn model.
     Defined in :numref:`sec_rnn-concise`"""
 
     def __init__(self, rnn_layer, vocab_size, **kwargs):
@@ -817,7 +817,7 @@ class RNNModel(nn.Module):
         self.rnn = rnn_layer
         self.vocab_size = vocab_size
         self.num_hiddens = self.rnn.hidden_size
-        # If the RNN is bidirectional (to be introduced later),
+        # If the rnn is bidirectional (to be introduced later),
         # `num_directions` should be 2, else it should be 1.
         if not self.rnn.bidirectional:
             self.num_directions = 1
@@ -983,7 +983,7 @@ class EncoderDecoder(nn.Module):
 
 
 class Seq2SeqEncoder(d2l.Encoder):
-    """The RNN encoder for sequence to sequence learning.
+    """The rnn encoder for sequence to sequence learning.
     Defined in :numref:`sec_seq2seq`"""
 
     def __init__(self, vocab_size, embed_size, num_hiddens, num_layers,
@@ -997,7 +997,7 @@ class Seq2SeqEncoder(d2l.Encoder):
     def forward(self, X, *args):
         # The output `X` shape: (`batch_size`, `num_steps`, `embed_size`)
         X = self.embedding(X)
-        # In RNN models, the first axis corresponds to time steps
+        # In rnn models, the first axis corresponds to time steps
         X = X.permute(1, 0, 2)
         # When state is not mentioned, it defaults to zeros
         output, state = self.rnn(X)
