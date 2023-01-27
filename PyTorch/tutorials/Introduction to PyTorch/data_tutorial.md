@@ -1,29 +1,29 @@
-# DATASETS & DATALOADERS
+# Dataset & DataLoader
 
-- [DATASETS \& DATALOADERS](#datasets--dataloaders)
-  - [简介](#简介)
-  - [加载数据集](#加载数据集)
-  - [迭代和可视化数据集](#迭代和可视化数据集)
-  - [自定义数据集](#自定义数据集)
-    - [`__init__`](#__init__)
-    - [`__len__`](#__len__)
-    - [`__getitem__`](#__getitem__)
-  - [准备 DataLoader](#准备-dataloader)
-  - [遍历 DataLoaderr](#遍历-dataloaderr)
-  - [参考](#参考)
+- [Dataset \& DataLoader](#dataset--dataloader)
+  - [1. 简介](#1-简介)
+  - [2. 加载数据集](#2-加载数据集)
+  - [3. 迭代和可视化数据集](#3-迭代和可视化数据集)
+  - [4. 自定义数据集](#4-自定义数据集)
+    - [4.1 `__init__`](#41-__init__)
+    - [4.2 `__len__`](#42-__len__)
+    - [4.3 `__getitem__`](#43-__getitem__)
+  - [5. 准备 DataLoader](#5-准备-dataloader)
+  - [6. 遍历 DataLoaderr](#6-遍历-dataloaderr)
+  - [7. 参考](#7-参考)
 
 Last updated: 2022-11-07, 18:29
 ****
 
-## 简介
+## 1. 简介
 
-数据预处理的代码容易变得混乱而难以维护，理想情况下，数据集代码与模型训练代码应该分离，以获得更好的可读性和模块化。PyTorch 提供了两个数据类：`torch.utils.data.DataLoader` 和 `torch.utils.data.Dataset` 用来加载数据。`Dataset` 存储样本及其标签，`DataLoader` 将 `Dataset` 封装为可迭代对象，包括访问数据。
+数据预处理的代码容易变得混乱而难以维护，理想情况下，数据预处理代码与模型训练代码应该分离，以获得更好的可读性和模块化。PyTorch 提供了两个数据类：`torch.utils.data.DataLoader` 和 `torch.utils.data.Dataset` 用来加载数据。`Dataset` 存储样本及其标签，`DataLoader` 将 `Dataset` 封装为可迭代对象，包括访问数据。
 
-PyTorch 特定领域库提供了许多预加载的数据集（如 FashionMNIST），这些数据集扩展 `torch.utils.data.Dataset` 并实现了特定于数据的函数。它们可用于模型的原型和基准测试。数据集位置：[图像数据集](https://pytorch.org/vision/stable/datasets.html)，[文本数据集](https://pytorch.org/text/stable/datasets.html)，[音频数据集](https://pytorch.org/audio/stable/datasets.html)。
+PyTorch 提供了许多预加载的数据集（如 FashionMNIST），这些数据集扩展 `torch.utils.data.Dataset` 并实现了特定于数据的函数。它们可用于模型的原型和基准测试。数据集位置：[图像数据集](https://pytorch.org/vision/stable/datasets.html)，[文本数据集](https://pytorch.org/text/stable/datasets.html)，[音频数据集](https://pytorch.org/audio/stable/datasets.html)。
 
-## 加载数据集
+## 2. 加载数据集
 
-下面演示如何从 TorchVision 加载 [Fashion-MNIST](https://github.com/zalandoresearch/) 数据集。Fashion-MNIST 数据集是 Zalando 文章中的一个图像数据集，包含 6 万训练样本和 1 万测试样本。每个样本包含一个 28x28 灰度图像和 10 分类标签。
+下面演示如何从 TorchVision 加载 [Fashion-MNIST](https://github.com/zalandoresearch/) 数据集。Fashion-MNIST 数据集是 Zalando 文章中的一个图像数据集，包含 6W 训练样本和 1W 测试样本。每个样本包含一个 28x28 灰度图像和 10 分类标签。
 
 使用以下参数加载 [FashionMNIST 数据集](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)：
 
@@ -54,7 +54,7 @@ test_data = datasets.FashionMNIST(
 )
 ```
 
-## 迭代和可视化数据集
+## 3. 迭代和可视化数据集
 
 可以像使用 list 一样对 `Dataset` 进行索引，例如 `training_data[index]`。使用 matplotlib 对训练数据的一些样本进行可视化。
 
@@ -85,9 +85,9 @@ plt.show()
 
 ![](images/2022-11-07-17-19-33.png)
 
-## 自定义数据集
+## 4. 自定义数据集
 
-自定义数据集必须实现三个函数：`__init__`, `__len__`, `__getitem__`。如下收拾，FashionMNIST 图像存储在 `img_dir` 目录，它们的标签单独保存在 CSV 文件 `annotations_file` 中。
+自定义数据集只需实现三个函数：`__init__`, `__len__`, `__getitem__`。如下所示，FashionMNIST 图像存储在 `img_dir` 目录，它们的标签单独保存在 CSV 文件 `annotations_file` 中。
 
 ```python
 import os
@@ -115,7 +115,7 @@ class CustomImageDataset(Dataset):
         return image, label
 ```
 
-### `__init__`
+### 4.1 `__init__`
 
 `__init__` 函数在实例化 Dataset 对象时运行一次。在其中初始化包含图像的目录、注释文件以及两个转换。
 
@@ -136,7 +136,7 @@ def __init__(self, annotations_file, img_dir, transform=None, target_transform=N
     self.target_transform = target_transform
 ```
 
-### `__len__`
+### 4.2 `__len__`
 
 `__len__` 函数返回数据集中样本的数量。例如：
 
@@ -145,7 +145,7 @@ def __len__(self):
     return len(self.img_labels)
 ```
 
-### `__getitem__`
+### 4.3 `__getitem__`
 
 `__getitem__` 从指定索引处加载并返回数据集的一个样本。根据索引确定图像在 disk 上的位置，使用 `read_image` 将其转换为张量，从 `self.img_labels` 检索相应的标签，调用变换函数（如果有），返回包含图像张量和标签的 tuple。
 
@@ -161,7 +161,7 @@ def __getitem__(self, idx):
     return image, label
 ```
 
-## 准备 DataLoader
+## 5. 准备 DataLoader
 
 `Dataset` 检索数据集，一次一个样本。而在训练模型时，通常以小批量的方式传递样本，在每个 epoch 对数据洗牌以减少过拟合，并使用 Python 的多处理器来加速数据检索。
 
@@ -174,7 +174,7 @@ train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
 ```
 
-## 遍历 DataLoaderr
+## 6. 遍历 DataLoaderr
 
 获得 DataLoader 后，可以根据需要迭代数据集。下面的每次迭代返回一批 (`batch_size=64`) `train_features` 和 `train_labels`。因为设置了 `shuffle=True`，遍历所有 batch 后（1 个 epoch），数据会洗牌（要对数据加载的顺序进行更细粒度的控制，请查看 [Sampler](https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler)）。
 
@@ -198,6 +198,6 @@ Labels batch shape: torch.Size([64])
 Label: 7
 ```
 
-## 参考
+## 7. 参考
 
 - https://pytorch.org/tutorials/beginner/basics/data_tutorial.html

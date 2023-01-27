@@ -5,6 +5,8 @@
   - [数据类型](#数据类型)
   - [初始化和基础操作](#初始化和基础操作)
   - [Tensor 类 API](#tensor-类-api)
+    - [permute](#permute)
+    - [repeat](#repeat)
   - [操作](#操作)
     - [detach](#detach)
     - [numpy](#numpy)
@@ -144,6 +146,41 @@ Tensor.T
 
 ```python
 Tensor.H
+```
+
+### permute
+
+```python
+Tensor.permute(*dims) → Tensor
+```
+
+参考 `torch.permute()`。
+
+### repeat
+
+```python
+Tensor.repeat(*sizes) → Tensor
+```
+
+沿指定维度重复张量。
+
+和 `expand()` 不同，该函数会复制张量数据。
+
+**参数：**
+
+- **sizes** (`torch.Size` or `int`...)
+
+指定在各个维度重复的次数。
+
+```python
+>>> x = torch.tensor([1, 2, 3])
+>>> x.repeat(4, 2)
+tensor([[ 1,  2,  3,  1,  2,  3],
+        [ 1,  2,  3,  1,  2,  3],
+        [ 1,  2,  3,  1,  2,  3],
+        [ 1,  2,  3,  1,  2,  3]])
+>>> x.repeat(4, 2, 1).size()
+torch.Size([4, 2, 3])
 ```
 
 ## 操作
@@ -1712,6 +1749,10 @@ See torch.renorm()
 Tensor.renorm_
 
 In-place version of renorm()
+
+
+
+
 
 Tensor.repeat
 

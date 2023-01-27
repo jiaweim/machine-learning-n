@@ -4,6 +4,7 @@
   - [Tensors](#tensors)
     - [创建操作](#创建操作)
     - [索引、切片、连接和突变](#索引切片连接和突变)
+      - [permute](#permute)
   - [Random sampling](#random-sampling)
     - [torch.manual\_seed](#torchmanual_seed)
   - [Math operations](#math-operations)
@@ -13,8 +14,10 @@
     - [Spectral Ops](#spectral-ops)
     - [Other Operations](#other-operations)
     - [BLAS and LAPACK Operations](#blas-and-lapack-operations)
+      - [torch.bmm](#torchbmm)
       - [torch.mm](#torchmm)
   - [Utilities](#utilities)
+    - [use\_deterministic\_algorithms](#use_deterministic_algorithms)
   - [Operator Tags](#operator-tags)
   - [操作](#操作)
     - [torch.adjoint](#torchadjoint)
@@ -28,6 +31,8 @@
     - [torch.var](#torchvar)
   - [参考](#参考)
 
+Last updated: 2023-01-27, 13:39
+***
 
 ## Tensors
 
@@ -264,9 +269,31 @@ Returns a new tensor that is a narrowed version of input tensor.
 
 nonzero
 
-permute
+#### permute
 
-Returns a view of the original tensor input with its dimensions permuted.
+```python
+torch.permute(input, dims) → Tensor
+```
+
+返回张量 `input` 的一个视图，其维度重新排列。
+
+**参数：**
+
+- **input** (`Tensor`)
+
+输入张量。
+
+- **dims** (tuple of python:int)
+
+所需维度顺序。
+
+```python
+>>> x = torch.randn(2, 3, 5)
+>>> x.size()
+torch.Size([2, 3, 5])
+>>> torch.permute(x, (2, 0, 1)).size()
+torch.Size([5, 2, 3])
+```
 
 reshape
 
@@ -949,6 +976,36 @@ Counts the number of non-zero values in the tensor input along the given dim.
 
 ### BLAS and LAPACK Operations
 
+#### torch.bmm
+
+```python
+torch.bmm(input, mat2, *, out=None) → Tensor
+```
+
+执行 `input` 和 `mat2` 矩阵的批处理矩阵乘法。
+
+`input` 和 `mat2` 是包含相同数目矩阵的 3D 张量。
+
+如果 `input` 为 $(b\times n\times m)$ 张量，`mat2` 是 $(b\times m\times p)$ 张量，则 `out` 为 $(b\times n\times p)$ 张量。
+
+$$out_i=input_i @ mat2_i$$
+
+> **NOTE**
+> 该函数不支持广播，对矩阵广播乘法，使用 `torch.matmul()`。
+
+**参数**
+
+- **input** (`Tensor`)：第一批矩阵
+- **mat2** (`Tensor`)：第二批矩阵 
+
+```python
+>>> input = torch.randn(10, 3, 4)
+>>> mat2 = torch.randn(10, 4, 5)
+>>> res = torch.bmm(input, mat2)
+>>> res.size()
+torch.Size([10, 3, 5])
+```
+
 #### torch.mm
 
 ```python
@@ -964,6 +1021,16 @@ torch.mm(input, mat2, *, out=None) → Tensor
 
 
 ## Utilities
+
+### use_deterministic_algorithms
+
+```python
+torch.use_deterministic_algorithms(mode, *, warn_only=False)
+```
+
+设置 PyTorch 操作是否使用**确定性** (deterministic) 算法。确定性算法，指给定相同输入，在相同的软件和硬件上运行，总是生成相同的输出。启用该设置，则所有操作将使用确定性算法，如果只有不确定性算法可以，则在调用时抛出 `RuntimeError`。
+
+> **NOTE:** 只用这个设置不足以使程序可重复。更多信息可参考 [Reproducibility](https://pytorch.org/docs/stable/notes/randomness.html#reproducibility)。
 
 ## Operator Tags
 
