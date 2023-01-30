@@ -11,8 +11,12 @@
     - [detach](#detach)
     - [numpy](#numpy)
     - [scatter\_](#scatter_)
-    - [to](#to)
+    - [Tensor.to](#tensorto)
     - [view](#view)
+    - [Tensor.byte](#tensorbyte)
+    - [Tensor.cpu](#tensorcpu)
+    - [Tensor.cuda](#tensorcuda)
+    - [Tensor.type](#tensortype)
   - [参考](#参考)
 
 Last updated: 2022-12-13, 17:34
@@ -185,14 +189,130 @@ torch.Size([4, 2, 3])
 
 ## 操作
 
-|方法|说明|
-|---|---|
-|`Tensor.bfloat16`|`self.bfloat16()` 等价于 `self.to(torch.bfloat16)`|
-|[Tensor.detach](#detach) |返回一个从当前 graph 中分离出来的新的张量|
-|`Tensor.t`|转置，参考 [torch.t()](torch.md#torcht)|
-|`Tensor.unsqueeze`|See torch.unsqueeze()|
-|`Tensor.unsqueeze_`|`unsqueeze()` 的原位操作|
-|Tensor.view|返回一个数据与 `self` 张量相同但 shape 不同的张量|
+### detach
+
+从当前图中分离出来，创建一个新的张量。
+
+返回的张量不需要梯度。
+
+该方法会影响正向模式的 AD 梯度，即结果也不会有正向模式的 AD 梯度。
+
+### numpy
+
+```python
+Tensor.numpy(*, force=False) → numpy.ndarray
+```
+
+返回张量的 numpy 形式。
+
+如果 `force` 为 `False`（默认），则要求 tensor 位于 CPU、不需要 grad、没有设置耦合位，dtype 和 layout  NumPy 支持才执行转换。返回的 ndarray 和 tensor 共享内存，因此张量和 ndarray 变化同步。
+
+如果 `force` 为 `True`，则等价于 `t.detach().cpu().resolve_conj().resolve_neg().numpy()`。如果 tensor 不在 CPU，或者设置了共轭位或负位，则张量与 ndarray 不共享内存。将 `force` 设置为 `True` 是一种获得张量 ndarray 形式的简单方法。
+
+即设置 `force=True` 返回的 ndarray 可以与张量不共享内存。
+
+### scatter_
+
+```python
+Tensor.scatter_(dim, index, src, reduce=None) → Tensor
+```
+
+按照索引张量 `index` 将 `src` 张量的值写入 `self`。对 `src` 的每个值，其输出索引由 `src` 的索引（`dimension != dim`）和 `index` 中的对应值指定（`dimension = dim`）。
+
+对 3D 张量，`self` 更新方式：
+
+```python
+self[index[i][j][k]][j][k] = src[i][j][k]  # if dim == 0
+self[i][index[i][j][k]][k] = src[i][j][k]  # if dim == 1
+self[i][j][index[i][j][k]] = src[i][j][k]  # if dim == 2
+```
+
+对 2D 张量，`self` 的更新方式：
+
+```python
+self[index[i][j]][j] = src[i][j] # if dim == 0
+```
+
+该操作和 `gather()` 操作相反。
+
+需要注意：
+
+- `self`, `index` 和 `src` 的维数必须相同；
+- 对所有维度 `d`，要求 `index.size(d) <= src.size(d)`；
+- 对所有 `d != dim` 的维度，要求 `index.size(d) <= self.size(d)`；
+- `index` 和 `src` 不广播
+
+> **WARNING** 当 indices 不
+
+参数：
+
+- **dim** (`int`)：索引维度；
+- **index** (`LongTensor`)：需分配元素的索引，可以为空或与 `src` 相同维度，为空时返回 `self` 不变；
+- **src** (`Tensor` 或 `float`)：待分配的元素
+- **reduce** (`str`, optional)：缩减操作，如 add 或 multiply。
+
+例如：
+
+```python
+>>> src = torch.arange(1, 11).reshape((2, 5))
+>>> src # shape (2, 5)
+tensor([[ 1,  2,  3,  4,  5],
+        [ 6,  7,  8,  9, 10]])
+>>> index = torch.tensor([[0, 1, 2, 0]]) # (1, 4)
+# output[index[i][j]][j] = src[i][j]
+# src[0][0]=self[index[0][0]][0]=self[0][0]=1
+# src[0][1]=self[index[0][1]][1]=self[1][1]=2
+# src[0][2]=self[index[0][2]][2]=self[2][2]=3
+# src[0][3]=self[index[0][3]][3]=self[0][3]=4
+>>> torch.zeros(3, 5, dtype=src.dtype).scatter_(0, index, src) # self (3, 5)
+tensor([[1, 0, 0, 4, 0],
+        [0, 2, 0, 0, 0],
+        [0, 0, 3, 0, 0]])
+
+>>> index = torch.tensor([[0, 1, 2], [0, 1, 4]])
+>>> torch.zeros(3, 5, dtype=src.dtype).scatter_(1, index, src)
+tensor([[1, 2, 3, 0, 0],
+        [6, 7, 0, 0, 8],
+        [0, 0, 0, 0, 0]])
+
+>>> torch.full((2, 4), 2.).scatter_(1, torch.tensor([[2], [3]]),
+...            1.23, reduce='multiply')
+tensor([[2.0000, 2.0000, 2.4600, 2.0000],
+        [2.0000, 2.0000, 2.0000, 2.4600]])
+>>> torch.full((2, 4), 2.).scatter_(1, torch.tensor([[2], [3]]),
+...            1.23, reduce='add')
+tensor([[2.0000, 2.0000, 3.2300, 2.0000],
+        [2.0000, 2.0000, 2.0000, 3.2300]])
+```
+
+### Tensor.to
+
+Last updated: 2023-01-30, 16:48
+
+```python
+Tensor.to(*args, **kwargs) → Tensor
+```
+
+执行张量 `dtype` and/or `device` 转换。`torch.dtype` 和 `torch.device` 
+ 
+```python
+>>> long_tensor = torch.tensor([[0, 0, 1], [1, 1, 1], [0, 0, 0]])
+>>> long_tensor.type()
+'torch.LongTensor'
+>>> float_tensor = long_tensor.to(dtype=torch.float32)
+>>> float_tensor.type()
+'torch.FloatTensor'
+```
+
+### view
+
+```python
+Tensor.view(*shape) → Tensor
+```
+
+返回一个与 `self` 张量具有相同数据是 shape 不同的张量。
+
+要张量视图，新的视图尺寸与原始张量的尺寸和步长必须兼容，即新的视图维度要么是原始维度的子空间，要么
 
 Tensor.new_tensor
 
@@ -456,11 +576,23 @@ In-place version of baddbmm()
 
 Tensor.bernoulli
 
-Returns a result tensor where each \texttt{result[i]}result[i] is independently sampled from \text{Bernoulli}(\texttt{self[i]})Bernoulli(self[i]).
+Returns a result tensor where each 
+result[i]
+result[i] is independently sampled from 
+Bernoulli
+(
+self[i]
+)
+Bernoulli(self[i]).
 
 Tensor.bernoulli_
 
-Fills each location of self with an independent sample from \text{Bernoulli}(\texttt{p})Bernoulli(p).
+Fills each location of self with an independent sample from 
+Bernoulli
+(
+p
+)
+Bernoulli(p).
 
 Tensor.bfloat16
 
@@ -526,9 +658,21 @@ Tensor.bool
 
 self.bool() is equivalent to self.to(torch.bool).
 
-Tensor.byte
+### Tensor.byte
 
-self.byte() is equivalent to self.to(torch.uint8).
+Last updated: 2023-01-30, 17:01
+
+```python
+Tensor.byte(memory_format=torch.preserve_format) → Tensor
+```
+
+`self.byte()` 等价于 `self.to(torch.uint8)`。
+
+**参数：**
+
+- **memory_format** (`torch.memory_format`, optional)
+
+张量的内存格式。
 
 Tensor.broadcast_to
 
@@ -666,17 +810,56 @@ Tensor.arccosh_
 
 acosh_() -> Tensor
 
-Tensor.cpu
+### Tensor.cpu
 
-Returns a copy of this object in CPU memory.
+Last updated: 2023-01-30, 16:13
+
+```python
+Tensor.cpu(memory_format=torch.preserve_format) → Tensor
+```
+
+返回张量的 CPU 副本。
+
+如果张量已在 CPU 内存且处于正确设备，则不复制，直接返回已有对象。
+
+**参数：**
+
+- **memory_format** (`torch.memory_format`, optional)
+
+返回张量的内存格式，默认 `torch.preserve_format`。
+
 
 Tensor.cross
 
 See torch.cross()
 
-Tensor.cuda
+### Tensor.cuda
 
-Returns a copy of this object in CUDA memory.
+Last updated: 2023-01-30, 16:10
+
+```python
+Tensor.cuda(device=None, 
+    non_blocking=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+返回张量的 CUDA 副本。
+
+如果该张量已在 CUDA 内存且设备没错，则不复制，直接返回原对象。
+
+**参数：**
+
+- **device=None** (`torch.device`)
+
+目标 GPU 设备，默认为当前 CUDA 设备。
+
+- **non_blocking=False** (`bool`)
+
+设置 `True` 且原张量位于 pinned 内存，则相对主机复制是异步执行的。否则该参数无效。
+
+- **memory_format** (`torch.memory_format`, optional)
+
+返回张量的内存格式。默认 `torch.preserve_format`。
 
 Tensor.logcumsumexp
 
@@ -1318,7 +1501,11 @@ In-place version of log2()
 
 Tensor.log_normal_
 
-Fills self tensor with numbers samples from the log-normal distribution parameterized by the given mean \muμ and standard deviation \sigmaσ.
+Fills self tensor with numbers samples from the log-normal distribution parameterized by the given mean 
+�
+μ and standard deviation 
+�
+σ.
 
 Tensor.logaddexp
 
@@ -1750,10 +1937,6 @@ Tensor.renorm_
 
 In-place version of renorm()
 
-
-
-
-
 Tensor.repeat
 
 Repeats this tensor along the specified dimensions.
@@ -1822,7 +2005,9 @@ Tensor.scatter
 
 Out-of-place version of torch.Tensor.scatter_()
 
-|[Tensor.scatter_](#scatter_)|根据索引张量 `index` 将 `src` 张量的所有值写入 `self`|
+Tensor.scatter_
+
+Writes all values from the tensor src into self at the indices specified in the index tensor.
 
 Tensor.scatter_add_
 
@@ -2188,9 +2373,23 @@ Tensor.trunc_
 
 In-place version of trunc()
 
-Tensor.type
+### Tensor.type
 
-Returns the type if dtype is not provided, else casts this object to the specified type.
+Last updated: 2023-01-30, 18:27
+
+```python
+Tensor.type(dtype=None, non_blocking=False, **kwargs) → str or Tensor
+```
+
+如果未提供 `dtype`，就返回类型；返回将该张量转换为指定 `dtype`。
+
+如果张量类型与提供的 `dtype` 一致，则不复制，直接返回原张量。
+
+**参数：**
+
+- **dtype** (dtype or string) – 期望类型
+- **non_blocking** (`bool`) – `True` 且原张量位于 pinned 内存，而目标位于 GPU（或相反情况），则异步执行复制。其它情况该参数无效。 
+- ****kwargs** – 兼容，可能包含 `async` 代替 `non_blocking`， `async` 参数已启用。
 
 Tensor.type_as
 
@@ -2267,125 +2466,6 @@ In-place version of xlogy()
 Tensor.zero_
 
 Fills self tensor with zeros.
-
-### detach
-
-从当前图中分离出来，创建一个新的张量。
-
-返回的张量不需要梯度。
-
-该方法会影响正向模式的 AD 梯度，即结果也不会有正向模式的 AD 梯度。
-
-### numpy
-
-```python
-Tensor.numpy(*, force=False) → numpy.ndarray
-```
-
-返回张量的 numpy 形式。
-
-如果 `force` 为 `False`（默认），则要求 tensor 位于 CPU、不需要 grad、没有设置耦合位，dtype 和 layout  NumPy 支持才执行转换。返回的 ndarray 和 tensor 共享内存，因此张量和 ndarray 变化同步。
-
-如果 `force` 为 `True`，则等价于 `t.detach().cpu().resolve_conj().resolve_neg().numpy()`。如果 tensor 不在 CPU，或者设置了共轭位或负位，则张量与 ndarray 不共享内存。将 `force` 设置为 `True` 是一种获得张量 ndarray 形式的简单方法。
-
-即设置 `force=True` 返回的 ndarray 可以与张量不共享内存。
-
-### scatter_
-
-```python
-Tensor.scatter_(dim, index, src, reduce=None) → Tensor
-```
-
-按照索引张量 `index` 将 `src` 张量的值写入 `self`。对 `src` 的每个值，其输出索引由 `src` 的索引（`dimension != dim`）和 `index` 中的对应值指定（`dimension = dim`）。
-
-对 3D 张量，`self` 更新方式：
-
-```python
-self[index[i][j][k]][j][k] = src[i][j][k]  # if dim == 0
-self[i][index[i][j][k]][k] = src[i][j][k]  # if dim == 1
-self[i][j][index[i][j][k]] = src[i][j][k]  # if dim == 2
-```
-
-对 2D 张量，`self` 的更新方式：
-
-```python
-self[index[i][j]][j] = src[i][j] # if dim == 0
-```
-
-该操作和 `gather()` 操作相反。
-
-需要注意：
-
-- `self`, `index` 和 `src` 的维数必须相同；
-- 对所有维度 `d`，要求 `index.size(d) <= src.size(d)`；
-- 对所有 `d != dim` 的维度，要求 `index.size(d) <= self.size(d)`；
-- `index` 和 `src` 不广播
-
-> **WARNING** 当 indices 不
-
-参数：
-
-- **dim** (`int`)：索引维度；
-- **index** (`LongTensor`)：需分配元素的索引，可以为空或与 `src` 相同维度，为空时返回 `self` 不变；
-- **src** (`Tensor` 或 `float`)：待分配的元素
-- **reduce** (`str`, optional)：缩减操作，如 add 或 multiply。
-
-例如：
-
-```python
->>> src = torch.arange(1, 11).reshape((2, 5))
->>> src # shape (2, 5)
-tensor([[ 1,  2,  3,  4,  5],
-        [ 6,  7,  8,  9, 10]])
->>> index = torch.tensor([[0, 1, 2, 0]]) # (1, 4)
-# output[index[i][j]][j] = src[i][j]
-# src[0][0]=self[index[0][0]][0]=self[0][0]=1
-# src[0][1]=self[index[0][1]][1]=self[1][1]=2
-# src[0][2]=self[index[0][2]][2]=self[2][2]=3
-# src[0][3]=self[index[0][3]][3]=self[0][3]=4
->>> torch.zeros(3, 5, dtype=src.dtype).scatter_(0, index, src) # self (3, 5)
-tensor([[1, 0, 0, 4, 0],
-        [0, 2, 0, 0, 0],
-        [0, 0, 3, 0, 0]])
-
->>> index = torch.tensor([[0, 1, 2], [0, 1, 4]])
->>> torch.zeros(3, 5, dtype=src.dtype).scatter_(1, index, src)
-tensor([[1, 2, 3, 0, 0],
-        [6, 7, 0, 0, 8],
-        [0, 0, 0, 0, 0]])
-
->>> torch.full((2, 4), 2.).scatter_(1, torch.tensor([[2], [3]]),
-...            1.23, reduce='multiply')
-tensor([[2.0000, 2.0000, 2.4600, 2.0000],
-        [2.0000, 2.0000, 2.0000, 2.4600]])
->>> torch.full((2, 4), 2.).scatter_(1, torch.tensor([[2], [3]]),
-...            1.23, reduce='add')
-tensor([[2.0000, 2.0000, 3.2300, 2.0000],
-        [2.0000, 2.0000, 2.0000, 3.2300]])
-```
-
-### to
-
-转换类型。
-
-```python
->>> long_tensor = torch.tensor([[0, 0, 1], [1, 1, 1], [0, 0, 0]])
->>> long_tensor.type()
-'torch.LongTensor'
->>> float_tensor = long_tensor.to(dtype=torch.float32)
->>> float_tensor.type()
-'torch.FloatTensor'
-```
-
-### view
-
-```python
-Tensor.view(*shape) → Tensor
-```
-
-返回一个与 `self` 张量具有相同数据是 shape 不同的张量。
-
-要张量视图，新的视图尺寸与原始张量的尺寸和步长必须兼容，即新的视图维度要么是原始维度的子空间，要么
 
 ## 参考
 

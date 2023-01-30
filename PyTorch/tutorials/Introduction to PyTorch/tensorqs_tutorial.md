@@ -236,6 +236,8 @@ CPU 上的张量与 NumPy 数组可以共享底层内存，修改一个会同步
 
 ### Tensor 到 NumPy
 
+`.numpy()` 转换为 NumPy 数组。
+ 
 ```python
 t = torch.ones(5)
 print(f"t: {t}")
@@ -262,6 +264,8 @@ n: [2. 2. 2. 2. 2.]
 ```
 
 ### NumPy 到 Tensor
+
+`torch.from_numpy` 从 NumPy 数组生成张量。
 
 ```python
 n = np.ones(5)

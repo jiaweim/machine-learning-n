@@ -3,10 +3,16 @@
 - [torch](#torch)
   - [Tensors](#tensors)
     - [创建操作](#创建操作)
+      - [torch.linspace](#torchlinspace)
+      - [torch.ones](#torchones)
     - [索引、切片、连接和突变](#索引切片连接和突变)
       - [permute](#permute)
-  - [Random sampling](#random-sampling)
+  - [随机采样](#随机采样)
     - [torch.manual\_seed](#torchmanual_seed)
+    - [torch.rand](#torchrand)
+    - [torch.randn](#torchrandn)
+    - [原地随机采样](#原地随机采样)
+    - [](#)
   - [Math operations](#math-operations)
     - [Pointwise Ops](#pointwise-ops)
     - [Reduction Ops](#reduction-ops)
@@ -53,10 +59,6 @@ Last updated: 2023-01-27, 13:39
 
 ### 创建操作
 
-> **NOTE**：随机采用的创建操作在后面单独列出。
-
-|操作|说明|
-|---|---|
 tensor
 
 Constructs a tensor with no autograd history (also known as a "leaf tensor", see Autograd mechanics) by copying data.
@@ -121,9 +123,48 @@ end−start
 ​
  ⌋+1 with values from start to end with step step.
 
-linspace
+#### torch.linspace
 
-Creates a one-dimensional tensor of size steps whose values are evenly spaced from start to end, inclusive.
+Last updated: 2023-01-30, 17:18
+
+```python
+torch.linspace(
+    start, end, steps, *, out=None, dtype=None, 
+    layout=torch.strided, 
+    device=None, 
+    requires_grad=False) → Tensor
+```
+
+创建一个长度为 `steps` 的一维张量，张量值从 `start` 到 `end` （inclusive）均匀分布。即：
+
+$$(start,start+\frac{end-start}{steps-1},...,start+(steps-2)*\frac{end-start}{steps-1},end)$$
+
+从 PyTorch 1.11 开始，linspace 需要 steps 参数。使用 `steps=100` 重现之前版本的行为。 
+
+**参数：**
+
+- **start** (`float`)：起始值
+- **end** (`float`)：末尾值
+- **steps** (`int`)：数据个数
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional)：输出张量。
+- **dtype** (`torch.dtype`, optional) ：数据类型。默认：当 `start` 和 `end` 为实数为全局默认类型 `torch.get_default_dtype()`，其中一个为复数时则 dtype 为复数。
+- **layout** (`torch.layout`, optional)：期望 layout，默认 `torch.strided`。
+- **device** (`torch.device`, optional)：期望 device。`None` 指对默认张量类型使用当前设备 (参考 `torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为当前 CUDA 设备。
+- **requires_grad** (`bool`, optional)：如果 autograd 则应该记录返回张量上的操作，默认 `False`
+
+```python
+>>> torch.linspace(3, 10, steps=5)
+tensor([  3.0000,   4.7500,   6.5000,   8.2500,  10.0000])
+>>> torch.linspace(-10, 10, steps=5)
+tensor([-10.,  -5.,   0.,   5.,  10.])
+>>> torch.linspace(start=-10, end=10, steps=5)
+tensor([-10.,  -5.,   0.,   5.,  10.])
+>>> torch.linspace(start=-10, end=10, steps=1)
+tensor([-10.])
+```
 
 logspace
 
@@ -180,6 +221,15 @@ Constructs a complex tensor whose elements are Cartesian coordinates correspondi
 heaviside
 
 Computes the Heaviside step function for each element in input.
+
+#### torch.ones
+
+```python
+torch.ones(*size, *, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) → Tensor
+```
+
+创建所有值为 1 的张量，张量大小为 `size`。
+
 
 
 ### 索引、切片、连接和突变
@@ -393,7 +443,7 @@ where
 
 Return a tensor of elements selected from either x or y, depending on condition.
 
-## Random sampling
+## 随机采样
 
 ### torch.manual_seed
 
@@ -408,6 +458,62 @@ torch.manual_seed(seed)
 - **seed** (`int`)
 
 期望 seed。取值范围 [-0x8000_0000_0000_0000, 0xffff_ffff_ffff_ffff]。负数按公式 0xffff_ffff_ffff_ffff + seed 重新映射到正数。
+
+### torch.rand
+
+```python
+torch.rand(*size, *, out=None, dtype=None, layout=torch.strided, device=None, 
+    requires_grad=False, pin_memory=False) → Tensor
+```
+
+从均匀分布 $[0,1)$ 中随机抽样。
+
+返回的张量大小由 `size` 定义。
+ 
+### torch.randn
+
+Last updated: 2023-01-30, 15:46
+
+```python
+torch.randn(*size, *, out=None, dtype=None, layout=torch.strided, device=None, 
+    requires_grad=False, pin_memory=False) → Tensor
+```
+
+返回一个由均值为0、方差为 1 的正态分布中随机数填充的张量。
+
+$$out_i ∼ N(0,1)$$
+
+张量的形状由参数 `size` 定义。
+
+**参数：**
+
+- **size** (`int`...)
+
+整数序列，定义输出张量的形状。可以是多个可变参数，也可以是 list 或 tuple。
+
+- **generator** ([torch.Generator](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional)
+
+用于抽样的伪随机数生成器。
+
+- **out** (`Tensor`, optional)
+
+输出张量。
+
+- **dtype** (`torch.dtype`, optional)
+
+返回张量的期望数据类型。如果为 `None`，则使用全局默认类型，参考 `torch.set_default_tensor_type()`。
+
+```python
+>>> torch.randn(4)
+tensor([-0.6837, -0.0592,  1.2451, -0.8639])
+>>> torch.randn(2, 3)
+tensor([[ 0.6635, -1.0228,  0.0674],
+        [ 1.4007,  1.6177, -0.7507]])
+```
+
+### 原地随机采样
+
+### 
 
 ## Math operations
 
