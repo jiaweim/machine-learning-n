@@ -5,7 +5,6 @@
   - [Read and write to a dataset](#read-and-write-to-a-dataset)
   - [Create an attribute](#create-an-attribute)
   - [Create a group](#create-a-group)
-  - [Create a chunked and compressed dataset](#create-a-chunked-and-compressed-dataset)
 
 ## Create dataset
 
@@ -130,5 +129,3 @@ An HDF5 group is a container for other objects; a group is similar to Python dic
 Show the members of the Root group using dictionary key method: ['MyGroup']
 Show the members of the Root group using the list function: ['MyGroup']
 ```
-
-## Create a chunked and compressed dataset
