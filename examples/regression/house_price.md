@@ -93,11 +93,11 @@ for i in range(1000):
     loss = torch.mean((predictions - y_train) ** 2)  #通过与标签数据y比较，计算误差
     print('loss:', loss)
     loss.backward()  #对损失函数进行梯度反传
-    a.data.add_(- learning_rate * a.grad.data)  #利用上一步计算中得到的a的梯度信息更新a中的data数值
-    b.data.add_(- learning_rate * b.grad.data)  #利用上一步计算中得到的b的梯度信息更新b中的data数值
-    ### 增加了这部分代码，清空存储在变量a，b中的梯度信息，以免在backward的过程中会反复不停地累加
-    a.grad.data.zero_()  #清空a的梯度数值
-    b.grad.data.zero_()  #清空b的梯度数值
+    with torch.no_grad():
+        a.add_(- learning_rate * a.grad.data)
+        b.add_(- learning_rate * b.grad.data)
+        a.grad.zero_()  #清空a的梯度数值
+        b.grad.zero_()  #清空b的梯度数值
 ```
 
 绘制拟合结果：

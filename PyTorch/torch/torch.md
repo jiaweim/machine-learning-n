@@ -13,6 +13,7 @@
     - [torch.randn](#torchrandn)
     - [原地随机采样](#原地随机采样)
     - [](#)
+  - [局部禁用梯度计算](#局部禁用梯度计算)
   - [Math operations](#math-operations)
     - [Pointwise Ops](#pointwise-ops)
     - [Reduction Ops](#reduction-ops)
@@ -514,6 +515,34 @@ tensor([[ 0.6635, -1.0228,  0.0674],
 ### 原地随机采样
 
 ### 
+
+## 局部禁用梯度计算
+
+上下文管理器 `torch.no_grad()`, `torch.enable_grad()` 和 `torch.set_grad_enabled()` 对局部禁用或启用梯度计算非常有用。
+
+no_grad
+
+Context-manager that disabled gradient calculation.
+
+enable_grad
+
+Context-manager that enables gradient calculation.
+
+set_grad_enabled
+
+Context-manager that sets gradient calculation to on or off.
+
+is_grad_enabled
+
+Returns True if grad mode is currently enabled.
+
+inference_mode
+
+Context-manager that enables or disables inference mode
+
+is_inference_mode_enabled
+
+Returns True if inference mode is currently enabled.
 
 ## Math operations
 
