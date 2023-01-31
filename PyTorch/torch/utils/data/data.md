@@ -308,11 +308,62 @@ class torch.utils.data.Dataset(*args, **kwds)
 
 ### torch.utils.data.Sampler
 
+```python
+class torch.utils.data.Sampler(data_source)
+```
+
+所有 `Sampler` 的基类。
+
+每个 `Sampler` 子类必须实现两个方法：
+
+- `__iter__()` 用来迭代数据集元素的索引
+- `__len__()` 迭代器包含的元素个数
+
+> **NOTE**
+> `DataLoader` 不要求 `__len__()` 方法，但任何涉及 `DataLoader` 长度的计算都需要用到。
+
 ### torch.utils.data.SequentialSampler
+
+```python
+class torch.utils.data.SequentialSampler(data_source)
+```
+
+按顺序采样。
+
+**参数：**
+
+- **data_source** (`Dataset`) – 数据来源
 
 ### torch.utils.data.RandomSampler
 
+```python
+class torch.utils.data.RandomSampler(data_source, 
+    replacement=False, 
+    num_samples=None, 
+    generator=None)
+```
+
+随机采样。如果 `replacement=False`，则从打乱的数据集中进行采样。如果 `replacement=True`，则可以指定抽样个数 `num_samples`.
+
+**参数：**
+
+- **data_source** (`Dataset`) – 数据集
+- **replacement** (`bool`) – `True` 表示按需返回抽样，默认 `False`
+- **num_samples** (`int`) – 抽样个数，默认 `len(dataset)`
+- **generator** (`Generator`) – 抽样中使用的 Generator
+
 ### torch.utils.data.SubsetRandomSampler
+
+```python
+class torch.utils.data.SubsetRandomSampler(indices, generator=None)
+```
+
+从给定索引列表中随机抽样，不放回抽样。
+
+**参数：**
+
+- **indices** (`sequence`) – 索引序列
+- **generator** (`Generator`) – 用于抽样的 Generator
 
 ### torch.utils.data.WeightedRandomSampler
 

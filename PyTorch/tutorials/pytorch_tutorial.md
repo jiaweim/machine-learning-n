@@ -4,7 +4,7 @@
 
 - [快速入门](Introduction%20to%20PyTorch/quickstart_tutorials.md)
 - [张量](Introduction%20to%20PyTorch/tensorqs_tutorial.md)
-- [Dataset 和 DataLoader](tutorials/Introduction%20to%20PyTorch/data_tutorial.md)
+- [Dataset & DataLoader](Introduction%20to%20PyTorch/data_tutorial.md)
 - [数据转换](Introduction%20to%20PyTorch/transforms_tutorial.md)
 - [构架模型](Introduction%20to%20PyTorch/buildmodel_tutorial.md)
 - [自动微分](Introduction%20to%20PyTorch/autogradqs_tutorial.md)
