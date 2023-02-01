@@ -25,34 +25,34 @@ pip install h5py
 
 ## 核心概念
 
-HDF5 文件是两种对象的容器：
+HDF5 文件是一个容器，包含两种对象：
 
-- datasets，类数组对象
-- groups，类似文件夹，包含 dataset 和 group
+- datasets，类似数组
+- groups，类似文件夹，可以包含 dataset 和 group
 
-在 h5py 中只需要记住一点：**group** 像 dict 一样使用，**dataset** 像 NumPy 数组。
+在 h5py 中只需要记住一点：像 dict 使用 **group**，像 NumPy 数组使用 **dataset** 。
 
-假设你有一个 HDF5 文件 `mytestfile.hdf5`，你需要做的第一件事是打开文件：
+假设 `mytestfile.hdf5` 是一个 HDF5 文件，你需要做的第一件事是打开文件：
 
 ```python
 import h5py
 f = h5py.File('mytestfile.hdf5', 'r')
 ```
 
-返回的文件对象是开始使用的起点。`h5py.File` 类似 Python dict，可以检查其 keys：
+返回的文件对象是读写 HDF5 文件的起点。`h5py.File` 类似 Python dict，可以检查其 keys：
 
 ```python
 >>> list(f.keys())
 ['mydataset']
 ```
 
-可以发现，该文件只有一个数据集 `mydataset`。检查该 `Dataset` 对象：
+可以发现，该文件只有一个数据集 `mydataset`。查询 `Dataset` 对象：
 
 ```python
 >>> dset = f['mydataset']
 ```
 
-- 该对象不是数组，而是 HDF5 的 `Dataset` 对象。和 NumPy 数组类似，dataset 也有 shape 和 datatype：
+- `dset` 不是数组，而是 HDF5 的 `Dataset` 对象。和 NumPy 数组类似，dataset 也有 shape 和 datatype：
 
 ```python
 >>> dset.shape
