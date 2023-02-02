@@ -12,12 +12,11 @@
   - [参考](#参考)
 
 Last updated: 2022-10-16, 00:33
-@author Jiawei Mao
 ****
 
 ## 简介
 
-Group 是 HDF5 文件的容器机制。从 Python 角度看，有点像 dict，"keys" 为 group 成员的名称，"values" 是成员对象本身（`Group` 和 `Dataset`）。
+Group 是 HDF5 文件的容器机制。从 Python 角度看，Group 类似 dict，"keys" 为 group 成员的名称，"values" 是成员对象本身（`Group` 和 `Dataset`）。
 
 Group 对象包含 HDF5 的大部分功能。文件对象除了作为文件入口，也是 root group。
 
@@ -29,11 +28,11 @@ Group 对象包含 HDF5 的大部分功能。文件对象除了作为文件入�
 []
 ```
 
-文件中所有对象的名称都是文本字符串（`str`）。在传入 HDF C 库前，将使用 UTF-8 对名称进行编码。也可以使用 byte string 检索对象，这类字符串将原样传入 HDF5。
+文件中所有对象的名称都是字符串（`str`）。在传入 HDF C 库前，将使用 UTF-8 对名称进行编码。也可以使用 byte string 检索对象，这类字符串将原样传入 HDF5。
 
 ## 创建 group
 
-创建新的 group：
+- 创建新的 group
 
 ```python
 >>> grp = f.create_group("bar")
@@ -44,7 +43,7 @@ Group 对象包含 HDF5 的大部分功能。文件对象除了作为文件入�
 '/bar/baz'
 ```
 
-也可以隐式创建多个中间 group：
+- 隐式创建多个中间 group
 
 ```python
 >>> grp2 = f.create_group("/some/long/path")
@@ -71,7 +70,7 @@ KeyError: "Unable to open object (object 'MyDS' doesn't exist)"
 del subgroup["MyDataset"]
 ```
 
-> **Note:** 在 Python 3 中使用 h5py 时，`keys()`, `values` 和 `items` 方法返回 view-like 对象，而不是 list。这些对象支持成员测试和迭代，而不能像 list 那样切片。
+> **Note:** 在 Python 3 中使用 h5py 时，`keys()`, `values` 和 `items` 方法返回 view-like 对象，而不是 list。该对象支持成员测试和迭代，而不能像 list 那样切片。
 
 group 中的对象默认按字母数字顺序迭代。但是，如果使用 `track_order=True` 创建 group，则 HDF5 文件会记住数据插入顺序，迭代按照插入顺序进行。后者与 Python 3.7+ dict 一致。
 
