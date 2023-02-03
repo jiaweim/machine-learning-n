@@ -3,6 +3,7 @@
 - [tfio.IODataset](#tfioiodataset)
   - [简介](#简介)
   - [方法](#方法)
+    - [batch](#batch)
     - [from\_hdf5](#from_hdf5)
   - [参考](#参考)
 
@@ -52,6 +53,17 @@ TensorSpec(shape=(), dtype=tf.int32, name=None)
 
 ## 方法
 
+### batch
+
+```python
+batch(
+    batch_size, 
+    drop_remainder=False, 
+    num_parallel_calls=None, deterministic=None,
+    name=None
+)
+```
+
 ### from_hdf5
 
 Last updated: 2023-02-01, 10:34
@@ -73,7 +85,7 @@ string，hdf5 文件名。
 
 - **dataset**
 
-string, hdf5 文件中的 dataset 名称。
+string, hdf5 文件中的 dataset 名称，注意，HDF5 数据集名称以 `/` 开头。
 
 - **spec**
 

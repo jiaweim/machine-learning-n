@@ -10,13 +10,13 @@
     - [tfds build CLI](#tfds-build-cli)
   - [迭代数据集](#迭代数据集)
     - [as dict](#as-dict)
-    - [as tuple(as_supervised=True)](#as-tupleas_supervisedtrue)
+    - [as tuple(as\_supervised=True)](#as-tupleas_supervisedtrue)
     - [as numpy](#as-numpy)
-    - [as batch tf.Tensor(batch_size=-1)](#as-batch-tftensorbatch_size-1)
+    - [as batch tf.Tensor(batch\_size=-1)](#as-batch-tftensorbatch_size-1)
   - [数据集 benchmark](#数据集-benchmark)
   - [可视化](#可视化)
-    - [tfds.as_dataframe](#tfdsas_dataframe)
-    - [tfds.show_examples](#tfdsshow_examples)
+    - [tfds.as\_dataframe](#tfdsas_dataframe)
+    - [tfds.show\_examples](#tfdsshow_examples)
   - [访问数据集元数据](#访问数据集元数据)
     - [Feature metadata](#feature-metadata)
     - [split 元数据](#split-元数据)
@@ -36,7 +36,7 @@ TFDS 提供了一组现成的数据集，可以在 TensorFlow、Jax 和其它机
 
 还可以用来下载和构建 `tf.data.Dataset`（或 `np.array`）。
 
-> ⭐ 不要 TFDF（这个库）和 `tf.data`（TensorFlow 用来构建数据管道的 API）。TFDS 对 `tf.data` 进行了包装。
+> ⭐ 不要 TFDS（本库）和 `tf.data`（TensorFlow 用来构建数据管道的 API）。TFDS 对 `tf.data` 进行了包装。
 
 ## 安装
 
