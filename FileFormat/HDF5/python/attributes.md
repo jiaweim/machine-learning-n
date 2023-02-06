@@ -2,30 +2,29 @@
 
 - [Attributes](#attributes)
   - [简介](#简介)
-  - [API](#api)
+  - [h5py.AttributeManager](#h5pyattributemanager)
   - [参考](#参考)
 
 Last updated: 2022-10-16, 15:58
-@author Jiawei Mao
 ****
 
 ## 简介
 
 属性（Attributes）是使 HDF5 成为“自我描述”格式的关键部分。它们直接连接到 `Group` 和 `Dataset` 对象，包含命名数据片段。这是 HDF5 存储元数据的标准方式。
 
-每个 Group 或 Dataset 都有一个小的代理对象 `<obj>.attrs`。属性具有如下特征：
+每个 Group 或 Dataset 都有一个小的代理对象 `<obj>.attrs`。属性的特征如下：
 
 - 它们可以从任意标量或 NumPy 数组创建
 - 每个 attribute 都应该很小（一般 < 64k）
 - 没有部分 I/O (即切片)；必须读取整个 attribute
 
-`.attrs` 代理对象类为 `AttributeManager`。该类支持 dict 样式接口。
+`.attrs` 代理对象类为 `AttributeManager`。该类支持 dict 接口。
 
-attributes 默认以字母数字顺序迭代。但是，如果以 `track_order=True` 创建 group 或 dataset，则 HDF5 文件保留 attribute 的插入顺序，迭代顺序与其相同。后者与 Python 3.7+ dict 一致。
+attributes 默认以字母数字顺序迭代。如果以 `track_order=True` 创建 group 或 dataset，则 HDF5 文件保留 attribute 的插入顺序，迭代顺序与插入顺序相同。后者与 Python 3.7+ dict 一致。
 
 所有新创建的 group 和 dataset 的默认 `track_order` 可以通过 `h5.get_config().track_order` 全局指定。
 
-## API
+## h5py.AttributeManager
 
 ```python
 class h5py.AttributeManager(parent)
@@ -121,3 +120,5 @@ modify(name, value)
 - `value` – 新的值，通过 `numpy.array(value)` 添加
 
 ## 参考
+
+- https://docs.h5py.org/en/stable/high/attr.html

@@ -1,6 +1,6 @@
-# Datasets
+# Dataset
 
-- [Datasets](#datasets)
+- [Dataset](#dataset)
   - [简介](#简介)
   - [创建数据集](#创建数据集)
   - [读写数据](#读写数据)
@@ -17,11 +17,10 @@
   - [Multi-Block 选择](#multi-block-选择)
   - [Fancy indexing](#fancy-indexing)
   - [创建和读取空 datasets 和 attributes](#创建和读取空-datasets-和-attributes)
-  - [API](#api)
+  - [h5py.Dataset](#h5pydataset)
   - [参考](#参考)
 
 Last updated: 2022-10-16, 01:32
-@author Jiawei Mao
 ****
 
 ## 简介
@@ -313,28 +312,28 @@ array([ 1,  2,  5,  6,  9, 10])
 
 ## 创建和读取空 datasets 和 attributes
 
-HDF5 具有空数据集或空属性的概念。不同于 shape 为 `()` 的数组，也不同于 HDF5 属于中的标量数据空间，相反，它是具有关联类型，没有 data 和 shape 的数据集。在 h5py 中，将其表示为 shape 为 `None` 的 dataset，或 `h5py.Empty` 实例。不能对空 dataset 和 attribute 进行切片。
+HDF5 具有 empty 或 null dataset 和 attribute 的概念。不同于 shape 为 `()` 的数组，也不同于 HDF5 的标量数据空间，它具有关联类型，但没有 data 和 shape 的数据集。在 h5py 中，将其表示为 shape 为 `None` 的 dataset，或 `h5py.Empty` 实例。不能对空 dataset 和 attribute 进行切片。
 
-根据属性使用 h5py.Empty 创建空属性：
+- 使用 `h5py.Empty` 创建空属性：
 
 ```python
 obj.attrs["EmptyAttr"] = h5py.Empty("f")
 ```
 
-读取空属性返回 `h5py.Empty`：
+- 读取空属性返回 `h5py.Empty`：
 
 ```python
 >>> obj.attrs["EmptyAttr"]
 h5py.Empty(dtype="f")
 ```
 
-也可以在 `create_dataset` 中定义 `dtype` 但不定义 `shape` 来创建空 dataset:
+- 在 `create_dataset` 中指定 `dtype` 但指定 `shape` 来创建空 dataset:
 
 ```python
 grp.create_dataset("EmptyDataset", dtype="f")
 ```
 
-或者将 `data` 参数设置为 `h5py.Empty` 实例：
+- 或者将 `data` 参数设置为 `h5py.Empty` 实例：
 
 ```python
 grp.create_dataset("EmptyDataset", data=h5py.Empty("f"))
@@ -349,13 +348,173 @@ h5py.Empty(dtype="f")
 
 数据集的 dtype 可以通过 `<dset>.dtype` 访问。空数据集不能切片，且在空数据集上调用数据集的部分方法，如 `read_direct` 会抛出 `TypeError`。 
 
-## API
+## h5py.Dataset
 
 ```python
 class h5py.Dataset(identifier)
 ```
 
+Dataset objects are typically created via Group.create_dataset(), or by retrieving existing datasets from a file. Call this constructor to create a new Dataset bound to an existing DatasetID identifier.
 
+__getitem__(args)¶
+NumPy-style slicing to retrieve data. See Reading & writing data.
+
+__setitem__(args)¶
+NumPy-style slicing to write data. See Reading & writing data.
+
+__bool__()¶
+Check that the dataset is accessible. A dataset could be inaccessible for several reasons. For instance, the dataset, or the file it belongs to, may have been closed elsewhere.
+
+f = h5py.open(filename)
+dset = f["MyDS"]
+f.close()
+if dset:
+    print("datset accessible")
+else:
+    print("dataset inaccessible")
+dataset inaccessible
+read_direct(array, source_sel=None, dest_sel=None)¶
+Read from an HDF5 dataset directly into a NumPy array, which can avoid making an intermediate copy as happens with slicing. The destination array must be C-contiguous and writable, and must have a datatype to which the source data may be cast. Data type conversion will be carried out on the fly by HDF5.
+
+source_sel and dest_sel indicate the range of points in the dataset and destination array respectively. Use the output of numpy.s_[args]:
+
+dset = f.create_dataset("dset", (100,), dtype='int64')
+arr = np.zeros((100,), dtype='int32')
+dset.read_direct(arr, np.s_[0:10], np.s_[50:60])
+write_direct(source, source_sel=None, dest_sel=None)¶
+Write data directly to HDF5 from a NumPy array. The source array must be C-contiguous. Selections must be the output of numpy.s_[<args>]. Broadcasting is supported for simple indexing.
+
+astype(dtype)¶
+Return a wrapper allowing you to read data as a particular type. Conversion is handled by HDF5 directly, on the fly:
+
+dset = f.create_dataset("bigint", (1000,), dtype='int64')
+out = dset.astype('int16')[:]
+out.dtype
+dtype('int16')
+Changed in version 3.0: Allowed reading through the wrapper object. In earlier versions, astype() had to be used as a context manager:
+
+with dset.astype('int16'):
+    out = dset[:]
+asstr(encoding=None, errors='strict')¶
+Only for string datasets. Returns a wrapper to read data as Python string objects:
+
+s = dataset.asstr()[0]
+encoding and errors work like bytes.decode(), but the default encoding is defined by the datatype - ASCII or UTF-8. This is not guaranteed to be correct.
+
+New in version 3.0.
+
+fields(names)¶
+Get a wrapper to read a subset of fields from a compound data type:
+
+2d_coords = dataset.fields(['x', 'y'])[:]
+If names is a string, a single field is extracted, and the resulting arrays will have that dtype. Otherwise, it should be an iterable, and the read data will have a compound dtype.
+
+New in version 3.0.
+
+iter_chunks()¶
+Iterate over chunks in a chunked dataset. The optional sel argument is a slice or tuple of slices that defines the region to be used. If not set, the entire dataspace will be used for the iterator.
+
+For each chunk within the given region, the iterator yields a tuple of slices that gives the intersection of the given chunk with the selection area. This can be used to read or write data in that chunk.
+
+A TypeError will be raised if the dataset is not chunked.
+
+A ValueError will be raised if the selection region is invalid.
+
+New in version 3.0.
+
+resize(size, axis=None)¶
+Change the shape of a dataset. size may be a tuple giving the new dataset shape, or an integer giving the new length of the specified axis.
+
+Datasets may be resized only up to Dataset.maxshape.
+
+len()¶
+Return the size of the first axis.
+
+make_scale(name='')¶
+Make this dataset an HDF5 dimension scale.
+
+You can then attach it to dimensions of other datasets like this:
+
+other_ds.dims[0].attach_scale(ds)
+You can optionally pass a name to associate with this scale.
+
+virtual_sources()¶
+If this dataset is a virtual dataset, return a list of named tuples: (vspace, file_name, dset_name, src_space), describing which parts of the dataset map to which source datasets. The two ‘space’ members are low-level SpaceID objects.
+
+shape¶
+NumPy-style shape tuple giving dataset dimensions.
+
+dtype¶
+NumPy dtype object giving the dataset’s type.
+
+size¶
+Integer giving the total number of elements in the dataset.
+
+nbytes¶
+Integer giving the total number of bytes required to load the full dataset into RAM (i.e. dset[()]). This may not be the amount of disk space occupied by the dataset, as datasets may be compressed when written or only partly filled with data. This value also does not include the array overhead, as it only describes the size of the data itself. Thus the real amount of RAM occupied by this dataset may be slightly greater.
+
+New in version 3.0.
+
+ndim¶
+Integer giving the total number of dimensions in the dataset.
+
+maxshape¶
+NumPy-style shape tuple indicating the maximum dimensions up to which the dataset may be resized. Axes with None are unlimited.
+
+chunks¶
+Tuple giving the chunk shape, or None if chunked storage is not used. See Chunked storage.
+
+compression¶
+String with the currently applied compression filter, or None if compression is not enabled for this dataset. See Filter pipeline.
+
+compression_opts¶
+Options for the compression filter. See Filter pipeline.
+
+scaleoffset¶
+Setting for the HDF5 scale-offset filter (integer), or None if scale-offset compression is not used for this dataset. See Scale-Offset filter.
+
+shuffle¶
+Whether the shuffle filter is applied (T/F). See Shuffle filter.
+
+fletcher32¶
+Whether Fletcher32 checksumming is enabled (T/F). See Fletcher32 filter.
+
+fillvalue¶
+Value used when reading uninitialized portions of the dataset, or None if no fill value has been defined, in which case HDF5 will use a type-appropriate default value. Can’t be changed after the dataset is created.
+
+external¶
+If this dataset is stored in one or more external files, this is a list of 3-tuples, like the external= parameter to Group.create_dataset(). Otherwise, it is None.
+
+is_virtual¶
+True if this dataset is a virtual dataset, otherwise False.
+
+dims¶
+Access to Dimension Scales.
+
+is_scale¶
+Return True if the dataset is also a dimension scale, False otherwise.
+
+- **attrs**
+
+该数据集的 Attributes.
+
+id¶
+The dataset’s low-level identifier; an instance of DatasetID.
+
+ref¶
+An HDF5 object reference pointing to this dataset. See Using object references.
+
+regionref¶
+Proxy object for creating HDF5 region references. See Using region references.
+
+name¶
+String giving the full path to this dataset.
+
+file¶
+File instance in which this dataset resides
+
+parent¶
+Group instance containing this dataset.
 
 ## 参考
 

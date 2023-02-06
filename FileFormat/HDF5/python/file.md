@@ -15,7 +15,7 @@
   - [h5py.File](#h5pyfile)
   - [参考](#参考)
 
-Last updated: 2023-02-02, 14:01
+Last updated: 2023-02-06, 16:37
 ****
 
 ## 简介
@@ -282,7 +282,27 @@ Windows 系统以 Unicode 处理文件名，并且从 HDF5 1.10.6 开始，所�
 > **Note:** 与 Python 文件对象不同，`File.name` 属性给出的是 root group `/`。访问磁盘上的名称，使用 `File.filename`。
 
 ```python
-classh5py.File(name, mode='r', driver=None, libver=None, userblock_size=None, swmr=False, rdcc_nslots=None, rdcc_nbytes=None, rdcc_w0=None, track_order=None, fs_strategy=None, fs_persist=False, fs_threshold=1, fs_page_size=None, page_buf_size=None, min_meta_keep=0, min_raw_keep=0, locking=None, alignment_threshold=1, alignment_interval=1, **kwds)
+classh5py.File(name, 
+    mode='r', 
+    driver=None, 
+    libver=None, 
+    userblock_size=None, 
+    swmr=False, 
+    rdcc_nslots=None, 
+    rdcc_nbytes=None, 
+    rdcc_w0=None, 
+    track_order=None, 
+    fs_strategy=None, 
+    fs_persist=False, 
+    fs_threshold=1, 
+    fs_page_size=None, 
+    page_buf_size=None, 
+    min_meta_keep=0, 
+    min_raw_keep=0, 
+    locking=None, 
+    alignment_threshold=1, 
+    alignment_interval=1, 
+    **kwds)
 ```
 
 打开或创建文件。
@@ -291,7 +311,7 @@ classh5py.File(name, mode='r', driver=None, libver=None, userblock_size=None, sw
 
 **参数：**
 
-name – Name of file (bytes or str), or an instance of h5f.FileID to bind to an existing file identifier, or a file-like object (see Python file-like objects).
+- **name** – Name of file (bytes or str), or an instance of h5f.FileID to bind to an existing file identifier, or a file-like object (see Python file-like objects).
 
 mode – Mode in which to open file; one of (“w”, “r”, “r+”, “a”, “w-“). See Opening & creating files.
 
@@ -301,7 +321,9 @@ libver – Compatibility bounds; see Version bounding.
 
 userblock_size – Size (in bytes) of the user block. If nonzero, must be a power of 2 and at least 512. See User block.
 
-swmr – If True open the file in single-writer-multiple-reader mode. Only used when mode=”r”.
+- **swmr**
+
+以 single-writer-multiple-reader 模式打开文件。仅当 mode='r' 时使用。
 
 rdcc_nbytes – Total size of the raw data chunk cache in bytes. The default size is 
  (1 MiB) per dataset.
@@ -354,46 +376,59 @@ kwds – Driver-specific keywords; see File drivers.
 
 **方法：**
 
-__bool__()¶
-Check that the file descriptor is valid and the file open:
+- `__bool__()`
 
-f = h5py.File(filename)
-f.close()
-if f:
-    print("file is open")
-else:
-    print("file is closed")
+检查文件描述符是否有效，文件是否打开：
+
+```python
+>>> f = h5py.File(filename)
+>>> f.close()
+>>> if f:
+...     print("file is open")
+... else:
+...     print("file is closed")
 file is closed
-close()¶
-Close this file. All open objects will become invalid.
+```
 
-flush()¶
-Request that the HDF5 library flush its buffers to disk.
+- **close()**
 
-id¶
-Low-level identifier (an instance of FileID).
+关闭该文件。所有打开的对象将无效。
 
-filename¶
-Name of this file on disk, as a Unicode string.
+- **flush()**
 
-mode¶
-String indicating if the file is open readonly (“r”) or read-write (“r+”). Will always be one of these two values, regardless of the mode used to open the file.
+将缓冲区刷新到磁盘。
 
-swmr_mode¶
-True if the file access is using Single Writer Multiple Reader (SWMR). Use mode to distinguish SWMR read from write.
+- **id**
 
-driver¶
-String giving the driver used to open the file. Refer to File drivers for a list of drivers.
+底层识别符（`FileID` 实例）。
+
+- **filename**
+
+文件在 disk 上的名称，Unicode 字符串。
+
+- **mode**
+
+字符串，文件打开模式：只读（"r"）或读写（"r+"）。无论以哪种模式打开文件，总是这两个值之一。
+
+- **swmr_mode**
+
+以 Single Writer Multiple Reader (SWMR) 模式访问文件时为 `True`。使用 `mode` 来区分读还是写 模式。
+
+- **driver**
+
+打开文件的驱动名称（string）。
 
 - **libver**
 
 包含版本设置的 2-tuple。参考[版本问题](#版本问题)
 
-userblock_size¶
-Size of user block (in bytes). Generally 0. See User block.
+- **userblock_size**
 
-meta_block_size¶
-Minimum size, in bytes, of metadata block allocations. Default: 2048. See :ref`file_meta_block_size`.
+user block 尺寸（bytes），一般为 0.
+
+- **meta_block_size**
+
+分配的元数据 block 最小尺寸（bytes），默认 2048.
 
 ## 参考
 
