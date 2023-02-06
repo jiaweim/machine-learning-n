@@ -9,7 +9,7 @@
   - [加载模型](#加载模型)
   - [参考](#参考)
 
-Last updated: 2022-11-07, 13:57
+Last updated: 2023-02-06, 10:31
 ****
 
 ## 简介
@@ -18,7 +18,7 @@ Last updated: 2022-11-07, 13:57
 
 ## 数据处理
 
-PyTorch 有两个处理数据的基础类：`torch.utils.data.DataLoader` 和 `torch.utils.data.Dataset`。`Dataset` 保存样本及标签，`DataLoader` 将 `Dataset` 包装为可迭代对象。
+PyTorch 有两个处理数据的基础类：`torch.utils.data.DataLoader` 和 `torch.utils.data.Dataset`。`Dataset` 包含样本及其标签，`DataLoader` 将 `Dataset` 包装为可迭代对象。
 
 ```python
 import torch
@@ -28,9 +28,9 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor
 ```
 
-PyTorch 为不同领域提供了不同的库，如 [TorchText](https://pytorch.org/text/stable/index.html), [TorchVision](https://pytorch.org/vision/stable/index.html) 和 [TorchAudio](https://pytorch.org/audio/stable/index.html)，这些库都包含数据集。本教程将使用一个 TorchVision 数据集。
+PyTorch 为不同领域提供了不同的库，如 [TorchText](https://pytorch.org/text/stable/index.html), [TorchVision](https://pytorch.org/vision/stable/index.html) 和 [TorchAudio](https://pytorch.org/audio/stable/index.html)，这些库都包含数据集。本教程将使用 TorchVision 的一个数据集。
 
-`torchvision.datasets` 模块包含许多现实世界视觉数据的 `Dataset` 对象，如 CIFAR，COCO [等](https://pytorch.org/vision/stable/datasets.html)。下面使用 FashionMNIST 数据集。每个 TorchVision `Dataset` 包含两个参数：`transform` 和 `target_transform`，分别用于修改样本和标签。
+`torchvision.datasets` 模块包含许多真实视觉数据的 `Dataset` 对象，如 CIFAR，COCO [等](https://pytorch.org/vision/stable/datasets.html)，下面以 FashionMNIST 数据集为例。每个 TorchVision `Dataset` 包含两个参数：`transform` 和 `target_transform`，分别用于修改样本和标签。
 
 ```python
 # 下载训练数据
@@ -49,7 +49,7 @@ test_data = datasets.FashionMNIST(
 )
 ```
 
-将 `Dataset` 作为参数传递给 DataLoader，它在数据集上封装了一个迭代器，并支持自动 batching, sampling, shuffling 以及多进程加载数据。下面定义 batch size 为 64，即 dataloader 迭代器的每个元素包含 64 对样本和标签。
+将 `Dataset` 作为参数传递给 DataLoader，它在数据集上封装了一个迭代器，并支持自动 batching, sampling, shuffling 以及多进程加载。下面定义 batch size 为 64，即 dataloader 迭代器的每个元素包含 64 对样本和标签。
 
 ```python
 batch_size = 64
@@ -71,7 +71,12 @@ Shape of y: torch.Size([64]) torch.int64
 
 ## 创建模型
 
-在 PyTorch 中通过创建继承 `nn.Module` 的类定义神经网络。在 `__init__` 函数中定义网络的层，在 `forward` 函数中定义数据如何通过网络。为了加速神经网络计算，可以将模型移到 GPU。
+在 PyTorch 中通过继承 `nn.Module` 类定义神经网络：
+
+- 在 `__init__` 函数中定义网络层
+- 在 `forward` 函数中定义网络的前向传播。
+
+为了加速神经网络计算，可以将模型移到 GPU。
 
 ```python
 # 使用 CPU 或 GPU 训练模型
@@ -123,7 +128,7 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 ```
 
-在单个训练循环中，模型对训练数据（分批输入）进行预测，并根据反向传播预测误差来调整模型参数。
+在单个训练循环中，模型对训练数据（按 batch 输入）进行预测，并根据反向传播预测误差来调整模型参数。
 
 ```python
 def train(dataloader, model, loss_fn, optimizer):
@@ -165,7 +170,7 @@ def test(dataloader, model, loss_fn):
     print(f"Test Error: \n Accuracy: {(100 * correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 ```
 
-训练过程进行几次迭代（epochs）。在每个 epoch，模型学习参数，以做出更好的预测。我们在每个 epoch 打印模型的精度和损失，期望精度随时间的推移增加，而损失则随时间的推移而减少。
+训练过程进行几次迭代（epochs）。在每个 epoch，模型调整参数以做出更好的预测。我们在每个 epoch 结尾打印模型的精度和损失，期望精度随时间的推移增加，而损失则随时间的推移而减少。
 
 ```python
 epochs = 5
@@ -257,7 +262,7 @@ Done!
 
 ## 保存模型
 
-保存模型的常用方法是序列化模型内部状态的字典（包含模型参数）。
+保存模型的一种常用方法是序列化包含模型内部状态的字典（包含模型参数）。
 
 ```python
 torch.save(model.state_dict(), "model.pth")
