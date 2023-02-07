@@ -7,7 +7,6 @@
   - [Tensor 类 API](#tensor-类-api)
     - [permute](#permute)
     - [repeat](#repeat)
-  - [操作](#操作)
     - [detach](#detach)
     - [numpy](#numpy)
     - [scatter\_](#scatter_)
@@ -187,8 +186,6 @@ tensor([[ 1,  2,  3,  1,  2,  3],
 torch.Size([4, 2, 3])
 ```
 
-## 操作
-
 ### detach
 
 从当前图中分离出来，创建一个新的张量。
@@ -287,21 +284,65 @@ tensor([[2.0000, 2.0000, 3.2300, 2.0000],
 
 ### Tensor.to
 
-Last updated: 2023-01-30, 16:48
-
 ```python
 Tensor.to(*args, **kwargs) → Tensor
 ```
 
-执行张量 `dtype` and/or `device` 转换。`torch.dtype` 和 `torch.device` 
- 
+执行张量 `dtype` and/or `device` 转换。`torch.dtype` 和 `torch.device` 根据 `self.to(*args, **kwargs)` 推断。
+
+> **NOTE**
+> 如果 `self` 张量的 `torch.dtype` 和 `torch.device` 已经正确，则直接返回 `self`。否则以指定 `torch.dtype` 和 `torch.device` 返回 `self` 的副本。
+
+下面是调用 `to` 的方法：
+
 ```python
->>> long_tensor = torch.tensor([[0, 0, 1], [1, 1, 1], [0, 0, 0]])
->>> long_tensor.type()
-'torch.LongTensor'
->>> float_tensor = long_tensor.to(dtype=torch.float32)
->>> float_tensor.type()
-'torch.FloatTensor'
+to(dtype, 
+    non_blocking=False, 
+    copy=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+返回指定 `dtype` 的张量。
+
+```python
+torch.to(device=None, 
+    dtype=None, 
+    non_blocking=False, 
+    copy=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+返回指定 `device` 和 `dtype`（可选）的张量。如果 `dtype` 为 `None`，则使用 `self.dtype`。当 `non_blocking`,则尝试与主机异步转换，例如，将锁业内存 CPU 张量转换为 CUDA 张量。当 `copy`，即使 `self` 已经满足需求，依然会创建一个新的张量。
+
+```python
+torch.to(other, 
+    non_blocking=False, 
+    copy=False) → Tensor
+```
+
+创建一个与 `other` 具有相同 `device` 和 `dtype` 的张量。
+
+**例如：**
+
+```python
+>>> tensor = torch.randn(2, 2)  # Initially dtype=float32, device=cpu
+>>> tensor.to(torch.float64)
+tensor([[-0.5044,  0.0005],
+        [ 0.3310, -0.0584]], dtype=torch.float64)
+
+>>> cuda0 = torch.device('cuda:0')
+>>> tensor.to(cuda0)
+tensor([[-0.5044,  0.0005],
+        [ 0.3310, -0.0584]], device='cuda:0')
+
+>>> tensor.to(cuda0, dtype=torch.float64)
+tensor([[-0.5044,  0.0005],
+        [ 0.3310, -0.0584]], dtype=torch.float64, device='cuda:0')
+
+>>> other = torch.randn((), dtype=torch.float64, device=cuda0)
+>>> tensor.to(other, non_blocking=True)
+tensor([[-0.5044,  0.0005],
+        [ 0.3310, -0.0584]], dtype=torch.float64, device='cuda:0')
 ```
 
 ### view

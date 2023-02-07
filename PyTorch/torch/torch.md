@@ -2,17 +2,24 @@
 
 - [torch](#torch)
   - [Tensors](#tensors)
-    - [创建操作](#创建操作)
-      - [torch.linspace](#torchlinspace)
-      - [torch.ones](#torchones)
-    - [索引、切片、连接和突变](#索引切片连接和突变)
+  - [创建张量](#创建张量)
+    - [torch.tensor](#torchtensor)
+    - [torch.zeros](#torchzeros)
+    - [torch.zeros\_like](#torchzeros_like)
+    - [torch.ones](#torchones)
+    - [torch.ones\_like](#torchones_like)
+    - [torch.linspace](#torchlinspace)
+    - [torch.empty](#torchempty)
+    - [torch.empty\_like](#torchempty_like)
+    - [torch.ones](#torchones-1)
+  - [索引、切片、连接和突变](#索引切片连接和突变)
       - [permute](#permute)
   - [随机采样](#随机采样)
     - [torch.manual\_seed](#torchmanual_seed)
     - [torch.rand](#torchrand)
     - [torch.randn](#torchrandn)
+    - [torch.rand\_like](#torchrand_like)
     - [原地随机采样](#原地随机采样)
-    - [](#)
   - [局部禁用梯度计算](#局部禁用梯度计算)
   - [Math operations](#math-operations)
     - [Pointwise Ops](#pointwise-ops)
@@ -38,7 +45,7 @@
     - [torch.var](#torchvar)
   - [参考](#参考)
 
-Last updated: 2023-01-27, 13:39
+Last updated: 2023-02-07, 19:12
 ***
 
 ## Tensors
@@ -58,11 +65,51 @@ Last updated: 2023-01-27, 13:39
 |set_printoptions|设置打印选项|
 |set_flush_denormal|禁用 CPU 上的非正规浮点数|
 
-### 创建操作
+## 创建张量
 
-tensor
+### torch.tensor
 
-Constructs a tensor with no autograd history (also known as a "leaf tensor", see Autograd mechanics) by copying data.
+```python
+torch.tensor(data, *, 
+    dtype=None, 
+    device=None, 
+    requires_grad=False, 
+    pin_memory=False) → Tensor
+```
+
+复制 `data` 的数据创建张量，该张量没有 autograd 历史，也称为叶张量（leaf tensor）。
+
+> **WARNING**
+> 建议使用 `torch.Tensor.clone()`, `torch.Tensor.detach()` 和 `torch.Tensor.requires_grad_()`。假设 `t` 是一个张量，则 `torch.tensor(t)` 等价于 `t.clone().detach()`；而 `torch.tensor(t, requires_grad=True)` 等价于 `t.clone().detach().requires_grad_(True)`。
+
+**参数：**
+
+- **data** (`array_like`)
+
+张量的初始化数据。支持 `list`, `tuple`, `ndarray`, scalar 等类型。
+
+**例如：**
+
+```python
+>>> torch.tensor([[0.1, 1.2], [2.2, 3.1], [4.9, 5.2]])
+tensor([[ 0.1000,  1.2000],
+        [ 2.2000,  3.1000],
+        [ 4.9000,  5.2000]])
+
+>>> torch.tensor([0, 1])  # Type inference on data
+tensor([ 0,  1])
+
+>>> torch.tensor([[0.11111, 0.222222, 0.3333333]],
+...              dtype=torch.float64,
+...              device=torch.device('cuda:0'))  # creates a double tensor on a CUDA device
+tensor([[ 0.1111,  0.2222,  0.3333]], dtype=torch.float64, device='cuda:0')
+
+>>> torch.tensor(3.14159)  # Create a zero-dimensional (scalar) tensor
+tensor(3.1416)
+
+>>> torch.tensor([])  # Create an empty tensor (of size (0,))
+tensor([])
+```
 
 sparse_coo_tensor
 
@@ -92,21 +139,126 @@ frombuffer
 
 Creates a 1-dimensional Tensor from an object that implements the Python buffer protocol.
 
-zeros
+### torch.zeros
 
-Returns a tensor filled with the scalar value 0, with the shape defined by the variable argument size.
+```python
+torch.zeros(*size, *, 
+    out=None, 
+    dtype=None, 
+    layout=torch.strided, 
+    device=None, 
+    requires_grad=False) → Tensor
+```
 
-zeros_like
+创建张量，并以 0 初始化。张量 shape 由参数 `size` 定义。
 
-Returns a tensor filled with the scalar value 0, with the same size as input.
 
-ones
+**参数：**
 
-Returns a tensor filled with the scalar value 1, with the shape defined by the variable argument size.
+- **size** (`int`...)
 
-ones_like
+整数序列，定义输出张量 shape。支持可变参数、list 和 tuple。
 
-Returns a tensor filled with the scalar value 1, with the same size as input.
+**关键字参数：**
+
+- **out** (`Tensor`, optional)
+
+输出张量。
+
+- **dtype** (`torch.dtype`, optional)
+
+指定张量类型。默认：`None` 表示使用全局默认类型 (`torch.set_default_tensor_type()`)。
+
+- **layout** (`torch.layout`, optional)
+
+指定张量 layout。默认 `torch.strided`。
+
+- **device** (`torch.device`, optional)
+
+指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (`torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为 CUDA。
+
+- **requires_grad** (`bool`, optional)
+
+支持梯度。默认 `False`。
+
+例如：
+
+```python
+>>> torch.zeros(2, 3)
+tensor([[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]])
+
+>>> torch.zeros(5)
+tensor([ 0.,  0.,  0.,  0.,  0.])
+```
+
+### torch.zeros_like
+
+```python
+torch.zeros_like(input, *, 
+    dtype=None, 
+    layout=None, 
+    device=None, 
+    requires_grad=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+创建shape 与 `input` 相同的张量，并以 0 初始化。`torch.zeros_like(input)` 等价于 `torch.zeros(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
+
+**例如：**
+
+```python
+>>> input = torch.empty(2, 3)
+>>> torch.zeros_like(input)
+tensor([[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]])
+```
+
+### torch.ones
+
+```python
+torch.ones(*size, *, 
+    out=None, 
+    dtype=None, 
+    layout=torch.strided, 
+    device=None, 
+    requires_grad=False) → Tensor
+```
+
+创建张量，并以 1 初始化。张量 shape 由参数 `size` 定义。
+
+**例如：**
+
+```python
+>>> torch.ones(2, 3)
+tensor([[ 1.,  1.,  1.],
+        [ 1.,  1.,  1.]])
+
+>>> torch.ones(5)
+tensor([ 1.,  1.,  1.,  1.,  1.])
+```
+
+### torch.ones_like
+
+```python
+torch.ones_like(input, *, 
+    dtype=None, 
+    layout=None, 
+    device=None, 
+    requires_grad=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+创建 `size` 与 `input` 相同的张量，并用 1 初始化。`torch.ones_like(input)` 等价于 `torch.ones(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
+
+**例如：**
+
+```python
+>>> input = torch.empty(2, 3)
+>>> torch.ones_like(input)
+tensor([[ 1.,  1.,  1.],
+        [ 1.,  1.,  1.]])
+```
 
 arange
 
@@ -124,9 +276,7 @@ end−start
 ​
  ⌋+1 with values from start to end with step step.
 
-#### torch.linspace
-
-Last updated: 2023-01-30, 17:18
+### torch.linspace
 
 ```python
 torch.linspace(
@@ -179,13 +329,92 @@ eye
 
 Returns a 2-D tensor with ones on the diagonal and zeros elsewhere.
 
-empty
+### torch.empty
 
-Returns a tensor filled with uninitialized data.
+```python
+torch.empty(*size, *, 
+    out=None, 
+    dtype=None, 
+    layout=torch.strided, 
+    device=None, 
+    requires_grad=False, 
+    pin_memory=False, 
+    memory_format=torch.contiguous_format) → Tensor
+```
 
-empty_like
+创建一个张量，其值未初始化。张量 shape 由 `size` 参数定义。
 
-Returns an uninitialized tensor with the same size as input.
+**参数：**
+
+- **size** (`int`...)
+
+整数序列，定义输出张量 shape。支持可变参数、list 和 tuple。
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional)
+
+输出张量。
+
+- **dtype** (`torch.dtype`, optional)
+
+指定张量类型。默认：`None` 表示使用全局默认类型 (`torch.set_default_tensor_type()`)。
+
+- **layout** (`torch.layout`, optional)
+
+指定张量 layout。默认 `torch.strided`。
+
+- **device** (`torch.device`, optional)
+
+指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (`torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为 CUDA。
+
+- **requires_grad** (`bool`, optional)
+
+支持梯度。默认 `False`。
+
+- **pin_memory** (`bool`, optional)
+
+`True` 表示是否在锁业内存中分配张量。仅用于 CPU 张量，默认 `False`。
+
+- **memory_format** (`torch.memory_format`, optional)
+
+指定张量的内存格式。默认 `torch.contiguous_format`。
+
+例如：
+
+```python
+>>> torch.empty((2,3), dtype=torch.int64)
+tensor([[ 9.4064e+13,  2.8000e+01,  9.3493e+13],
+        [ 7.5751e+18,  7.1428e+18,  7.5955e+18]])
+```
+
+### torch.empty_like
+
+```python
+torch.empty_like(input, *, 
+    dtype=None, 
+    layout=None, 
+    device=None, 
+    requires_grad=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+返回一个 `size` 与 `input` 相同的张量，值未初始化。`torch.empty_like(input)` 等价于 `torch.empty(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
+
+**参数：**
+
+- **input** (`Tensor`)
+
+`input` 的 size 决定输出张量的 size。
+
+**例如：**
+
+```python
+>>> a=torch.empty((2,3), dtype=torch.int32, device = 'cuda')
+>>> torch.empty_like(a)
+tensor([[0, 0, 0],
+        [0, 0, 0]], device='cuda:0', dtype=torch.int32)
+```
 
 empty_strided
 
@@ -223,7 +452,7 @@ heaviside
 
 Computes the Heaviside step function for each element in input.
 
-#### torch.ones
+### torch.ones
 
 ```python
 torch.ones(*size, *, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) → Tensor
@@ -232,8 +461,7 @@ torch.ones(*size, *, out=None, dtype=None, layout=torch.strided, device=None, re
 创建所有值为 1 的张量，张量大小为 `size`。
 
 
-
-### 索引、切片、连接和突变
+## 索引、切片、连接和突变
 
 |操作|说明|
 |---|---|
@@ -446,6 +674,83 @@ Return a tensor of elements selected from either x or y, depending on condition.
 
 ## 随机采样
 
+seed
+
+Sets the seed for generating random numbers to a non-deterministic random number.
+
+manual_seed
+
+Sets the seed for generating random numbers.
+
+initial_seed
+
+Returns the initial seed for generating random numbers as a Python long.
+
+get_rng_state
+
+Returns the random number generator state as a torch.ByteTensor.
+
+set_rng_state
+
+Sets the random number generator state.
+
+torch.default_generator Returns the default CPU torch.Generator
+bernoulli
+
+Draws binary random numbers (0 or 1) from a Bernoulli distribution.
+
+multinomial
+
+Returns a tensor where each row contains num_samples indices sampled from the multinomial probability distribution located in the corresponding row of tensor input.
+
+normal
+
+Returns a tensor of random numbers drawn from separate normal distributions whose mean and standard deviation are given.
+
+poisson
+
+Returns a tensor of the same size as input with each element sampled from a Poisson distribution with rate parameter given by the corresponding element in input i.e.,
+
+rand
+
+Returns a tensor filled with random numbers from a uniform distribution on the interval 
+[
+0
+,
+1
+)
+[0,1)
+
+rand_like
+
+Returns a tensor with the same size as input that is filled with random numbers from a uniform distribution on the interval 
+[
+0
+,
+1
+)
+[0,1).
+
+randint
+
+Returns a tensor filled with random integers generated uniformly between low (inclusive) and high (exclusive).
+
+randint_like
+
+Returns a tensor with the same shape as Tensor input filled with random integers generated uniformly between low (inclusive) and high (exclusive).
+
+randn
+
+Returns a tensor filled with random numbers from a normal distribution with mean 0 and variance 1 (also called the standard normal distribution).
+
+randn_like
+
+Returns a tensor with the same size as input that is filled with random numbers from a normal distribution with mean 0 and variance 1.
+
+randperm
+
+Returns a random permutation of integers from 0 to n - 1.
+
 ### torch.manual_seed
 
 ```python
@@ -454,30 +759,85 @@ torch.manual_seed(seed)
 
 设置生成随机数的种子。返回 `torch.Generator` 对象。
 
-参数：
+**参数：**
 
 - **seed** (`int`)
 
 期望 seed。取值范围 [-0x8000_0000_0000_0000, 0xffff_ffff_ffff_ffff]。负数按公式 0xffff_ffff_ffff_ffff + seed 重新映射到正数。
 
+> **NOTE**
+用随机数初始化张量是常见操作（如模型权重初始化），但有时（特别是研究中）希望确保结果的可重复性，手动设置随机数生成器的 seed 可以帮助做到这一点。
+
+```python
+torch.manual_seed(1729)
+random1 = torch.rand(2, 3)
+print(random1)
+
+random2 = torch.rand(2, 3)
+print(random2)
+
+torch.manual_seed(1729)
+random3 = torch.rand(2, 3)
+print(random3)
+
+random4 = torch.rand(2, 3)
+print(random4)
+```
+
+```txt
+tensor([[0.3126, 0.3791, 0.3087],
+        [0.0736, 0.4216, 0.0691]])
+tensor([[0.2332, 0.4047, 0.2162],
+        [0.9927, 0.4128, 0.5938]])
+tensor([[0.3126, 0.3791, 0.3087],
+        [0.0736, 0.4216, 0.0691]])
+tensor([[0.2332, 0.4047, 0.2162],
+        [0.9927, 0.4128, 0.5938]])
+```
+
+可以看到 `random1` 和 `random3` 的值相同，`random2` 和 `random4` 的值相同。手动设置 RNG 的 seed 会重置。
+
 ### torch.rand
 
 ```python
-torch.rand(*size, *, out=None, dtype=None, layout=torch.strided, device=None, 
+torch.rand(*size, *, 
+    out=None, 
+    dtype=None, 
+    layout=torch.strided, 
+    device=None, 
     requires_grad=False, pin_memory=False) → Tensor
 ```
 
-从均匀分布 $[0,1)$ 中随机抽样。
+创建张量，从均匀分布 $[0,1)$ 中随机抽样填充张量。
 
 返回的张量大小由 `size` 定义。
- 
-### torch.randn
 
-Last updated: 2023-01-30, 15:46
+**关键字参数：**
+
+- **generator** (`torch.Generator`, optional)
+
+用于采样的伪随机数生成器。
+
+例如：
 
 ```python
-torch.randn(*size, *, out=None, dtype=None, layout=torch.strided, device=None, 
-    requires_grad=False, pin_memory=False) → Tensor
+>>> torch.rand(4)
+tensor([ 0.5204,  0.2503,  0.3525,  0.5673])
+>>> torch.rand(2, 3)
+tensor([[ 0.8237,  0.5781,  0.6879],
+        [ 0.3816,  0.7249,  0.0998]])
+```
+
+### torch.randn
+
+```python
+torch.randn(*size, *, 
+    out=None, 
+    dtype=None, 
+    layout=torch.strided, 
+    device=None, 
+    requires_grad=False, 
+    pin_memory=False) → Tensor
 ```
 
 返回一个由均值为0、方差为 1 的正态分布中随机数填充的张量。
@@ -512,9 +872,21 @@ tensor([[ 0.6635, -1.0228,  0.0674],
         [ 1.4007,  1.6177, -0.7507]])
 ```
 
-### 原地随机采样
+### torch.rand_like
 
-### 
+```python
+torch.rand_like(input, *, 
+    dtype=None, 
+    layout=None, 
+    device=None, 
+    requires_grad=False, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+创建一个与 `input` 张量 size 相同的张量，用满足 [0,1) 均匀分布的随机数填充。`torch.rand_like(input)` 等价于 `torch.rand(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
+
+
+### 原地随机采样
 
 ## 局部禁用梯度计算
 
