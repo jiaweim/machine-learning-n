@@ -2,8 +2,16 @@
 
 - [张量](#张量)
   - [简介](#简介)
+  - [创建张量](#创建张量)
+    - [不同初始化方式](#不同初始化方式)
+    - [相同 shape](#相同-shape)
+    - [数值初始化](#数值初始化)
   - [张量索引](#张量索引)
-  - [类型](#类型)
+  - [张量类型](#张量类型)
+  - [数学和逻辑运算](#数学和逻辑运算)
+    - [张量与标量运算](#张量与标量运算)
+    - [张量与张量](#张量与张量)
+    - [广播](#广播)
   - [Tensor API](#tensor-api)
   - [Storage](#storage)
     - [Storage 索引](#storage-索引)
@@ -12,6 +20,7 @@
     - [转置（无复制）](#转置无复制)
     - [高维转置](#高维转置)
     - [连续张量](#连续张量)
+  - [复制张量](#复制张量)
   - [将张量移到 GPU](#将张量移到-gpu)
   - [NumPy 互操](#numpy-互操)
   - [张量序列化](#张量序列化)
@@ -34,6 +43,158 @@ Python 数字 list 或 tuple，是 Python 对象的集合，而 PyTorch 张量�
 ![](images/2022-12-12-17-38-17.png)
 
 > Python 对象（装箱）数字与张量（拆箱数组）的对比。
+
+## 创建张量
+
+### 不同初始化方式
+
+| 方法 | 说明 |
+|---|---|
+| `torch.empty` | 创建张量，不初始化 |
+| `torch.zeros` | 创建张量，用 0 初始化 |
+| `torch.ones` | 创建张量，用 1 初始化 |
+| `torch.rand` | 创建张量，用 [0,1) 均匀分布随机数初始化 |
+
+这些方法的参数基本相同。
+
+**参数：**
+
+- **size** (`int`...)
+
+整数序列，定义输出张量 shape。支持可变参数、list 和 tuple。
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional)
+
+输出张量。
+
+- **dtype** (`torch.dtype`, optional)
+
+指定张量类型。默认：`None` 表示使用全局默认类型 (`torch.set_default_tensor_type()`)。
+
+- **layout** (`torch.layout`, optional)
+
+指定张量 layout。默认 `torch.strided`。
+
+- **device** (`torch.device`, optional)
+
+指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (`torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为 CUDA。
+
+- **requires_grad** (`bool`, optional)
+
+支持梯度。默认 `False`。
+
+- **pin_memory** (`bool`, optional)
+
+`True` 表示是否在锁业内存中分配张量。仅用于 CPU 张量，默认 `False`。
+
+- **memory_format** (`torch.memory_format`, optional)
+
+指定张量的内存格式。默认 `torch.contiguous_format`。
+
+### 相同 shape
+
+在执行张量运算时，一般需要具有相同的 shape。为此，torch 提供了 `torch.*_like()` 方法：
+
+| 方法 | 说明 |
+|---|---|
+| `torch.empty_like` | 创建张量，不初始化，size 同 `input` |
+| `torch.zeros_like` | 创建张量，用 0 初始化，size 同 `input` |
+| `torch.ones_like` | 创建张量，用 1 初始化，size 同 `input` |
+| `torch.rand_like` | 创建张量，用 [0,1) 均匀分布随机数初始化，size 同 `input` |
+
+返回一个 `size` 与 `input` 相同的张量。
+
+**参数：**
+
+- **input** (`Tensor`)
+
+`input` 的 size 决定输出张量的 size。
+
+**示例：**
+
+```python
+x = torch.empty(2, 2, 3)
+print(x.shape)
+print(x)
+
+empty_like_x = torch.empty_like(x)
+print(empty_like_x.shape)
+print(empty_like_x)
+
+zeros_like_x = torch.zeros_like(x)
+print(zeros_like_x.shape)
+print(zeros_like_x)
+
+ones_like_x = torch.ones_like(x)
+print(ones_like_x.shape)
+print(ones_like_x)
+
+rand_like_x = torch.rand_like(x)
+print(rand_like_x.shape)
+print(rand_like_x)
+```
+
+```txt
+torch.Size([2, 2, 3])
+tensor([[[0., 0., 0.],
+         [0., 0., 0.]],
+
+        [[0., 0., 0.],
+         [0., 0., 0.]]])
+torch.Size([2, 2, 3])
+tensor([[[0., 0., 0.],
+         [0., 0., 0.]],
+
+        [[0., 0., 0.],
+         [0., 0., 0.]]])
+torch.Size([2, 2, 3])
+tensor([[[0., 0., 0.],
+         [0., 0., 0.]],
+
+        [[0., 0., 0.],
+         [0., 0., 0.]]])
+torch.Size([2, 2, 3])
+tensor([[[1., 1., 1.],
+         [1., 1., 1.]],
+
+        [[1., 1., 1.],
+         [1., 1., 1.]]])
+torch.Size([2, 2, 3])
+tensor([[[0.1948, 0.7857, 0.1221],
+         [0.9282, 0.1628, 0.7539]],
+
+        [[0.3136, 0.5497, 0.3110],
+         [0.9080, 0.3870, 0.1229]]])
+```
+
+### 数值初始化
+
+创建张量的最后一种方法，是直接提供数据，使用 `torch.tensor()` 创建：
+
+```python
+some_constants = torch.tensor([[3.1415926, 2.71828], [1.61803, 0.0072897]])
+print(some_constants)
+
+some_integers = torch.tensor((2, 3, 5, 7, 11, 13, 17, 19))
+print(some_integers)
+
+more_integers = torch.tensor(((2, 4, 6), [3, 6, 9]))
+print(more_integers)
+```
+
+```txt
+tensor([[3.1416, 2.7183],
+        [1.6180, 0.0073]])
+tensor([ 2,  3,  5,  7, 11, 13, 17, 19])
+tensor([[2, 4, 6],
+        [3, 6, 9]])
+```
+
+> **NOTE**
+> 如果已有数据，使用 `torch.tensor()` 是创建张量的最直观的方式。
+> `torch.tensor()` 会复制参数的数据。
 
 ## 张量索引
 
@@ -60,9 +221,12 @@ points[None] # 添加一个 size 为 1 的维度，类似 unsequeeze
 
 除了切片，PyTorch 还支持高级索引，后面会介绍。
 
-## 类型
+## 张量类型
 
-张量构造函数（如 `tensor`, `zeros` 和 `ones`）使用 `dtype` 参数指定数据类型。
+指定张量类型的方法有两种：
+
+- 创建张量时（如 `tensor`, `zeros` 等）指定 `dtype` 参数；
+- 使用 `to` 转换类型。
 
 张量的默认类型为 `torch.float32`。
 
@@ -105,6 +269,88 @@ short_points = torch.ones(10, 2).to(dtype=torch.short)
 >>> points_short = points_64.to(torch.short)
 >>> points_64 * points_short
 tensor([0., 0., 0., 0., 0.], dtype=torch.float64)
+```
+
+## 数学和逻辑运算
+
+### 张量与标量运算
+
+张量与标量的算术运算，如加减乘除，是对张量的每个元素逐个运算。由于运算结果是张量，因此支持链式操作（按运算符优先级运算）。示例：
+
+```python
+ones = torch.zeros(2, 2) + 1
+twos = torch.ones(2, 2) * 2
+threes = (torch.ones(2, 2) * 7 - 1) / 2
+fours = twos ** 2
+sqrt2s = twos ** 0.5
+
+print(ones)
+print(twos)
+print(threes)
+print(fours)
+print(sqrt2s)
+```
+
+```txt
+tensor([[1., 1.],
+        [1., 1.]])
+tensor([[2., 2.],
+        [2., 2.]])
+tensor([[3., 3.],
+        [3., 3.]])
+tensor([[4., 4.],
+        [4., 4.]])
+tensor([[1.4142, 1.4142],
+        [1.4142, 1.4142]])
+```
+
+### 张量与张量
+
+张量与张量运算，也是逐元素操作，因此 **shape 必须相同**。
+
+```python
+powers2 = twos ** torch.tensor([[1, 2], [3, 4]])
+print(powers2)
+
+fives = ones + fours
+print(fives)
+
+dozens = threes * fours
+print(dozens)
+```
+
+```txt
+tensor([[ 2.,  4.],
+        [ 8., 16.]])
+tensor([[5., 5.],
+        [5., 5.]])
+tensor([[12., 12.],
+        [12., 12.]]
+```
+
+### 广播
+
+张量 shape 不同其实也能运算，只要 shape 满足广播条件：
+
+- 每个张量维度 $\ge 1$，即没有空张量；
+- 比较两个张量的维度，从最后一个维度到第一个维度：
+  - 维度相等，或
+  - 其中一个维度为 1，或
+  - 其中一个张量没有该维度
+
+例如：
+
+```python
+a =     torch.ones(4, 3, 2)
+
+b = a * torch.rand(   3, 2) # 3rd & 2nd dims identical to a, dim 1 absent
+print(b)
+
+c = a * torch.rand(   3, 1) # 3rd dim = 1, 2nd dim identical to a
+print(c)
+
+d = a * torch.rand(   1, 2) # 3rd dim identical to a, 2nd dim = 1
+print(d)
 ```
 
 ## Tensor API
@@ -183,7 +429,12 @@ tensor([[2., 1.],
 
 ### 原地操作
 
-原地操作以下划线结尾，如 `zero_`，这类操作不创建新的张量，而是修改输入。
+更新已有张量的方法有两种：
+
+- 原地操作
+- 函数的 `out` 参数
+
+**原地操作**以下划线结尾，如 `zero_`，这类操作不创建新的张量，而是修改输入。
 
 例如，`zero_` 将输入的所有元素清零，而不带下划线的方法保持输入张量不变，返回一个新的张量：
 
@@ -196,6 +447,36 @@ tensor([[0., 0.],
         [0., 0.]])
 ```
 
+这些原地操作在 `torch.Tensor` 中，`torch` 模块中没有。
+
+`torch` 的许多方法和函数有一个 `out` 参数，可用来接收输出。如果 `out` 的 shape 和 dtype 正确，就不会分配新内存：
+
+```python
+a = torch.rand(2, 2)
+b = torch.rand(2, 2)
+c = torch.zeros(2, 2)
+old_id = id(c)
+
+print(c)
+d = torch.matmul(a, b, out=c)
+print(c)                # c 的内容被修改
+
+assert c is d           # c 和 d 是相同对象
+assert id(c), old_id    # c 与原来的 c 是相同对象
+
+torch.rand(2, 2, out=c) # works for creation too!
+print(c)                # c has changed again
+assert id(c), old_id    # still the same object!
+```
+
+```txt
+tensor([[0., 0.],
+        [0., 0.]])
+tensor([[0.3653, 0.8699],
+        [0.2364, 0.3604]])
+tensor([[0.0776, 0.4004],
+        [0.9877, 0.0352]])
+```
 
 ## Size, offset 和 stride
 
@@ -394,9 +675,13 @@ tensor([[4., 5., 2.],
 
 > 张量的 offset, size 和 stride 之间的关系。这里张量是一个更大的 storage 的视图。
 
+## 复制张量
+
+使用 `clone()`
+
 ## 将张量移到 GPU
 
-PyTorch 的 `Tensor` 除了 `dtype`，还有一个 `device` 属性，指定放置张量数据的位置。在构造函数中指定 `device` 参数可以在 GPU 上创建张量：
+`Tensor` 除了 `dtype`，还有一个 `device` 属性，指定张量数据存放位置。在构造函数中指定 `device` 参数可以在 GPU 上创建张量：
 
 ```python
 points_gpu = torch.tensor([[4.0, 1.0], [5.0, 3.0], [2.0, 1.0]], device='cuda')
@@ -485,6 +770,12 @@ points = torch.from_numpy(points_np)
 ```
 
 > **NOTE**：PyTorch 的默认数值类型为 float32，而是 NumPy 是 float64。由于 PyTorch 一般用 float32，所以从 NumPy 数组生成的张量，注意类型，确保为 torch.float。
+
+说明：
+
+- `torch.tensor()` 会复制数据；
+- `torch.as_tensor()` 共享数据；
+- `torch.from_numpy()` 共享数据；
 
 ## 张量序列化
 

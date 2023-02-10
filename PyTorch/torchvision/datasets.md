@@ -1,5 +1,15 @@
 # Datasets
 
+- [Datasets](#datasets)
+  - [简介](#简介)
+  - [内置数据集](#内置数据集)
+    - [Image classification](#image-classification)
+  - [自定义数据集的基类](#自定义数据集的基类)
+    - [datasets.ImageFolder](#datasetsimagefolder)
+  - [参考](#参考)
+
+***
+
 ## 简介
 
 Torchvision 在 `torchvision.datasets` 模块提供了许多内置数据集，以及用于自定义数据集的工具类。
@@ -168,11 +178,42 @@ USPS Dataset.
 
 ## 自定义数据集的基类
 
-|类|说明|
-|---|---|
 DatasetFolder(root, loader[, extensions, ...])
 
 A generic data loader.
+
+### datasets.ImageFolder
+
+```python
+class torchvision.datasets.ImageFolder(
+    root: str, 
+    transform: ~typing.Optional[~typing.Callable] = None, 
+    target_transform: ~typing.Optional[~typing.Callable] = None, 
+    loader: ~typing.Callable[[str], ~typing.Any] = <function default_loader>, 
+    is_valid_file: ~typing.Optional[~typing.Callable[[str], bool]] = None)
+```
+
+一个通用图像加载器，图像默认以如下方式存储：
+
+```python
+root/dog/xxx.png
+root/dog/xxy.png
+root/dog/[...]/xxz.png
+
+root/cat/123.png
+root/cat/nsdf3.png
+root/cat/[...]/asd932_.png
+```
+
+该类继承自 `DatasetFolder`，因此可以覆盖相同的方法来自定义数据集。
+
+**参数：**
+
+- **root** (`string`)：根目录
+- **transform** (`callable`, optional)：函数或变换，接受 PIL 图像，返回变换版本图像，如 `transforms.RandomCrop`
+- **target_transform** (`callable`, optional)：target 变换函数
+- **loader** (`callable`, optional)：根据路径加载图像的函数
+- **is_valid_file** – 函数，以文件路径为参数，检查对应文件是否有效
 
 ImageFolder(root, transform, ...)
 

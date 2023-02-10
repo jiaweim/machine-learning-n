@@ -8,6 +8,7 @@
     - [软链接](#软链接)
     - [外部链接](#外部链接)
   - [API](#api)
+    - [items](#items)
   - [Link 类](#link-类)
   - [参考](#参考)
 
@@ -204,8 +205,16 @@ Get the objects contained in the group (Group and Dataset instances). Broken sof
 Returns
 a collection or bag-like object.
 
-items()¶
-Get (name, value) pairs for object directly attached to this group. Values for broken soft or external links show up as None.
+### items
+
+```python
+items()
+```
+
+以 `(name, value)` 形式返回直接附加到该 group 的对象。断开的软链接或外部链接显示为 `None`。
+
+**返回：** set 对象。
+
 
 Returns
 a set-like object.

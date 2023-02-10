@@ -21,12 +21,14 @@
     - [torch.rand\_like](#torchrand_like)
     - [原地随机采样](#原地随机采样)
   - [局部禁用梯度计算](#局部禁用梯度计算)
-  - [Math operations](#math-operations)
+  - [数学运算](#数学运算)
     - [Pointwise Ops](#pointwise-ops)
     - [Reduction Ops](#reduction-ops)
-    - [Comparison Ops](#comparison-ops)
+    - [比较](#比较)
+      - [torch.eq](#torcheq)
     - [Spectral Ops](#spectral-ops)
-    - [Other Operations](#other-operations)
+    - [其它操作](#其它操作)
+      - [torch.clone](#torchclone)
     - [BLAS and LAPACK Operations](#blas-and-lapack-operations)
       - [torch.bmm](#torchbmm)
       - [torch.mm](#torchmm)
@@ -77,7 +79,7 @@ torch.tensor(data, *,
     pin_memory=False) → Tensor
 ```
 
-复制 `data` 的数据创建张量，该张量没有 autograd 历史，也称为叶张量（leaf tensor）。
+**复制** `data` 的数据创建张量，该张量没有 autograd 历史，也称为叶张量（leaf tensor）。
 
 > **WARNING**
 > 建议使用 `torch.Tensor.clone()`, `torch.Tensor.detach()` 和 `torch.Tensor.requires_grad_()`。假设 `t` 是一个张量，则 `torch.tensor(t)` 等价于 `t.clone().detach()`；而 `torch.tensor(t, requires_grad=True)` 等价于 `t.clone().detach().requires_grad_(True)`。
@@ -88,7 +90,7 @@ torch.tensor(data, *,
 
 张量的初始化数据。支持 `list`, `tuple`, `ndarray`, scalar 等类型。
 
-**例如：**
+**示例：**
 
 ```python
 >>> torch.tensor([[0.1, 1.2], [2.2, 3.1], [4.9, 5.2]])
@@ -104,10 +106,10 @@ tensor([ 0,  1])
 ...              device=torch.device('cuda:0'))  # creates a double tensor on a CUDA device
 tensor([[ 0.1111,  0.2222,  0.3333]], dtype=torch.float64, device='cuda:0')
 
->>> torch.tensor(3.14159)  # Create a zero-dimensional (scalar) tensor
+>>> torch.tensor(3.14159)  # 创建 0 维张量：标量
 tensor(3.1416)
 
->>> torch.tensor([])  # Create an empty tensor (of size (0,))
+>>> torch.tensor([])  # 创建空张量: size (0,)
 tensor([])
 ```
 
@@ -916,7 +918,7 @@ is_inference_mode_enabled
 
 Returns True if inference mode is currently enabled.
 
-## Math operations
+## 数学运算
 
 ### Pointwise Ops
 
@@ -1475,11 +1477,419 @@ count_nonzero
 
 Counts the number of non-zero values in the tensor input along the given dim.
 
-### Comparison Ops
+### 比较
+
+allclose
+
+This function checks if all input and other satisfy the condition:
+
+argsort
+
+Returns the indices that sort a tensor along a given dimension in ascending order by value.
+
+#### torch.eq
+
+```python
+torch.eq(input, other, *, out=None) → Tensor
+```
+
+计算每个元素是否相等。
+
+第二个参数可以是数字或张量，第二个张量的 shape 可以广播到与第一个参数匹配。
+
+**参数：**
+
+- **input** (`Tensor`) – 要比较的张量
+- **other** (`Tensor` or `float`) – 要比较的张量或数值
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional) – 输出张量
+
+**返回：**
+
+boolean 张量，`input` 与 `other` 相等时为 `True`.
+
+**示例：**
+
+```python
+>>> torch.eq(torch.tensor([[1, 2], [3, 4]]), torch.tensor([[1, 1], [4, 4]]))
+tensor([[ True, False],
+        [False, True]])
+```
+
+equal
+
+True if two tensors have the same size and elements, False otherwise.
+
+ge
+
+Computes 
+input
+≥
+other
+input≥other element-wise.
+
+greater_equal
+
+Alias for torch.ge().
+
+gt
+
+Computes 
+input
+>
+other
+input>other element-wise.
+
+greater
+
+Alias for torch.gt().
+
+isclose
+
+Returns a new tensor with boolean elements representing if each element of input is "close" to the corresponding element of other.
+
+isfinite
+
+Returns a new tensor with boolean elements representing if each element is finite or not.
+
+isin
+
+Tests if each element of elements is in test_elements.
+
+isinf
+
+Tests if each element of input is infinite (positive or negative infinity) or not.
+
+isposinf
+
+Tests if each element of input is positive infinity or not.
+
+isneginf
+
+Tests if each element of input is negative infinity or not.
+
+isnan
+
+Returns a new tensor with boolean elements representing if each element of input is NaN or not.
+
+isreal
+
+Returns a new tensor with boolean elements representing if each element of input is real-valued or not.
+
+kthvalue
+
+Returns a namedtuple (values, indices) where values is the k th smallest element of each row of the input tensor in the given dimension dim.
+
+le
+
+Computes 
+input
+≤
+other
+input≤other element-wise.
+
+less_equal
+
+Alias for torch.le().
+
+lt
+
+Computes 
+input
+<
+other
+input<other element-wise.
+
+less
+
+Alias for torch.lt().
+
+maximum
+
+Computes the element-wise maximum of input and other.
+
+minimum
+
+Computes the element-wise minimum of input and other.
+
+fmax
+
+Computes the element-wise maximum of input and other.
+
+fmin
+
+Computes the element-wise minimum of input and other.
+
+ne
+
+Computes 
+input
+≠
+other
+input
+
+=other element-wise.
+
+not_equal
+
+Alias for torch.ne().
+
+sort
+
+Sorts the elements of the input tensor along a given dimension in ascending order by value.
+
+topk
+
+Returns the k largest elements of the given input tensor along a given dimension.
+
+msort
+
+Sorts the elements of the input tensor along its first dimension in ascending order by value.
 
 ### Spectral Ops
 
-### Other Operations
+### 其它操作
+
+atleast_1d
+
+Returns a 1-dimensional view of each input tensor with zero dimensions.
+
+atleast_2d
+
+Returns a 2-dimensional view of each input tensor with zero dimensions.
+
+atleast_3d
+
+Returns a 3-dimensional view of each input tensor with zero dimensions.
+
+bincount
+
+Count the frequency of each value in an array of non-negative ints.
+
+block_diag
+
+Create a block diagonal matrix from provided tensors.
+
+broadcast_tensors
+
+Broadcasts the given tensors according to Broadcasting semantics.
+
+broadcast_to
+
+Broadcasts input to the shape shape.
+
+broadcast_shapes
+
+Similar to broadcast_tensors() but for shapes.
+
+bucketize
+
+Returns the indices of the buckets to which each value in the input belongs, where the boundaries of the buckets are set by boundaries.
+
+cartesian_prod
+
+Do cartesian product of the given sequence of tensors.
+
+cdist
+
+Computes batched the p-norm distance between each pair of the two collections of row vectors.
+
+#### torch.clone
+
+```python
+torch.clone(input, *, 
+    memory_format=torch.preserve_format) → Tensor
+```
+
+返回 `input` 的副本。
+
+> **NOTE**
+> 该操作是可微的，所以梯度会从这个操作的结果流回 `input`。要创建于 `input` 没有 autograd 关系的张量，可参考 `detach()`。
+
+
+
+
+combinations
+
+Compute combinations of length 
+�
+r of the given tensor.
+
+corrcoef
+
+Estimates the Pearson product-moment correlation coefficient matrix of the variables given by the input matrix, where rows are the variables and columns are the observations.
+
+cov
+
+Estimates the covariance matrix of the variables given by the input matrix, where rows are the variables and columns are the observations.
+
+cross
+
+Returns the cross product of vectors in dimension dim of input and other.
+
+cummax
+
+Returns a namedtuple (values, indices) where values is the cumulative maximum of elements of input in the dimension dim.
+
+cummin
+
+Returns a namedtuple (values, indices) where values is the cumulative minimum of elements of input in the dimension dim.
+
+cumprod
+
+Returns the cumulative product of elements of input in the dimension dim.
+
+cumsum
+
+Returns the cumulative sum of elements of input in the dimension dim.
+
+diag
+
+If input is a vector (1-D tensor), then returns a 2-D square tensor
+
+diag_embed
+
+Creates a tensor whose diagonals of certain 2D planes (specified by dim1 and dim2) are filled by input.
+
+diagflat
+
+If input is a vector (1-D tensor), then returns a 2-D square tensor
+
+diagonal
+
+Returns a partial view of input with the its diagonal elements with respect to dim1 and dim2 appended as a dimension at the end of the shape.
+
+diff
+
+Computes the n-th forward difference along the given dimension.
+
+einsum
+
+Sums the product of the elements of the input operands along dimensions specified using a notation based on the Einstein summation convention.
+
+flatten
+
+Flattens input by reshaping it into a one-dimensional tensor.
+
+flip
+
+Reverse the order of a n-D tensor along given axis in dims.
+
+fliplr
+
+Flip tensor in the left/right direction, returning a new tensor.
+
+flipud
+
+Flip tensor in the up/down direction, returning a new tensor.
+
+kron
+
+Computes the Kronecker product, denoted by 
+⊗
+⊗, of input and other.
+
+rot90
+
+Rotate a n-D tensor by 90 degrees in the plane specified by dims axis.
+
+gcd
+
+Computes the element-wise greatest common divisor (GCD) of input and other.
+
+histc
+
+Computes the histogram of a tensor.
+
+histogram
+
+Computes a histogram of the values in a tensor.
+
+histogramdd
+
+Computes a multi-dimensional histogram of the values in a tensor.
+
+meshgrid
+
+Creates grids of coordinates specified by the 1D inputs in attr:tensors.
+
+lcm
+
+Computes the element-wise least common multiple (LCM) of input and other.
+
+logcumsumexp
+
+Returns the logarithm of the cumulative summation of the exponentiation of elements of input in the dimension dim.
+
+ravel
+
+Return a contiguous flattened tensor.
+
+renorm
+
+Returns a tensor where each sub-tensor of input along dimension dim is normalized such that the p-norm of the sub-tensor is lower than the value maxnorm
+
+repeat_interleave
+
+Repeat elements of a tensor.
+
+roll
+
+Roll the tensor input along the given dimension(s).
+
+searchsorted
+
+Find the indices from the innermost dimension of sorted_sequence such that, if the corresponding values in values were inserted before the indices, when sorted, the order of the corresponding innermost dimension within sorted_sequence would be preserved.
+
+tensordot
+
+Returns a contraction of a and b over multiple dimensions.
+
+trace
+
+Returns the sum of the elements of the diagonal of the input 2-D matrix.
+
+tril
+
+Returns the lower triangular part of the matrix (2-D tensor) or batch of matrices input, the other elements of the result tensor out are set to 0.
+
+tril_indices
+
+Returns the indices of the lower triangular part of a row-by- col matrix in a 2-by-N Tensor, where the first row contains row coordinates of all indices and the second row contains column coordinates.
+
+triu
+
+Returns the upper triangular part of a matrix (2-D tensor) or batch of matrices input, the other elements of the result tensor out are set to 0.
+
+triu_indices
+
+Returns the indices of the upper triangular part of a row by col matrix in a 2-by-N Tensor, where the first row contains row coordinates of all indices and the second row contains column coordinates.
+
+unflatten
+
+Expands a dimension of the input tensor over multiple dimensions.
+
+vander
+
+Generates a Vandermonde matrix.
+
+view_as_real
+
+Returns a view of input as a real tensor.
+
+view_as_complex
+
+Returns a view of input as a complex tensor.
+
+resolve_conj
+
+Returns a new tensor with materialized conjugation if input's conjugate bit is set to True, else returns input.
+
+resolve_neg
+
+Returns a new tensor with materialized negation if input's negative bit is set to True, else returns input.
 
 ### BLAS and LAPACK Operations
 

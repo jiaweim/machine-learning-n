@@ -4,18 +4,25 @@
   - [简介](#简介)
   - [数据类型](#数据类型)
   - [初始化和基础操作](#初始化和基础操作)
-  - [Tensor 类 API](#tensor-类-api)
+  - [Tensor](#tensor)
+    - [Tensor.new\_tensor](#tensornew_tensor)
     - [permute](#permute)
     - [repeat](#repeat)
-    - [detach](#detach)
     - [numpy](#numpy)
     - [scatter\_](#scatter_)
     - [Tensor.to](#tensorto)
-    - [view](#view)
+    - [Tensor.view](#tensorview)
     - [Tensor.byte](#tensorbyte)
+    - [Tensor.clone](#tensorclone)
     - [Tensor.cpu](#tensorcpu)
     - [Tensor.cuda](#tensorcuda)
+    - [Tensor.detach](#tensordetach)
+    - [Tensor.item](#tensoritem)
+    - [Tensor.numpy](#tensornumpy)
+    - [Tensor.size](#tensorsize)
+    - [Tensor.tolist](#tensortolist)
     - [Tensor.type](#tensortype)
+    - [Tensor.view](#tensorview-1)
   - [参考](#参考)
 
 Last updated: 2022-12-13, 17:34
@@ -124,7 +131,20 @@ tensor([[ 2.0000, -2.0000],
 
 > **WARNING** 当前 torch.Tensor 实现具有内存开销，创建大量小张量会导致高内存。对这种情况，建议使用一个大的张量结构。
 
-## Tensor 类 API
+## Tensor
+
+### Tensor.new_tensor
+
+```python
+Tensor.new_tensor(data, *, 
+    dtype=None, 
+    device=None, 
+    requires_grad=False, 
+    layout=torch.strided, 
+    pin_memory=False) → Tensor
+```
+
+
 
 ```python
 class torch.Tensor
@@ -185,14 +205,6 @@ tensor([[ 1,  2,  3,  1,  2,  3],
 >>> x.repeat(4, 2, 1).size()
 torch.Size([4, 2, 3])
 ```
-
-### detach
-
-从当前图中分离出来，创建一个新的张量。
-
-返回的张量不需要梯度。
-
-该方法会影响正向模式的 AD 梯度，即结果也不会有正向模式的 AD 梯度。
 
 ### numpy
 
@@ -345,19 +357,13 @@ tensor([[-0.5044,  0.0005],
         [ 0.3310, -0.0584]], dtype=torch.float64, device='cuda:0')
 ```
 
-### view
+### Tensor.view
 
-```python
-Tensor.view(*shape) → Tensor
-```
 
-返回一个与 `self` 张量具有相同数据是 shape 不同的张量。
 
-要张量视图，新的视图尺寸与原始张量的尺寸和步长必须兼容，即新的视图维度要么是原始维度的子空间，要么
+返回一个与 `self` 具有相同数据只是 `shape` 不同的张量。
 
-Tensor.new_tensor
-
-Returns a new Tensor with data as the tensor data.
+返回的张量与原张量共享数据，因此它们的元素个数必须相同。新的视图尺寸与原始张量的尺寸和步长必须兼容，即新的视图维度要么是原始维度的子空间，要么
 
 Tensor.new_full
 
@@ -767,9 +773,9 @@ Tensor.clip_
 
 Alias for clamp_().
 
-Tensor.clone
+### Tensor.clone
 
-See torch.clone()
+参考 `torch.clone()`
 
 Tensor.contiguous
 
@@ -962,9 +968,21 @@ Tensor.dense_dim
 
 Return the number of dense dimensions in a sparse tensor self.
 
-Tensor.detach
+### Tensor.detach
 
-Returns a new Tensor, detached from the current graph.
+```python
+Tensor.detach()
+```
+
+从当前图中分离出来，创建一个新的张量。
+
+返回的张量不需要梯度。
+
+该方法会影响正向模式的 AD 梯度，即结果也不会有正向模式的 AD 梯度。
+
+> **NOTE**
+> 返回的张量与原张量共享内存。对返回张量执行的原地操作，如 `resize_`, `resize_as_`, `set_`, `transpose_` 会触发错误。
+
 
 Tensor.detach_
 
@@ -1448,7 +1466,23 @@ Tensor.isreal
 
 See torch.isreal()
 
-Tensor.item
+### Tensor.item
+
+```python
+Tensor.item() → number
+```
+
+对只包含一个元素的张量，以 Python 数字返回其元素值。对包含多个元素的张量，用 `tolist()`。
+
+该操作不可微。
+
+**示例：**
+
+```python
+>>> x = torch.tensor([1.0])
+>>> x.item()
+1.0
+```
 
 Returns the value of this tensor as a standard Python number.
 
@@ -1842,9 +1876,23 @@ Tensor.numel
 
 See torch.numel()
 
-Tensor.numpy
+### Tensor.numpy
 
-Returns the tensor as a NumPy ndarray.
+```python
+Tensor.numpy(*, force=False) → numpy.ndarray
+```
+
+将 tensor 转换为 NumPy `ndarray`。
+
+`force=False` 时（默认），仅当张量在 CPU 上、不需要梯度、没有共轭 bit set，并且是 NumPy 支持的 dtype 和 layout 才转换。返回的 ndarray 和张量共享内存。
+
+`force=True` 等价于 `t.detach().cpu().resolve_conj().resolve_neg().numpy()`。如果张量不在 CPU，或设置了 conjugate 或 negative bit，则张量不与返回的 ndarray 共享内存。
+
+**参数：**
+
+- **force** (`bool`)
+
+`True` 时 ndarray 可能是张量的副本，不一定共享内存。
 
 Tensor.orgqr
 
@@ -2154,9 +2202,32 @@ Tensor.arcsinh_
 
 In-place version of arcsinh()
 
-Tensor.size
+### Tensor.size
 
-Returns the size of the self tensor.
+```python
+Tensor.size(dim=None) → torch.Size or int
+```
+
+返回 `self` 张量的大小：
+
+- 不指定 `dim`，返回 `torch.Size`，它是 `tuple` 的子类；
+- 指定 `dim`，返回 `int`，为该维度的大小 
+
+**参数：**
+
+- **dim** (`int`, optional)
+
+要检索的维度。
+
+**示例：**
+
+```python
+>>> t = torch.empty(3, 4, 5)
+>>> t.size()
+torch.Size([3, 4, 5])
+>>> t.size(dim=1)
+4
+```
 
 Tensor.slogdet
 
@@ -2334,7 +2405,26 @@ Tensor.arctanh_
 
 In-place version of arctanh()
 
-Tensor.tolist
+### Tensor.tolist
+
+```python
+Tensor.tolist() → list or number
+```
+
+以 list 形式返回张量值；对标量直接返回一个 Python 数，同 `item()`。如果需要，自动将张量移到 CPU。
+
+该操作不可微。
+
+**示例：**
+
+```python
+>>> a = torch.randn(2, 2)
+>>> a.tolist()
+[[0.012766935862600803, 0.5415473580360413],
+ [-0.08909505605697632, 0.7729271650314331]]
+>>> a[0,0].tolist()
+0.012766935862600803
+```
 
 Returns the tensor as a (nested) list.
 
@@ -2480,7 +2570,7 @@ Tensor.vdot
 
 See torch.vdot()
 
-Tensor.view
+### Tensor.view
 
 Returns a new tensor with the same data as the self tensor but of a different shape.
 

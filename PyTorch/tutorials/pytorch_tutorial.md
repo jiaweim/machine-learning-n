@@ -11,6 +11,11 @@
 - [优化模型参数](Introduction%20to%20PyTorch/optimization_tutorial.md)
 - [保存和加载模型](Introduction%20to%20PyTorch/saveloadrun_tutorial.md)
 
+## PyTorch 入门（YouTube）
+
+- [x] [PyTorch 简介](https://pytorch.org/tutorials/beginner/introyt/introyt1_tutorial.html)
+
+
 
 ## Text
 
