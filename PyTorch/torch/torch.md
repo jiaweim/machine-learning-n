@@ -14,6 +14,8 @@
     - [torch.ones](#torchones-1)
   - [索引、切片、连接和突变](#索引切片连接和突变)
       - [permute](#permute)
+    - [torch.squeeze](#torchsqueeze)
+    - [torch.unsqueeze](#torchunsqueeze)
   - [随机采样](#随机采样)
     - [torch.manual\_seed](#torchmanual_seed)
     - [torch.rand](#torchrand)
@@ -29,6 +31,7 @@
     - [Spectral Ops](#spectral-ops)
     - [其它操作](#其它操作)
       - [torch.clone](#torchclone)
+      - [torch.flip](#torchflip)
     - [BLAS and LAPACK Operations](#blas-and-lapack-operations)
       - [torch.bmm](#torchbmm)
       - [torch.mm](#torchmm)
@@ -43,11 +46,10 @@
     - [torch.sqrt](#torchsqrt)
     - [torch.sum](#torchsum)
     - [torch.t](#torcht)
-    - [torch.unsqueeze](#torchunsqueeze)
     - [torch.var](#torchvar)
   - [参考](#参考)
 
-Last updated: 2023-02-07, 19:12
+Last updated: 2023-02-13, 10:24
 ***
 
 ## Tensors
@@ -616,9 +618,45 @@ split
 
 Splits the tensor into chunks.
 
-squeeze
+### torch.squeeze
 
-Returns a tensor with all the dimensions of input of size 1 removed.
+```python
+torch.squeeze(input, dim=None) → Tensor
+```
+
+对输入张量 `input`，删除所有大小为 1 的维度。
+
+例如，如果 `input` 的 shape 为 (A×1×B×C×1×D)，则输出张量 shape 为 (A×B×C×D)。
+
+当指定 `dim`，则只对该维度进行操作。如果 `input` shape 为 (A×1×B)，则 `squeeze(input, 0)` 不改变张量，而 `squeeze(input, 1)` 返回张量 shape 为 (A×B)。
+
+> **NOTE**
+> 返回的张量与 `input` 张量**共享内存**，因此改变一个张量，另一个也随之改变。
+
+> **WARNING**
+> 如果张量的 batch 维度为 1，那么 `squeeze(input)` 会删除 batch 维度，可能导致意外错误。
+
+**参数：**
+
+- **input** (`Tensor`) – 输入张量。
+- **dim** (`int`, optional) – 如果指定，则只对指定维度进行操作。
+
+**示例：**
+
+```python
+>>> x = torch.zeros(2, 1, 2, 1, 2)
+>>> x.size()
+torch.Size([2, 1, 2, 1, 2])
+>>> y = torch.squeeze(x)
+>>> y.size()
+torch.Size([2, 2, 2])
+>>> y = torch.squeeze(x, 0)
+>>> y.size()
+torch.Size([2, 1, 2, 1, 2])
+>>> y = torch.squeeze(x, 1)
+>>> y.size()
+torch.Size([2, 2, 1, 2])
+```
 
 stack
 
@@ -660,7 +698,35 @@ unbind
 
 Removes a tensor dimension.
 
-|[unsqueeze](#torchunsqueeze)|在指定位置插入一个长度为 1 的维度|
+### torch.unsqueeze
+
+```python
+torch.unsqueeze(input, dim) → Tensor
+```
+
+在指定位置插入一个大小为 1 的维度，返回一个新的张量。
+
+返回的张量与原张量共享底层数据。
+
+`dim` 值的有效范围为 `[-input.dim() - 1, input.dim() + 1)`。负数 `dim` 对应维度为 `dim = dim + input.dim() + 1`。
+
+**参数：**
+
+- **input** (`Tensor`) – 输入张量。
+- **dim** (`int`) – 插入维度的位置索引。
+
+**示例：**
+
+```python
+>>> x = torch.tensor([1, 2, 3, 4])
+>>> torch.unsqueeze(x, 0)
+tensor([[ 1,  2,  3,  4]])
+>>> torch.unsqueeze(x, 1)
+tensor([[ 1],
+        [ 2],
+        [ 3],
+        [ 4]])
+```
 
 vsplit
 
@@ -1773,9 +1839,39 @@ flatten
 
 Flattens input by reshaping it into a one-dimensional tensor.
 
-flip
+#### torch.flip
 
-Reverse the order of a n-D tensor along given axis in dims.
+```python
+torch.flip(input, dims) → Tensor
+```
+
+将张量指定维度的数据翻转。
+
+> **NOTE**
+> `torch.flip` 复制 `input` 数据，而 NumPy 的 `np.flip` 返回一个 view。因为复制张量更费时，所以 `torch.flip` 预计比 `np.flip` 慢。
+
+**参数：**
+
+- **input** (`Tensor`) – 输入张量。
+- **dims** (a list or `tuple`) – 翻转的维度。
+
+**示例：**
+
+```python
+>>> x = torch.arange(8).view(2, 2, 2)
+>>> x
+tensor([[[ 0,  1],
+         [ 2,  3]],
+
+        [[ 4,  5],
+         [ 6,  7]]])
+>>> torch.flip(x, [0, 1]) # 同时翻转两个维度
+tensor([[[ 6,  7],
+         [ 4,  5]],
+
+        [[ 2,  3],
+         [ 0,  1]]])
+```
 
 fliplr
 
@@ -2159,31 +2255,6 @@ tensor([[ 0.4875,  0.3938],
         [-0.5872,  0.6932]])
 ```
 
-### torch.unsqueeze
-
-```python
-torch.unsqueeze(input, dim) → Tensor
-```
-
-在指定位置插入一个大小为 1 的维度，返回一个新的张量。
-
-返回的张量与原张量共享底层数据。
-
-`dim` 值的有效范围为 `[-input.dim() - 1, input.dim() + 1)`。负数 `dim` 对应维度为 `dim = dim + input.dim() + 1`。
-
-例如：
-
-```python
->>> x = torch.tensor([1, 2, 3, 4])
->>> torch.unsqueeze(x, 0)
-tensor([[ 1,  2,  3,  4]])
->>> torch.unsqueeze(x, 1)
-tensor([[ 1],
-        [ 2],
-        [ 3],
-        [ 4]])
-```
-
 ### torch.var
 
 ```python
@@ -2215,8 +2286,6 @@ torch.var(input, unbiased) → Tensor
 >>> torch.var(a, unbiased=False)
 tensor(0.1754)
 ```
-
-
 
 ## 参考
 

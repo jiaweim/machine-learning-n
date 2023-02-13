@@ -32,3 +32,10 @@ def mean_squared_error(y, t):
     """
     return 0.5 * np.sum((y - t) ** 2)
 ```
+
+## binary cross-entropy
+
+## 参考
+
+- https://towardsdatascience.com/understanding-binary-cross-entropy-log-loss-a-visual-explanation-a3ac6025181a
+- [为何出现验证损失小于训练损失？](https://pyimagesearch.com/2019/10/14/why-is-my-validation-loss-lower-than-my-training-loss/)
