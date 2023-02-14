@@ -1,10 +1,9 @@
 # TensorFlow 2 快速入门（专家）
 
-Last updated: 2022-06-16, 15:26
-@author Jiawei Mao
+Last updated: 2023-02-14, 14:05
 ****
 
-下载并安装 TensorFlow 2，导入 TensorFlow：
+导入 TensorFlow：
 
 ```python
 import tensorflow as tf
@@ -15,10 +14,10 @@ from tensorflow.keras import Model
 ```
 
 ```txt
-TensorFlow version: 2.9.1
+TensorFlow version: 2.10.1
 ```
 
-加载并准备 MNIST 数据集：
+加载 MNIST 数据集：
 
 ```python
 mnist = tf.keras.datasets.mnist
@@ -26,12 +25,12 @@ mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-# 添加通道维度
+# 添加 channel 维度
 x_train = x_train[..., tf.newaxis].astype("float32")
 x_test = x_test[..., tf.newaxis].astype("float32")
 ```
 
-使用 `tf.data` 执行 batch（批量） 和 shuffle（打乱）数据集操作：
+使用 `tf.data` 执行 batch 和 shuffle 操作：
 
 ```python
 train_ds = tf.data.Dataset.from_tensor_slices(
@@ -40,7 +39,7 @@ train_ds = tf.data.Dataset.from_tensor_slices(
 test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 ```
 
-使用 `tf.keras` 的扩展父类 API 构建模型：
+扩展 `Model` 构建模型：
 
 ```python
 class MyModel(Model):
@@ -86,8 +85,8 @@ test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
 @tf.function
 def train_step(images, labels):
     with tf.GradientTape() as tape:
-        # 只有在包含训练和推理时行为不同的 layer 时（如 Dropout），
-        # 才需要设置 training=True
+        # 若包含训练和预测时行为不同的 layer（如 Dropout），
+        # 需要设置 training=True
         predictions = model(images, training=True)
         loss = loss_object(labels, predictions)
     gradients = tape.gradient(loss, model.trainable_variables)
@@ -102,8 +101,8 @@ def train_step(images, labels):
 ```python
 @tf.function
 def test_step(images, labels):
-    # 只有包含训练和推理时行为不同的 layer 时（如 Dropout），
-    # 才需要设置 training=False
+    # 若包含训练和预测时行为不同的 layer（如 Dropout），
+    # 需要设置 training=False
     predictions = model(images, training=False)
     t_loss = loss_object(labels, predictions)
 

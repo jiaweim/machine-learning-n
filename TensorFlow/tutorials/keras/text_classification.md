@@ -18,7 +18,6 @@
   - [5. 参考](#5-参考)
 
 Last updated: 2022-06-20, 15:23
-@author Jiawei Mao
 ****
 
 ## 1. 简介
