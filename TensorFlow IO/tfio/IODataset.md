@@ -2,7 +2,10 @@
 
 - [tfio.IODataset](#tfioiodataset)
   - [简介](#简介)
+  - [参数](#参数)
+  - [属性](#属性)
   - [方法](#方法)
+    - [apply](#apply)
     - [batch](#batch)
     - [from\_hdf5](#from_hdf5)
   - [参考](#参考)
@@ -33,13 +36,13 @@ import tensorflow_io as tfio
 audio = tfio.IODataset.from_audio("sample.wav")
 ```
 
-**参数：**
+## 参数
 
 - **variant_tensor**
 
 一个 `DT_VARIANT` 张量，用于表示 dataset。
 
-**属性：**
+## 属性
 
 - **element_spec**
 
@@ -52,6 +55,18 @@ TensorSpec(shape=(), dtype=tf.int32, name=None)
 ```
 
 ## 方法
+
+### apply
+
+```python
+apply(
+    transformation_func
+)
+```
+
+应用转换函数。
+
+
 
 ### batch
 
@@ -66,8 +81,6 @@ batch(
 
 ### from_hdf5
 
-Last updated: 2023-02-01, 10:34
-
 ```python
 @classmethod
 from_hdf5(
@@ -79,17 +92,13 @@ from_hdf5(
 
 **参数：**
 
-- **filename**
+- **filename** - string，hdf5 文件名。
 
-string，hdf5 文件名。
-
-- **dataset**
-
-string, hdf5 文件中的 dataset 名称，注意，HDF5 数据集名称以 `/` 开头。
+- **dataset** - string, hdf5 文件中的 dataset 名称，注意，HDF5 数据集名称以 `/` 开头。
 
 - **spec**
 
-dataset 的 `tf.TensorSpec` 或 dtype (如 `tf.int64`)。graph 模式需要 spec。在 eager 模式，自动检测 s`pec`。
+dataset 的 `tf.TensorSpec` 或 dtype (如 `tf.int64`)。graph 模式需要 spec。在 eager 模式，自动检测 `spec`。
 
 - **name**
 

@@ -4,6 +4,8 @@
   - [Tensors](#tensors)
   - [创建张量](#创建张量)
     - [torch.tensor](#torchtensor)
+    - [torch.as\_tensor](#torchas_tensor)
+    - [torch.from\_numpy](#torchfrom_numpy)
     - [torch.zeros](#torchzeros)
     - [torch.zeros\_like](#torchzeros_like)
     - [torch.ones](#torchones)
@@ -13,7 +15,13 @@
     - [torch.empty\_like](#torchempty_like)
     - [torch.ones](#torchones-1)
   - [索引、切片、连接和突变](#索引切片连接和突变)
-      - [permute](#permute)
+    - [torch.adjoint](#torchadjoint)
+    - [torch.argwhere](#torchargwhere)
+    - [torch.cat](#torchcat)
+    - [torch.concat](#torchconcat)
+    - [torch.nonzero](#torchnonzero)
+    - [torch.permute](#torchpermute)
+    - [torch.split](#torchsplit)
     - [torch.squeeze](#torchsqueeze)
     - [torch.unsqueeze](#torchunsqueeze)
   - [随机采样](#随机采样)
@@ -25,9 +33,11 @@
   - [局部禁用梯度计算](#局部禁用梯度计算)
   - [数学运算](#数学运算)
     - [Pointwise Ops](#pointwise-ops)
-    - [Reduction Ops](#reduction-ops)
+    - [约简操作](#约简操作)
+      - [torch.amin](#torchamin)
     - [比较](#比较)
       - [torch.eq](#torcheq)
+      - [torch.isin](#torchisin)
     - [Spectral Ops](#spectral-ops)
     - [其它操作](#其它操作)
       - [torch.clone](#torchclone)
@@ -39,8 +49,6 @@
     - [use\_deterministic\_algorithms](#use_deterministic_algorithms)
   - [Operator Tags](#operator-tags)
   - [操作](#操作)
-    - [torch.adjoint](#torchadjoint)
-    - [torch.argwhere](#torchargwhere)
     - [torch.mean](#torchmean)
     - [torch.reshape](#torchreshape)
     - [torch.sqrt](#torchsqrt)
@@ -123,17 +131,78 @@ asarray
 
 Converts obj to a tensor.
 
-as_tensor
+### torch.as_tensor
 
-Converts data into a tensor, sharing data and preserving autograd history if possible.
+```python
+torch.as_tensor(data, dtype=None, device=None) → Tensor
+```
+
+将 `data` 转换为张量，尽可能**共享内存**并保留 autograd 历史。
+
+- 如果 `data` 已是张量
+  - dtype 和 device 满足要求，则直接返回 `data`；
+  - dtype 和 device 不符合要求，则返回副本，类似 `data.to(dtype=dtype, device=device)`；
+- 如果 `data` 是 ndarray，且 dtype 和 device 满足要求，则使用 `torch.from_numpy()` 创建张量
+
+> **NOTE**
+> `torch.tensor()` 永远不会共享数据。
+
+**参数：**
+
+- **data** (`array_like`) – 初始数据，支持 list, tuple, NumPy ndarray, scalar 等类型。
+- **dtype** (`torch.dtype`, optional) – 张量类型，默认 `None` 表示从数据推断类型。
+- **device** (`torch.device`, optional) – `None` 且 `data` 是张量，则直接使用 `data` device；`None` 且 `data` 不是张量，则为 CPU。
+
+**示例：**
+
+```python
+>>> a = numpy.array([1, 2, 3])
+>>> t = torch.as_tensor(a)
+>>> t
+tensor([ 1,  2,  3])
+>>> t[0] = -1 # 与 ndarray 共享内存
+>>> a
+array([-1,  2,  3])
+
+>>> a = numpy.array([1, 2, 3])
+>>> t = torch.as_tensor(a, device=torch.device('cuda'))
+>>> t
+tensor([ 1,  2,  3])
+>>> t[0] = -1
+>>> a
+array([1,  2,  3])
+```
 
 as_strided
 
 Create a view of an existing torch.Tensor input with specified size, stride and storage_offset.
 
-from_numpy
+### torch.from_numpy
 
-Creates a Tensor from a numpy.ndarray.
+```python
+torch.from_numpy(ndarray) → Tensor
+```
+
+使用 `numpy.ndarray` 创建 `Tensor`。
+
+返回的张量与 `ndarray` 共享内存。返回的张量不能调整大小。
+
+目前支持的 `ndarray` 类型：`numpy.float64`, `numpy.float32`, `numpy.float16`, `numpy.complex64`, `numpy.complex128`, `numpy.int64`, `numpy.int32`, `numpy.int16`, `numpy.int8`, `numpy.uint8`, and `numpy.bool`。
+
+> **WARNING**
+> 从只读 `ndarray` 创建的张量不支持写入。
+
+**示例：**
+
+```python
+>>> a = numpy.array([1, 2, 3])
+>>> t = torch.from_numpy(a)
+>>> t
+tensor([ 1,  2,  3])
+>>> t[0] = -1
+>>> a
+array([-1,  2,  3])
+```
 
 from_dlpack
 
@@ -469,18 +538,101 @@ torch.ones(*size, *, out=None, dtype=None, layout=torch.strided, device=None, re
 
 |操作|说明|
 |---|---|
-|[adjoint](#torchadjoint)|将最后两个维度转换，然后返回共轭视图|
-|[argwhere](#torchargwhere)|以张量形式返回 `input` 中非零元素索引|
 |[reshape](#torchreshape)|返回指定形状的张量，与输入张量具有相同的数据和元素数|
 
+### torch.adjoint
 
-cat
+```python
+torch.adjoint(Tensor) → Tensor
+```
 
-Concatenates the given sequence of seq tensors in the given dimension.
+将张量最后两个维度转换，然后返回共轭视图。
 
-concat
+对复数张量，`x.adjoint()` 等价于 `x.transpose(-2, -1).conj()`；对实数张量等价于 `x.transpose(-2, -1)`。
 
-Alias of torch.cat().
+```python
+>>> x = torch.arange(4, dtype=torch.float)
+>>> A = torch.complex(x, x).reshape(2, 2)
+>>> A
+tensor([[0.+0.j, 1.+1.j],
+        [2.+2.j, 3.+3.j]])
+>>> A.adjoint()
+tensor([[0.-0.j, 2.-2.j],
+        [1.-1.j, 3.-3.j]])
+>>> (A.adjoint() == A.mH).all()
+tensor(True)
+```
+
+### torch.argwhere
+
+```python
+torch.argwhere(input) → Tensor
+```
+
+返回一个包含 `input` 中所有非零元素索引的张量。结果中，每行对应一个输入中非零元素的索引。
+
+如果 `input` 有 n 维，则得到的索引张量 shape 为 $(z\times n)$，其中 z 是 `input` 张量非零元素个数。
+
+> **NOTE** 该函数功能与 NumPy 的 `argwhere` 类似。
+
+例如：
+
+```python
+>>> t = torch.tensor([1, 0, 1])
+>>> torch.argwhere(t)
+tensor([[0],
+        [2]])
+>>> t = torch.tensor([[1, 0, 1], [0, 1, 1]])
+>>> torch.argwhere(t)
+tensor([[0, 0],
+        [0, 2],
+        [1, 1],
+        [1, 2]])
+```
+
+### torch.cat
+
+```python
+torch.cat(tensors, dim=0, *, out=None) → Tensor
+```
+
+将张量序列 `tensors` 沿指定维度串联起来。所有张量的 shape 必须相同（除了连接的维度）或 empty。
+
+`torch.cat()` 可以看作 `torch.split()` 和 `torch.chunk()` 的逆操作。
+
+**参数：**
+
+- **tensors** (sequence of `Tensors`) – *相同类型*的张量序列。non-empty 张量除了 cat 维度，shape 必须相同。
+- **dim** (`int`, optional) – 连接的维度。
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional) – 输出张量。
+
+**示例：**
+
+```python
+>>> x = torch.randn(2, 3)
+>>> x
+tensor([[ 0.6580, -1.0969, -0.4614],
+        [-0.1034, -0.5790,  0.1497]])
+>>> torch.cat((x, x, x), 0)
+tensor([[ 0.6580, -1.0969, -0.4614],
+        [-0.1034, -0.5790,  0.1497],
+        [ 0.6580, -1.0969, -0.4614],
+        [-0.1034, -0.5790,  0.1497],
+        [ 0.6580, -1.0969, -0.4614],
+        [-0.1034, -0.5790,  0.1497]])
+>>> torch.cat((x, x, x), 1)
+tensor([[ 0.6580, -1.0969, -0.4614,  0.6580, -1.0969, -0.4614,  0.6580,
+         -1.0969, -0.4614],
+        [-0.1034, -0.5790,  0.1497, -0.1034, -0.5790,  0.1497, -0.1034,
+         -0.5790,  0.1497]])
+```
+
+### torch.concat
+
+`torch.cat()` 的别名。
 
 concatenate
 
@@ -550,25 +702,29 @@ narrow
 
 Returns a new tensor that is a narrowed version of input tensor.
 
-nonzero
+### torch.nonzero
 
-#### permute
+```python
+torch.nonzero(input, 
+    *, 
+    out=None, 
+    as_tuple=False) → LongTensor or tuple of LongTensors
+```
+
+
+
+### torch.permute
 
 ```python
 torch.permute(input, dims) → Tensor
 ```
 
-返回张量 `input` 的一个视图，其维度重新排列。
+返回 `input` 张量的一个 **view**，其维度重新排列。
 
 **参数：**
 
-- **input** (`Tensor`)
-
-输入张量。
-
-- **dims** (tuple of python:int)
-
-所需维度顺序。
+- **input** (`Tensor`) - 输入张量。
+- **dims** (tuple of python:int) - 维度顺序。
 
 ```python
 >>> x = torch.randn(2, 3, 5)
@@ -614,9 +770,51 @@ scatter_reduce
 
 Out-of-place version of torch.Tensor.scatter_reduce_()
 
-split
+### torch.split
 
-Splits the tensor into chunks.
+```python
+torch.split(tensor, split_size_or_sections, dim=0)
+```
+
+把张量分成若干块，每块都是原张量的一个视图。
+
+若 `split_size_or_sections` 是整数，将张量等分。如果张量在 `dim` 维度不能被 `split_size` 整除，最后一个chunk 会小一点。
+
+若 `split_size_or_sections` 是 list，则根据 `split_size_or_sections` 在 `dim` 维度将张量拆分为 `len(split_size_or_sections)` 份。
+
+**参数：**
+
+- **tensor** (`Tensor`) – 待拆分张量
+- **split_size_or_sections** (`int`) or (`list(int)`) – 单个 chunk 大小，或包含每个 chunk 大小的 list
+- **dim** (`int`) – 进行拆分的维度
+
+**返回：**
+
+- `List[Tensor]`
+
+**示例：**
+
+```python
+>>> a = torch.arange(10).reshape(5,2)
+>>> a
+tensor([[0, 1],
+        [2, 3],
+        [4, 5],
+        [6, 7],
+        [8, 9]])
+>>> torch.split(a, 2)
+(tensor([[0, 1],
+         [2, 3]]),
+ tensor([[4, 5],
+         [6, 7]]),
+ tensor([[8, 9]]))
+>>> torch.split(a, [1,4])
+(tensor([[0, 1]]),
+ tensor([[2, 3],
+         [4, 5],
+         [6, 7],
+         [8, 9]]))
+```
 
 ### torch.squeeze
 
@@ -1425,10 +1623,8 @@ xlogy
 Alias for torch.special.xlogy().
 
 
-### Reduction Ops
+### 约简操作
 
-|操作|说明|
-|---|---|
 argmax
 
 Returns the indices of the maximum value of all elements in the input tensor.
@@ -1441,9 +1637,49 @@ amax
 
 Returns the maximum value of each slice of the input tensor in the given dimension(s) dim.
 
-amin
+#### torch.amin
 
-Returns the minimum value of each slice of the input tensor in the given dimension(s) dim.
+```python
+torch.amin(
+    input, 
+    dim, 
+    keepdim=False, 
+    *, 
+    out=None) → Tensor
+```
+
+返回 `input` 张量 `dim` 维度每个切片的最小值。
+
+`max`/`min` 和 `amax`/`amin` 的差别：
+
+- `amax`/`amin` 支持多维约简；
+- `amax`/`amin` 不返回索引；
+- `amax`/`amin` 在相等值之间均匀分布梯度，而 `max`/`min` 只将张量传播到原张量的单个索引。
+
+如果 `keepdim=True`，则输出张量与 `input` 张量除了 `dim` 大小为 1，其它维度大小相同。否则，`dim` 被压缩（`torch.squeeze()`），输出张量维度减 1.
+
+**参数：**
+
+- **input** (`Tensor`) – 输入张量
+- **dim** (`int` or tuple of ints) – 约简维度
+- **keepdim** (`bool`) – 是否保留约简的维度
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional) – 输出张量
+
+**示例：**
+
+```python
+>>> a = torch.randn(4, 4)
+>>> a
+tensor([[ 0.6451, -0.4866,  0.2987, -1.3312],
+        [-0.5744,  1.2980,  1.8397, -0.2713],
+        [ 0.9128,  0.9214, -1.7268, -0.2995],
+        [ 0.9023,  0.4853,  0.9075, -1.6165]])
+>>> torch.amin(a, 1)
+tensor([-1.3312, -0.5744, -1.7268, -1.6165])
+```
 
 aminmax
 
@@ -1620,9 +1856,40 @@ isfinite
 
 Returns a new tensor with boolean elements representing if each element is finite or not.
 
-isin
+#### torch.isin
 
-Tests if each element of elements is in test_elements.
+```python
+torch.isin(
+    elements, 
+    test_elements, 
+    *, 
+    assume_unique=False, 
+    invert=False) → Tensor
+```
+
+测试 `elements` 的每个元素是否在 `test_elements` 中。返回一个与 `elements` shape 相同的 boolean 张量，当 `elements` 中对应元素在 `test_elements` 时为 True，否则为 False.
+
+> **NOTE**
+> `elements` 或 `test_elements` 其中一个可以为标量，但不能都是标量。
+
+**参数:**
+
+- **elements** (`Tensor` or Scalar) – 输入元素
+- **test_elements** (`Tensor` or Scalar) – 用于测试输入元素
+- **assume_unique** (`bool`, optional) – True 则假设 `elements` 和 `test_elements` 不含重复值，这样可以加速计算速度。默认：False
+- **invert** (`bool`, optional) – True 则反转 boolean 张量，此时不在 `test_elements` 中的元素结果为 True。默认：False
+
+**返回：**
+
+- 一个 shape 与 `elements` 相同的布尔张量，当对应元素在 `test_elements` 中为 True，否则为 False。
+
+**示例：**
+
+```python
+>>> torch.isin(torch.tensor([[1, 2], [3, 4]]), torch.tensor([2, 3]))
+tensor([[False,  True],
+        [ True, False]])
+```
 
 isinf
 
@@ -1845,7 +2112,7 @@ Flattens input by reshaping it into a one-dimensional tensor.
 torch.flip(input, dims) → Tensor
 ```
 
-将张量指定维度的数据翻转。
+将张量指定维度的数据翻转。如对序列数据，生成 reverse 序列数据。
 
 > **NOTE**
 > `torch.flip` 复制 `input` 数据，而 NumPy 的 `np.flip` 返回一个 view。因为复制张量更费时，所以 `torch.flip` 预计比 `np.flip` 慢。
@@ -2049,55 +2316,6 @@ torch.use_deterministic_algorithms(mode, *, warn_only=False)
 
 ## 操作
 
-### torch.adjoint
-
-```python
-torch.adjoint(Tensor) → Tensor
-```
-
-将张量最后两个维度转换，然后返回共轭视图。
-
-对复数张量，`x.adjoint()` 等价于 `x.transpose(-2, -1).conj()`；对实数张量等价于 `x.transpose(-2, -1)`。
-
-```python
->>> x = torch.arange(4, dtype=torch.float)
->>> A = torch.complex(x, x).reshape(2, 2)
->>> A
-tensor([[0.+0.j, 1.+1.j],
-        [2.+2.j, 3.+3.j]])
->>> A.adjoint()
-tensor([[0.-0.j, 2.-2.j],
-        [1.-1.j, 3.-3.j]])
->>> (A.adjoint() == A.mH).all()
-tensor(True)
-```
-
-### torch.argwhere
-
-```python
-torch.argwhere(input) → Tensor
-```
-
-返回一个包含 `input` 中所有非零元素索引的张量。结果中，每行对应一个输入中非零元素的索引。
-
-如果 `input` 有 n 维，则得到的索引张量 shape 为 $(z\times n)$，其中 z 是 `input` 张量非零元素个数。
-
-> **NOTE** 该函数功能与 NumPy 的 `argwhere` 类似。
-
-例如：
-
-```python
->>> t = torch.tensor([1, 0, 1])
->>> torch.argwhere(t)
-tensor([[0],
-        [2]])
->>> t = torch.tensor([[1, 0, 1], [0, 1, 1]])
->>> torch.argwhere(t)
-tensor([[0, 0],
-        [0, 2],
-        [1, 1],
-        [1, 2]])
-```
 
 ### torch.mean
 

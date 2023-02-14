@@ -10,17 +10,18 @@
   - [方法](#方法)
     - [batch](#batch)
     - [cache](#cache)
-    - [from_generator](#from_generator)
-    - [from_tensor_slices](#from_tensor_slices)
+    - [from\_generator](#from_generator)
+    - [from\_tensor\_slices](#from_tensor_slices)
     - [map](#map)
-    - [padded_batch](#padded_batch)
+    - [padded\_batch](#padded_batch)
     - [prefetch](#prefetch)
     - [repeat](#repeat)
     - [shuffle](#shuffle)
     - [take](#take)
+    - [zip](#zip)
   - [参考](#参考)
 
-2022-01-18, 16:40
+Last updated: 2023-02-14, 13:25
 ***
 
 ## 简介
@@ -376,8 +377,6 @@ for element in B.as_numpy_iterator():
 
 ### prefetch
 
-Last updated: 2022-08-09, 13:13
-
 ```python
 prefetch(
     buffer_size, name=None
@@ -386,11 +385,15 @@ prefetch(
 
 从该数据集预先取一部分元素创建 `Dataset`。
 
-**返回**：`Dataset`
+**返回：**
 
-大部分数据集输入管道应该以调用 `prefetch` 结尾。这样在处理当前元素时同时准备后续元素，从而提高吞吐量，降低延迟；代价是使用额外的内存来存储预取的元素。
+应用转换后的 `Dataset`。
 
-> **Note：** 和其它 `Dataset` 方法一样，`prefetch` 对输入数据集的元素进行操作，没有样本和批量的概念。`examples.prefetch(2)` 将预取 2 个元素（即 2 个样本），而 `examples.batch(20).prefetch(2)` 虽然也是预取 2 个元素，但每个元素为 1 个批量，每个批量包含 20 个元素。
+大部分数据集输入管道应该以调用 `prefetch` 结尾。这样在处理当前数据时同时准备后续数据，从而提高吞吐量，降低延迟；代价是使用额外的内存来存储预取的元素。
+
+> **Note：** 和其它 `Dataset` 方法一样，`prefetch` 对输入数据集的元素进行操作，没有样本和批量的概念。`examples.prefetch(2)` 预取 2 个元素（即 2 个样本），而 `examples.batch(20).prefetch(2)` 虽然也是预取 2 个元素，但每个元素为 1 个批量，每个批量包含 20 个元素。
+
+**示例：**
 
 ```python
 >>> dataset = tf.data.Dataset.range(3)
@@ -399,9 +402,15 @@ prefetch(
 [0, 1, 2]
 ```
 
-|参数|说明|
-|---|---|
-|buffer_size|`tf.int64` 标量 `tf.Tensor`, 表示预取时缓冲元素的最大个数。如果使用 `tf.data.AUTOTUNE`，则动态调整缓冲区大小|
+**参数：**
+
+- **buffer_size**
+
+`tf.int64` 类型 `tf.Tensor` 标量，表示缓存的最大元素个数。如果使用 `tf.data.AUTOTUNE`，则动态调整缓冲区大小。 
+
+- **name**	Optional
+
+操作名称。
 
 ### repeat
 
@@ -509,6 +518,69 @@ take(
 |参数|说明|
 |---|---|
 |count|`tf.int64` 类型的标量，表示从该数据集中取出 `count` 个元素创建新数据集。如果 `count` 为 -1，或者 `count` 大于该数据集的 size，则新数据集包含该数据集全部元素|
+
+### zip
+
+```python
+@staticmethod
+zip(
+    datasets, name=None
+)
+```
+
+通过 zip 包含多个数据集的 `datasets` 来创建 `Dataset`。
+
+该方法与 Python 内置 `zip()` 函数类似，主要区别在于 `datasets` 可以是 (嵌套) `Dataset` 对象。
+
+- `datasets` 的嵌套结构决定了生成数据集中元素的结构
+
+```python
+>>> a = tf.data.Dataset.range(1, 4)  # ==> [ 1, 2, 3 ]
+>>> b = tf.data.Dataset.range(4, 7)  # ==> [ 4, 5, 6 ]
+>>>
+>>> ds = tf.data.Dataset.zip((a, b))
+>>> list(ds.as_numpy_iterator())
+[(1, 4), (2, 5), (3, 6)]
+>>>
+>>> ds = tf.data.Dataset.zip((b, a))
+>>> list(ds.as_numpy_iterator())
+[(4, 1), (5, 2), (6, 3)]
+```
+
+- `datasets` 可以包含任意数目的数据集
+
+```python
+c = tf.data.Dataset.range(7, 13).batch(2)   # ==> [ [7, 8],
+                                            #       [9, 10],
+                                            #       [11, 12] ]
+ds = tf.data.Dataset.zip((a, b, c))
+for element in ds.as_numpy_iterator():
+    print(element)
+```
+
+```txt
+(1, 4, array([7, 8], dtype=int64))
+(2, 5, array([ 9, 10], dtype=int64))
+(3, 6, array([11, 12], dtype=int64))
+```
+
+- 生成数据集中元素个数与 `datasets` 中最小数据集相同
+
+```python
+>>> d = tf.data.Dataset.range(13, 15)  # ==> [ 13, 14 ]
+>>> ds = tf.data.Dataset.zip((a, d))
+>>> list(ds.as_numpy_iterator())
+[(1, 13), (2, 14)]
+```
+
+**参数：**
+
+- **datasets**	数据集（支持嵌套）
+- **name**	(Optional) 操作名称
+
+**返回：**
+
+- 一个新的 `Dataset`。
 
 ## 参考
 

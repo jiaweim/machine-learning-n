@@ -6,23 +6,24 @@
   - [初始化和基础操作](#初始化和基础操作)
   - [Tensor](#tensor)
     - [Tensor.new\_tensor](#tensornew_tensor)
-    - [permute](#permute)
     - [repeat](#repeat)
     - [numpy](#numpy)
     - [scatter\_](#scatter_)
     - [Tensor.to](#tensorto)
-    - [Tensor.view](#tensorview)
     - [Tensor.byte](#tensorbyte)
     - [Tensor.clone](#tensorclone)
+    - [Tensor.contiguous](#tensorcontiguous)
     - [Tensor.cpu](#tensorcpu)
     - [Tensor.cuda](#tensorcuda)
     - [Tensor.detach](#tensordetach)
+    - [Tensor.float](#tensorfloat)
     - [Tensor.item](#tensoritem)
     - [Tensor.numpy](#tensornumpy)
+    - [Tensor.permute](#tensorpermute)
     - [Tensor.size](#tensorsize)
     - [Tensor.tolist](#tensortolist)
     - [Tensor.type](#tensortype)
-    - [Tensor.view](#tensorview-1)
+    - [Tensor.view](#tensorview)
   - [参考](#参考)
 
 Last updated: 2022-12-13, 17:34
@@ -171,14 +172,6 @@ Tensor.T
 Tensor.H
 ```
 
-### permute
-
-```python
-Tensor.permute(*dims) → Tensor
-```
-
-参考 `torch.permute()`。
-
 ### repeat
 
 ```python
@@ -300,7 +293,7 @@ tensor([[2.0000, 2.0000, 3.2300, 2.0000],
 Tensor.to(*args, **kwargs) → Tensor
 ```
 
-执行张量 `dtype` and/or `device` 转换。`torch.dtype` 和 `torch.device` 根据 `self.to(*args, **kwargs)` 推断。
+张量 `dtype` and/or `device` 转换。`torch.dtype` 和 `torch.device` 根据 `self.to(*args, **kwargs)` 推断。
 
 > **NOTE**
 > 如果 `self` 张量的 `torch.dtype` 和 `torch.device` 已经正确，则直接返回 `self`。否则以指定 `torch.dtype` 和 `torch.device` 返回 `self` 的副本。
@@ -334,7 +327,7 @@ torch.to(other,
 
 创建一个与 `other` 具有相同 `device` 和 `dtype` 的张量。
 
-**例如：**
+**示例：**
 
 ```python
 >>> tensor = torch.randn(2, 2)  # Initially dtype=float32, device=cpu
@@ -356,14 +349,6 @@ tensor([[-0.5044,  0.0005],
 tensor([[-0.5044,  0.0005],
         [ 0.3310, -0.0584]], dtype=torch.float64, device='cuda:0')
 ```
-
-### Tensor.view
-
-
-
-返回一个与 `self` 具有相同数据只是 `shape` 不同的张量。
-
-返回的张量与原张量共享数据，因此它们的元素个数必须相同。新的视图尺寸与原始张量的尺寸和步长必须兼容，即新的视图维度要么是原始维度的子空间，要么
 
 Tensor.new_full
 
@@ -777,9 +762,17 @@ Alias for clamp_().
 
 参考 `torch.clone()`
 
-Tensor.contiguous
+### Tensor.contiguous
 
-Returns a contiguous in memory tensor containing the same data as self tensor.
+```python
+Tensor.contiguous(memory_format=torch.contiguous_format) → Tensor
+```
+
+返回一个内存连续张量，其数据与 `self` 相同。如果 `self` 已经满足指定内存格式，则直接返回 `self`。
+
+**参数：**
+
+- **memory_format** (`torch.memory_format`, optional) – 指定张量的内存格式。默认: `torch.contiguous_format`。
 
 Tensor.copy_
 
@@ -1164,9 +1157,17 @@ Tensor.flipud
 
 See torch.flipud()
 
-Tensor.float
+### Tensor.float
 
-self.float() is equivalent to self.to(torch.float32).
+```python
+Tensor.float(memory_format=torch.preserve_format) → Tensor
+```
+
+`self.float()` 等价于 `self.to(torch.float32)`。
+
+**参数：**
+
+- **memory_format** (`torch.memory_format`, optional) – 返回张量的内存格式。默认: `torch.preserve_format`。
 
 Tensor.float_power
 
@@ -1906,9 +1907,13 @@ Tensor.outer
 
 See torch.outer().
 
-Tensor.permute
+### Tensor.permute
 
-See torch.permute()
+```python
+Tensor.permute(*dims) → Tensor
+```
+
+参考 `torch.permute()`。
 
 Tensor.pin_memory
 
@@ -2572,7 +2577,13 @@ See torch.vdot()
 
 ### Tensor.view
 
-Returns a new tensor with the same data as the self tensor but of a different shape.
+```python
+Tensor.view(*shape) → Tensor
+```
+
+返回一个与 `self` 张量数据相同但 `shape` 不同的新张量。
+
+返回的张量共享数据，元素个数相同，但是 size 可能不同。对 view 张量，其 size 必须与原张量的 size 和 stride 兼容，
 
 Tensor.view_as
 
