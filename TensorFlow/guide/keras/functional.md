@@ -3,7 +3,7 @@
 - [函数 API](#函数-api)
   - [配置](#配置)
   - [简介](#简介)
-  - [训练、评估和推断](#训练评估和推断)
+  - [训练、评估和预测](#训练评估和预测)
   - [保存和序列化](#保存和序列化)
   - [使用相同 layers 定义多个模型](#使用相同-layers-定义多个模型)
   - [模型是可调用对象](#模型是可调用对象)
@@ -20,7 +20,6 @@
   - [13. 参考](#13-参考)
 
 Last updated: 2022-06-30, 15:36
-@author Jiawei Mao
 ****
 
 ## 配置
@@ -34,9 +33,9 @@ from tensorflow.keras import layers
 
 ## 简介
 
-Keras 函数（functional）API 是一种比 [tf.keras.Sequential](https://tensorflow.google.cn/guide/keras/sequential_model) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，以及包含多个输入或多个输出的模型。
+Keras 函数（functional）API 是一种比 [tf.keras.Sequential](https://tensorflow.google.cn/guide/keras/sequential_model) 更灵活的创建模型的方法。函数式 API 可以创建非线性拓扑结构、共享层，以及包含多输入或多输出的模型。
 
-其主要思想是，深度学习模型是由神经网络 layer 组成的有向无环图（directed acyclic graph, DAG），函数式 API 提供构建这种图的方法。
+其主要思想是，深度学习模型是由神经网络层组成的有向无环图（directed acyclic graph, DAG），函数式 API 提供构建这种图的方法。
 
 考虑如下模型：
 
@@ -58,7 +57,7 @@ Keras 函数（functional）API 是一种比 [tf.keras.Sequential](https://tenso
 inputs = keras.Input(shape=(784,))
 ```
 
-输入向量 shape 为 784。此处一般只指定样本 shape，忽略 batch size。假如输入 shape 为 `(32, 32, 3)` 的图片。此时可定义输入为：
+输入向量 shape 为 784。此处一般只指定样本 shape，忽略 batch size。假如输入是 shape 为 `(32, 32, 3)` 的图像。此时可定义输入为：
 
 ```python
 img_inputs = keras.Input(shape=(32, 32, 3))
@@ -131,23 +130,25 @@ keras.utils.plot_model(model, "my_first_model.png")
 
 ![](images/2022-02-16-12-10-57.png)
 
-- 导出图片时可以显示每个 layer 的输入和输出 shape
+- 导出图片时可以显示每层输入和输出的 shape
 
 ```python
-keras.utils.plot_model(model, "my_first_model_with_shape_info.png", show_shapes=True)
+keras.utils.plot_model(model, 
+    "my_first_model_with_shape_info.png", 
+    show_shapes=True)
 ```
 
 ![](images/2022-02-16-12-31-53.png)
 
-这个图和创建该图的代码几乎相同，只是将连接箭头用方法调用替换了。
+这个图和创建该图的代码几乎相同，只是将连接箭头替换为方法调用。
 
-## 训练、评估和推断
+## 训练、评估和预测
 
 使用函数 API 构建的模型，在训练、评估和推断方面与 [Sequential](https://tensorflow.google.cn/guide/keras/sequential_model) 模型完全相同。
 
-`Model` 类内置训练循环方法 `fit()` 和评估循环方法 `evaluate()`，并且可以自定义这些循环，以实现监督学习以外的训练流程，如 GAN。
+`Model` 类内置训练循环方法 `fit()` 和评估循环方法 `evaluate()`，也可以自定义这些循环，以实现监督学习以外的训练流程，如 GAN。
 
-下面，加载 MNIST 数据集，reshape 为向量，训练上面创建的模型，在 validation split 上监视性能，并使用测试集评估模型：
+下面，加载 MNIST 数据集，reshape 为向量，训练上面的模型，在验证集上监视性能，在测试集评估模型：
 
 ```python
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
@@ -192,12 +193,12 @@ Test accuracy: 0.9559999704360962
 保存模型：
 
 ```python
-model_path = r"D:\it\test\model"
+model_path = "path_to_my_model"
 model.save(model_path)
 ```
 
 ```txt
-INFO:tensorflow:Assets written to: D:\it\test\model\assets
+INFO:tensorflow:Assets written to: path_to_my_model\assets
 ```
 
 然后重新载入模型：
@@ -314,9 +315,9 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-这里解码架构与编码架构严格对称，因此输出形状和输入形状 `(28, 28, 1)` 相同。
+这里 decoder 与 encoder 严格对称，因此输出形状和输入形状 `(28, 28, 1)` 相同。
 
-`Conv2D` layer 的逆操作是 `Conv2DTranspose` layer，`MaxPooling2D` 的逆操作是 `UpSampling2D` 层。
+`Conv2D` 层的逆操作是 `Conv2DTranspose` 层，`MaxPooling2D` 的逆操作是 `UpSampling2D` 层。
 
 ## 模型是可调用对象
 
@@ -425,14 +426,13 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-如上所示，模型可以嵌套，即一个模型可以包含子模型。模型嵌套常用于模型集成。例如，将一组模型组合成一个单一模型，来平均它们的预测：
+如上所示，模型可以嵌套，即一个模型可以包含子模型。模型嵌套常用于模型集成。例如，将一组模型组合成一个单个模型，来平均它们的预测：
 
 ```python
 def get_model():
     inputs = keras.Input(shape=(128,))
     outputs = layers.Dense(1)(inputs)
     return keras.Model(inputs, outputs)
-
 
 model1 = get_model()
 model2 = get_model()
@@ -452,7 +452,7 @@ ensemble_model = keras.Model(inputs=inputs, outputs=outputs)
 
 函数 API 可以创建包含多个输入和输出的模型，[Sequential](sequential_model.md) API 就不行。
 
-例如，如果你要构建一个系统，用于按优先级对客户的票据进行排序，并将其转到正确的部门，那么该模型至少有三个输入：
+例如，如果你要构建一个系统，用于按优先级对客户的票据进行排序，然后转到正确的部门，那么该模型至少有三个输入：
 
 - 票据标题（文本输入）
 - 票据内容（文本输入）

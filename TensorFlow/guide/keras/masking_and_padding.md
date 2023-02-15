@@ -1,12 +1,12 @@
-# 屏蔽和填充序列（Keras）
+# 屏蔽和填充序列
 
-- [屏蔽和填充序列（Keras）](#屏蔽和填充序列keras)
-  - [1. 导入包](#1-导入包)
-  - [2. 简介](#2-简介)
-  - [3. 填充序列数据](#3-填充序列数据)
-  - [4. 屏蔽](#4-屏蔽)
-  - [5. 屏蔽生成层：Embedding 和 Masking](#5-屏蔽生成层embedding-和-masking)
-  - [6. Functional API 和 Sequential API 中 mask 的传播](#6-functional-api-和-sequential-api-中-mask-的传播)
+- [屏蔽和填充序列](#屏蔽和填充序列)
+  - [导入包](#导入包)
+  - [简介](#简介)
+  - [填充序列数据](#填充序列数据)
+  - [屏蔽 (Masking)](#屏蔽-masking)
+  - [屏蔽生成层：Embedding 和 Masking](#屏蔽生成层embedding-和-masking)
+  - [Functional API 和 Sequential API 中 mask 的传播](#functional-api-和-sequential-api-中-mask-的传播)
   - [7. 直接将 mask 张量传递给 layer](#7-直接将-mask-张量传递给-layer)
   - [8. 自定义 mask 生成层](#8-自定义-mask-生成层)
   - [9. 自定义 mask 传播层](#9-自定义-mask-传播层)
@@ -17,7 +17,7 @@
 Last updated: 2023-01-18, 10:05
 ****
 
-## 1. 导入包
+## 导入包
 
 ```python
 import numpy as np
@@ -26,13 +26,13 @@ from tensorflow import keras
 from tensorflow.keras import layers
 ```
 
-## 2. 简介
+## 简介
 
 **屏蔽**（Masking）是告诉序列处理层输入数据缺少某些时间步，因此在处理数据时应该跳过这些时间步。
 
-**填充**（Padding）是一种特殊的屏蔽，其屏蔽的时间步位于序列的开头或结尾。填充是为了支持批处理：使同一批次的所有序列长度相同，需要填充或裁剪部分序列。
+**填充**（Padding）是一种特殊的 masking，其屏蔽的时间步位于序列的开头或结尾。填充是为了支持批处理：使同一批次的所有序列长度相同，需要填充或裁剪部分序列。
 
-## 3. 填充序列数据
+## 填充序列数据
 
 序列数据不同样本长度不同很常见。例如，下面是按单词标记化后的文本：
 
@@ -80,7 +80,7 @@ print(padded_inputs)
  [  83   91    1  645 1253  927]]
 ```
 
-## 4. 屏蔽
+## 屏蔽 (Masking)
 
 统一样本长度后，需要告诉模型哪些数据是填充值应该忽略，该机制就是**屏蔽**（masking）。
 
@@ -90,7 +90,7 @@ print(padded_inputs)
 2. 为 `keras.layers.Embedding` layer 添加设置 `mask_zero=True`
 3. 对支持 `mask` 参数的 layer 手动传入该参数，如 RNN layer
 
-## 5. 屏蔽生成层：Embedding 和 Masking
+## 屏蔽生成层：Embedding 和 Masking
 
 `Embedding` 和 `Masking` 生成一个 shape 为 `(batch, sequence_length)` 的 2D mask 张量并将其放在 layer 的输出后面实现屏蔽，两者的屏蔽张量均保存在 `_keras_mask` 字段中。
 
@@ -110,7 +110,7 @@ masked_embedding = masking_layer(unmasked_embedding)
 print(masked_embedding._keras_mask) # 查看屏蔽张量
 ```
 
-```sh
+```txt
 tf.Tensor(
 [[ True  True  True False False False]
  [ True  True  True  True  True False]
@@ -121,15 +121,15 @@ tf.Tensor(
  [ True  True  True  True  True  True]], shape=(3, 6), dtype=bool)
 ```
 
-从输出结果可以看出，屏蔽张量是一个 `(batch_size, sequence_length)` 2D boolean 张量，值为 `False` 表示在处理时忽略对应的时间步。
+从输出结果可以看出，屏蔽张量是一个 `(batch_size, sequence_length)` 2D boolean 张量，`False` 表示在处理时忽略该时间步。
 
 > 下面屏蔽张量简称屏蔽，以 mask 表示。
 
-## 6. Functional API 和 Sequential API 中 mask 的传播
+## Functional API 和 Sequential API 中 mask 的传播
 
-在 Functional API 或 Sequential API 中，由 `Embedding` 或 `Masking` layer 生成的 mask 会通过网络传播给任何能处理 mask 的 layer，如 RNN layer。Keras 会自动获取与输入对应的 mask，并将其传递给能处理的 layer。
+在 Functional API 或 Sequential API 中，由 `Embedding` 或 `Masking` layer 生成的 mask 会通过网络传播给任何能处理 mask 的 layer，如 RNN。Keras 会自动获取与输入对应的 mask，并将其传递给能处理的 layer。
 
-例如，在 Sequential 模型中，`LSTM` 会自动接收 mask，即它能忽略填充值：
+例如，在 Sequential 模型中，`LSTM` 会自动接收 mask 忽略填充值：
 
 ```py
 model = keras.Sequential(

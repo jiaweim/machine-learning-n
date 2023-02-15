@@ -22,7 +22,7 @@
 |AvgPool2D|Average pooling operation for spatial data.|
 |AvgPool3D|Average pooling operation for 3D data (spatial or spatio-temporal).|
 |BatchNormalization|Layer that normalizes its inputs.|
-|Bidirectional|Bidirectional wrapper for RNNs.|
+|[Bidirectional](Bidirectional.md)|双向 RNN 的 wrapper|
 |CategoryEncoding|A preprocessing layer which encodes integer features.|
 |CenterCrop|A preprocessing layer which crops images.|
 |Concatenate|Layer that concatenates a list of inputs.|
