@@ -11,8 +11,8 @@
   - [8. 自定义 mask 生成层](#8-自定义-mask-生成层)
   - [9. 自定义 mask 传播层](#9-自定义-mask-传播层)
   - [10. 自定义 mask 使用层](#10-自定义-mask-使用层)
-  - [11. 总结](#11-总结)
-  - [12. 参考](#12-参考)
+  - [总结](#总结)
+  - [参考](#参考)
 
 Last updated: 2023-01-18, 10:05
 ****
@@ -339,17 +339,17 @@ model = keras.Model(inputs, outputs)
 y = model(np.random.randint(0, 10, size=(32, 100)), np.random.random((32, 100, 1)))
 ```
 
-## 11. 总结
+## 总结
 
 以上是 Keras 中需要了解的所有填充和屏蔽内容。总结一下：
 
-- 屏蔽是 layer 跳过或忽略输入序列中的某些时间步；
+- 屏蔽是 layer 忽略输入序列的某些时间步；
 - 有些 layer 可以生成 mask: `Embedding` 可以根据输入值生成 mask (`mask_zero=True` 时)，`Masking` 层也可以；
 - 有些 layer 可以使用 mask: 在它们的 `__call__` 方法中公开 `mask` 参数，RNN 层就是如此；
 - 在函数 API 和串联 API 中，mask 信息会自动传播；
 - 当单独使用 layers 时，可以手动传递 `mask` 参数；
 - 可以自定义 layer，实现 mask 的生成、修改和使用。
 
-## 12. 参考
+## 参考
 
 - https://www.tensorflow.org/guide/keras/masking_and_padding

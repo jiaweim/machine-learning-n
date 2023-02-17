@@ -1,6 +1,7 @@
 # tf.keras.layers.TimeDistributed
 
-2022-01-30, 23:32
+Last updated: 2023-02-15, 11:14
+****
 
 ## 简介
 
@@ -28,7 +29,12 @@ TensorShape([None, 10, 126, 126, 64])
 
 因为 `TimeDistributed` 对每个时间步应用相同的 `Conv2D` 实例，所以对每个时间步使用了相同的权重。
 
-## 调用参数
+**参数：**
+
+- **layer**	- `tf.keras.layers.Layer` 实例
+
+
+**调用参数：**
 
 - **inputs**
 
@@ -36,7 +42,11 @@ shape 为 `(batch, time, ...)` 的输入张量，或所有张量 shape 都为 `(
 
 - **training**
 
+表示该层是在训练模式还是预测模式。该参数会传递给 wrapper 的层。
 
+- **mask**
+
+shape 为 `(samples, timesteps)` 的张量，表示是否屏蔽指定时间步。该参数直接传递给 wrapper 层（该层需支持该 `mask` 参数）。
 
 ## 参考
 

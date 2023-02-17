@@ -9,7 +9,7 @@
   - [模型是可调用对象](#模型是可调用对象)
   - [复杂拓扑图形结构](#复杂拓扑图形结构)
     - [多输入输出](#多输入输出)
-    - [7.2 A toy ResNet model](#72-a-toy-resnet-model)
+    - [A toy ResNet model](#a-toy-resnet-model)
   - [8. 共享层](#8-共享层)
   - [9. 提取和重用 graph 节点](#9-提取和重用-graph-节点)
   - [10. 自定义 layer](#10-自定义-layer)
@@ -524,7 +524,7 @@ model.compile(
 )
 ```
 
-因为两个输出层的名称不同，所以也可以根据名称指定损失函数和权重：
+- 因为两个输出层的名称不同，所以也可以**根据名称指定损失函数**和权重：
 
 ```python
 model.compile(
@@ -537,7 +537,7 @@ model.compile(
 )
 ```
 
-输入数据和目标值，通过 NumPy 数组传入：
+- 输入数据和目标值，通过 NumPy 数组传入
 
 ```python
 # 虚拟输入数据
@@ -565,9 +565,12 @@ Epoch 2/2
 <keras.callbacks.History at 0x2438808d5b0>
 ```
 
-当以 `Dataset` 对象调用 `fit`，要么生成 `([title_data, body_data, tags_data], [priority_targets, dept_targets])` tuple of list，或 `({'title': title_data, 'body': body_data, 'tags': tags_data}, {'priority': priority_targets, 'department': dept_targets})` a tuple of dict。
+当以 `Dataset` 对象调用 `fit`，有两种方式：
 
-### 7.2 A toy ResNet model
+- 提供 tuple of list：`([title_data, body_data, tags_data], [priority_targets, dept_targets])`
+- 提供 tuple of dict：`({'title': title_data, 'body': body_data, 'tags': tags_data}, {'priority': priority_targets, 'department': dept_targets})`
+
+### A toy ResNet model
 
 除了多输入、多输出模型外，函数 API 还可以创建非线性拓扑结构模型，而 `Sequential` API 不行。
 

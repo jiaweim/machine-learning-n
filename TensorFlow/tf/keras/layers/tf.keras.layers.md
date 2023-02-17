@@ -125,7 +125,7 @@
 |Subtract|Layer that subtracts two inputs.|
 |TextVectorization|A preprocessing layer which maps text features to integer sequences.|
 |ThresholdedReLU|Thresholded Rectified Linear Unit.|
-|TimeDistributed|This wrapper allows to apply a layer to every temporal slice of an input.|
+|[TimeDistributed](TimeDistributed.md)|对输入的每个时间步应用相同的层|
 |UpSampling1D|Upsampling layer for 1D inputs.|
 |UpSampling2D|Upsampling layer for 2D inputs.|
 |UpSampling3D|Upsampling layer for 3D inputs.|

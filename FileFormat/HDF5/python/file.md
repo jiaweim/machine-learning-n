@@ -2,7 +2,7 @@
 
 - [文件对象](#文件对象)
   - [简介](#简介)
-  - [Opening \& creating files](#opening--creating-files)
+  - [打开和创建文件](#打开和创建文件)
   - [File drivers](#file-drivers)
   - [Python 文件对象](#python-文件对象)
   - [版本问题](#版本问题)
@@ -22,7 +22,7 @@ Last updated: 2023-02-06, 16:37
 
 `File` 对象是 HDF5 文件访问的入口。除了下面列出的特定于 `File` 的功能，`File` 还是 HDF5 group，表示 HDF5 文件的 root group。
 
-## Opening & creating files
+## 打开和创建文件
 
 HDF5 文件的工作方式与 Python 文件类似，支持多个标准模式，如 r/w/a，在不使用时也需要关闭。不过没有 "text" 和 "binary" 模式的概念。
 

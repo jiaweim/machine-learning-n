@@ -6,3 +6,5 @@
 - [TensorFlow 2 快速入门（专家）](quickstart_experts.md)
 
 ## Keras 基础
+
+- [保存和加载模型](keras/save_and_load.md)
