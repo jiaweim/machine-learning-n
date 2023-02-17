@@ -8,7 +8,7 @@
     - [SavedModel 格式](#savedmodel-格式)
     - [Keras H5 格式](#keras-h5-格式)
   - [保存架构](#保存架构)
-    - [函数 API 模型或 Sequential 模型的架构](#函数-api-模型或-sequential-模型的架构)
+    - [Functional 或 Sequential 模型的架构](#functional-或-sequential-模型的架构)
     - [自定义对象](#自定义对象)
   - [仅保存和加载模型的权重](#仅保存和加载模型的权重)
     - [内存中权重迁移 API](#内存中权重迁移-api)
@@ -17,8 +17,7 @@
     - [HDF5 格式](#hdf5-格式)
   - [参考](#参考)
 
-Last updated: 2022-10-06, 20:33
-@author Jiawei Mao
+Last updated: 2023-02-17, 10:03
 ****
 
 ## 简介
@@ -27,10 +26,10 @@ Keras 模型由多个组件组成：
 
 - 模型架构/配置，指模型包含哪些 layer，以及这些 layer 的连接方式；
 - 权重值（模型状态，state of the model）；
-- 优化器（optimizer），通过 compile 设置；
-- losses 和 metrics，通过 compile 或调用 `add_loss()`, `add_metric()` 设置。
+- 优化器（optimizer），通过 `compile` 设置；
+- losses 和 metrics，通过 `compile` 或调用 `add_loss()`, `add_metric()` 设置。
 
-Keras API 支持一次性保存所有这些组件，也可以选择只保存一部分：
+Keras API 支持一次性保存所有这些组件，也可以只保存一部分：
 
 - 将所有组件保存为单个 TF SavedModel 归档格式或老式的 Keras H5 格式，这是标准做法；
 - 只保存模型架构，通常保存为 JSON 格式；
@@ -260,16 +259,17 @@ reconstructed_model.fit(test_input, test_target)
 
 与 SavedModel 格式相比，H5 文件没有包含两个内容：
 
-- 通过 `model.add_loss()` 和 `model.add_metric()` 添加的外部 losses 和 metrics。如果你的模型包含这类 losses 和 metrics，并且想恢复训练，就需要在加载模型后手动将这些 losses 加回来。不过，这不适用于通过 `self.add_loss()` 和 `self.add_metrics()` 在 layer 内创建的 losses/metrics。只要加载 layer，这类 losses 和 metrics 就被保留，因为它们是 layer `call` 方法的一部分。
+- 通过 `model.add_loss()` 和 `model.add_metric()` 添加的外部 losses 和 metrics。如果模型包含这类 losses 和 metrics，并且想恢复训练，就需要在加载模型后手动将这些 losses 加回来。不过，这不适用于通过 `self.add_loss()` 和 `self.add_metrics()` 在 layer 内创建的 losses/metrics。只要加载 layer，这类 losses 和 metrics 就被保留，因为它们是 layer `call` 方法的一部分。
 - 自定义对象的计算图。加载时，Keras 需要访问这些对象的 Python 类/函数，以便重建模型。
 
 ## 保存架构
 
 模型架构（或配置）指模型包含的 layers，以及这些 layers 的连接方式。如果已有模型的架构，那么重新初始化权重就能创建模型，不需要编译信息。
 
-> **Note:** 只适用于使用函数 API 或 Sequential API 创建的模型，subclass 模型不行。
+> **Note:** 
+> 只适用于使用函数 API 或 Sequential API 创建的模型，subclass 模型不行。
 
-### 函数 API 模型或 Sequential 模型的架构
+### Functional 或 Sequential 模型的架构
 
 这类模型都是清晰的 layer graph，它们的架构通常为结构化形式。
 
@@ -473,7 +473,7 @@ with keras.utils.custom_object_scope(custom_objects):
 
 可以选择只保存和加载模型的权重，在以下情况很有用：
 
-- 只需要使用模型进行推理：此时你不需要重新训练，所以不需要编译信息或 optimizer 状态；
+- 只需要使用模型进行推理：此时不需要重新训练，所以不需要编译信息或 optimizer 状态；
 - 进行迁移学习，此时重用上一个模型的状态训练一个新模型，因此不需要上一个模型的编译信息。
 
 ### 内存中权重迁移 API

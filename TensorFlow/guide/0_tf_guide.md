@@ -10,6 +10,7 @@
 
 - [屏蔽和填充序列](keras/masking_and_padding.md)
 - [函数 API](keras/functional.md)
+- [Keras 模型的保存和加载](keras/save_and_serialize.md)
 
 ## 加速
 
