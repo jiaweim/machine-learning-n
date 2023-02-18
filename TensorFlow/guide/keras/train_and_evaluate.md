@@ -29,7 +29,6 @@
   - [参考](#参考)
 
 Last updated: 2022-09-27, 15:45
-@author Jiawei Mao
 ****
 
 ## 简介
@@ -52,7 +51,7 @@ from tensorflow.keras import layers
 
 TF 支持的数据形式包括 NumPy 数组（可以全部载入内存的小数据集）和 `tf.data.Dataset` 对象。接下来，使用 NumPy 数组类型的 MNIST 数据集，演示如何使用 optimizers、losses 和 metrics。
 
-考虑如下模型（这里用的函数 API，使用 Sequential 模型或子类模型亦可）：
+考虑如下模型（这里用的Functional API，使用 Sequential 模型或子类模型亦可）：
 
 ```python
 inputs = keras.Input(shape=(784,), name="digits")
@@ -260,7 +259,7 @@ model.fit(x_train, y_train_one_hot, batch_size=64, epochs=1)
 <keras.callbacks.History at 0x1b32735a9a0>
 ```
 
-如果所需 loss 除了 `y_true` 和 `y_pred`，还需要其它参数。则可以扩展 `tf.keras.losses.Loss` 类，并实现以下两个方法：
+**第二种**方法，如果所需 loss 除了 `y_true` 和 `y_pred`，还需要其它参数，可以扩展 `tf.keras.losses.Loss` 类，并实现以下两个方法：
 
 - `__init__(self)`：在调用损失函数时可以接受参数。
 - `call(self, y_true, y_pred)`：使用目标值 `y_true` 和模型预测值 `y_pred` 计算模型损失。
@@ -502,7 +501,7 @@ model.fit(data)
 
 ### 自动设置验证 holdout
 
-在上面第一个端到端示例中，使用 `validation_data` 参数将 numpy 数组 `(x_val, y_val)` 传递给模型，以评估模型在每个 epoch 结束后的 validation loss 和额 validation metric。
+在上面第一个端到端示例中，使用 `validation_data` 参数将 numpy 数组 `(x_val, y_val)` 传递给模型，以评估模型在每个 epoch 结束后的 validation loss 和 validation metric。
 
 这里还有另一个选择：参数 `validation_split` 自动保留训练数据的一部分用作验证。该参数表示留作验证数据的比例，所以在 0 到 1 之间。例如，`validation_split=0.2` 表示使用 20% 的数据进行验证，`validation_split=0.6` 表示使用 60% 的数据进行验证。
 
@@ -567,7 +566,7 @@ Evaluate
 {'loss': 0.1554352343082428, 'sparse_categorical_accuracy': 0.954200029373169}
 ```
 
-`Dataset` 在每个 epoch 结束重置，因此可以在下一个 epoch 重用。
+`Dataset` 在每个 epoch 结束后重置，因此可以在下一个 epoch 重用。
 
 如果只想使用 Dataset 特定数目的 batch 进行过训练，可以使用 `steps_per_epoch` 参数指定单个 epoch 训练多少次。
 

@@ -3,6 +3,7 @@
 - [Masking](#masking)
   - [简介](#简介)
   - [示例](#示例)
+  - [个人总结](#个人总结)
   - [参考](#参考)
 
 Last updated: 2023-01-18, 10:18
@@ -41,8 +42,21 @@ model.add(tf.keras.layers.Masking(mask_value=0.,
 model.add(tf.keras.layers.LSTM(32))
 
 output = model(inputs)
-# 在 LSTM 计算中会跳过 3 和 5 两个时间步
+# 在 LSTM 计算中会跳过 batch 所有样本的 3 和 5 两个时间步
 ```
+
+## 个人总结
+
+-  `Masking` 需要输入为 3D，即 (batch, sequence, features)
+-  `Masking` 不修改输入，而是额外添加了一个 `_keras_mask` 属性
+-  使用 `compute_mask()` 更新 mask，默认直接返回上一个 mask
+-  可以用 `supports_masking` 属性查看 `Layer` 是否支持 mask
+
+支持 masking 的 keras layers：`SimpleRNN`, `GRU`, `LSTM`, `Bidirectional`, `Dense`, `TimeDistributed`, `Add` 等。
+
+如果 mask 从输入传播到输出，那么也应用于 loss 函数，即 mask 时间步不影响 loss。
+
+`Masking` 等价于 `tf.math.reduce_any(tf.math.not_equal(X, 0), axis=-1)`，即将最后一个维度全为 0 的时间步设为 False。
 
 ## 参考
 

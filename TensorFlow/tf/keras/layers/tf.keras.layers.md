@@ -74,9 +74,9 @@
 |InputLayer|Layer to be used as an entry point into a Network (a graph of layers).|
 |InputSpec|Specifies the rank, dtype and shape of every input to a layer.|
 |IntegerLookup|A preprocessing layer which maps integer features to contiguous ranges.|
-|LSTM|Long Short-Term Memory layer - Hochreiter 1997.|
+|[LSTM](LSTM.md)|LSTM 层|
 |LSTMCell|Cell |for the LSTM layer.|
-|Lambda|Wraps arbitrary expressions as a Layer object.|
+|[Lambda](Lambda.md)|将任意表达式包装为 `Layer` 对象|
 |Layer|This is the |from which all layers inherit.|
 |LayerNormalization|Layer normalization layer (Ba et al., 2016).|
 |LeakyReLU|Leaky version of a Rectified Linear Unit.|
@@ -106,7 +106,7 @@
 |RandomWidth|A preprocessing layer which randomly varies image width during training.|
 |RandomZoom|A preprocessing layer which randomly zooms images during training.|
 |ReLU|Rectified Linear Unit activation function.|
-|RepeatVector|Repeats the input n times.|
+|[RepeatVector](RepeatVector.md)|将输入重复 n 次|
 |Rescaling|A preprocessing layer which rescales input values to a new range.|
 |Reshape|Layer that reshapes inputs into the given shape.|
 |Resizing|A preprocessing layer which resizes images.|

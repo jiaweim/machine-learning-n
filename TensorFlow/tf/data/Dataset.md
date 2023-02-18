@@ -351,15 +351,11 @@ padded_batch(
 )
 ```
 
-|参数|说明|
-|---|---|
-|batch_size|
+将数据集的连续元素合并为 padded batches。
 
-将数据集的元素合并为 padded batches。
+此转换将输入数据集中多个连续元素合并为单个元素。
 
-次转换将输入数据集中多个连续元素合并为单个元素。
-
-和 `tf.data.Dataset.batch` 一样，生成元素的组成外部多一个维度，长度为 `batch_size`（如果不能整除，最后一个 batch 为 `N % batch_size`）。如果需要所有 batch 元素个数相同，则应该设置 `drop_remainder=True`。
+和 `tf.data.Dataset.batch` 一样，生成的元素外部多了一个长度为 `batch_size` 的维度，如果不能整除，最后一个 batch 产固定为 `N % batch_size`。如果需要所有 batch 元素个数相同，则应该设置 `drop_remainder=True`。
 
 和 `tf.data.Dataset.batch` 不同的是，组合成 batch 的元素的 shape 可能不同，`padded_batch` 将元素的每个组件填充到指定 shape `padded_shapes`。`padded_shapes` 指定输出元素中每个组件的 shape:
 

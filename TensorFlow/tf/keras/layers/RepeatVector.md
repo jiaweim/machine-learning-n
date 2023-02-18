@@ -1,8 +1,7 @@
 # RepeatVector
 
-Last updated: 2022-08-01, 15:04
-@author Jiawei Mao
-***
+Last updated: 2023-02-18, 16:31
+****
 
 ## 简介
 
@@ -19,11 +18,11 @@ tf.keras.layers.RepeatVector(
 ```python
 model = Sequential()
 model.add(Dense(32, input_dim=32))
-# now: model.output_shape == (None, 32)
-# note: `None` is the batch dimension
+# 此时 model.output_shape == (None, 32)
+# 其中 `None` 是 batch 维度
 
 model.add(RepeatVector(3))
-# now: model.output_shape == (None, 3, 32)
+# 此时 model.output_shape == (None, 3, 32)
 ```
 
 ## 参数

@@ -7,14 +7,15 @@
   - [屏蔽 (Masking)](#屏蔽-masking)
   - [屏蔽生成层：Embedding 和 Masking](#屏蔽生成层embedding-和-masking)
   - [Functional API 和 Sequential API 中 mask 的传播](#functional-api-和-sequential-api-中-mask-的传播)
-  - [7. 直接将 mask 张量传递给 layer](#7-直接将-mask-张量传递给-layer)
-  - [8. 自定义 mask 生成层](#8-自定义-mask-生成层)
-  - [9. 自定义 mask 传播层](#9-自定义-mask-传播层)
-  - [10. 自定义 mask 使用层](#10-自定义-mask-使用层)
+  - [直接将 mask 张量传递给 layer](#直接将-mask-张量传递给-layer)
+  - [自定义 mask 生成层](#自定义-mask-生成层)
+  - [自定义 mask 传播层](#自定义-mask-传播层)
+  - [自定义 mask 使用层](#自定义-mask-使用层)
   - [总结](#总结)
+  - [个人总结](#个人总结)
   - [参考](#参考)
 
-Last updated: 2023-01-18, 10:05
+Last updated: 2023-02-18, 12:47
 ****
 
 ## 导入包
@@ -123,7 +124,7 @@ tf.Tensor(
 
 从输出结果可以看出，屏蔽张量是一个 `(batch_size, sequence_length)` 2D boolean 张量，`False` 表示在处理时忽略该时间步。
 
-> 下面屏蔽张量简称屏蔽，以 mask 表示。
+> 下面屏蔽张量以 mask 表示。
 
 ## Functional API 和 Sequential API 中 mask 的传播
 
@@ -148,7 +149,7 @@ outputs = layers.LSTM(32)(x)
 model = keras.Model(inputs, outputs)
 ```
 
-## 7. 直接将 mask 张量传递给 layer
+## 直接将 mask 张量传递给 layer
 
 能处理 mask 的 layer（如 `LSTM`）的 `__call__` 方法包含一个 `mask` 参数。
 
@@ -194,7 +195,7 @@ array([[ 2.0880729e-03,  2.6909247e-04, -4.2011710e-03, ...,
         -4.6893870e-03, -1.1392428e-02, -6.2933145e-03]], dtype=float32)>
 ```
 
-## 8. 自定义 mask 生成层
+## 自定义 mask 生成层
 
 有时需要自己生成 mask，或者需要修改当前 mask。
 
@@ -278,7 +279,7 @@ tf.Tensor(
  [ True  True  True  True  True  True  True  True False  True]], shape=(3, 10), dtype=bool)
 ```
 
-## 9. 自定义 mask 传播层
+## 自定义 mask 传播层
 
 大多数 layer 不修改时间维度，因此也不需要修改 mask，但是它们可能需要将当前的 mask 传播到下一层。自定义层默认会销毁 mask，因为框架无法判断传播的 mask 是否安全。
 
@@ -311,7 +312,7 @@ model = keras.Model(inputs, outputs)
 Mask found: KerasTensor(type_spec=TensorSpec(shape=(None, None), dtype=tf.bool, name=None), name='Placeholder_1:0')
 ```
 
-## 10. 自定义 mask 使用层
+## 自定义 mask 使用层
 
 mask 使用层在 `call` 方法中接收 `mask` 参数，并使用 mask 信息确定是否跳过某些时间步。
 
@@ -350,6 +351,23 @@ y = model(np.random.randint(0, 10, size=(32, 100)), np.random.random((32, 100, 1
 - 当单独使用 layers 时，可以手动传递 `mask` 参数；
 - 可以自定义 layer，实现 mask 的生成、修改和使用。
 
+## 个人总结
+
+- padding 是为了支持变长序列的 batch 训练；
+- padding 后不 masking，也可能学习到好的模型，但会浪费计算资源；
+
+
+- 对 RNN，忽略所有 mask 时间步，mask 时间步的输出和状态从上一步非 mask 的时间步复制而来。
+
+![](images/2023-02-18-13-45-54.png)
+
+对 right-padded 序列（minibatch element 0），RNN 的隐藏状态为最后一个有效输入步骤的状态。
+
+对 left-padded 序列（minibatch element 1），RNN 开始的时间步都是默认状态，直到第一个有效输入。
+
+而 minibatch element 2 是中间包含 pad 的情况，
+
 ## 参考
 
 - https://www.tensorflow.org/guide/keras/masking_and_padding
+- https://towardsdatascience.com/how-does-masking-work-in-an-rnn-and-variants-and-why-537bf63c306d
