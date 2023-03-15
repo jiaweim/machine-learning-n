@@ -1,7 +1,6 @@
 # EarlyStopping
 
 Last updated: 2022-09-01, 17:06
-@author Jiawei Mao
 ****
 
 ## 简介

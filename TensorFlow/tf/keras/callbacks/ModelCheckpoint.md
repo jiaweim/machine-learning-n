@@ -68,7 +68,7 @@ tf.keras.callbacks.ModelCheckpoint(
 
 如果 `save_best_only=True`，则根据监视指标的最大化或最小化来决定是否覆盖保存文件。对 `val_acc` 应为 `max`，对 `val_loss` 应为 `min`。在 `auto` 模式，如果监控的指标为 `acc` 或以 'fmeasure' 开头，则模式为 `max`，对余下的则为 `min`。
 
-**save_weights_only**
+- **save_weights_only**
 
 True 表示只保存模型的权重 `model.save_weights(filepath)`，否则保存整个模型 `model.save(filepath)`。
 
