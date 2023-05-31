@@ -1,6 +1,6 @@
 # 自然语言处理
 
-- [注意力机制](attention.md)
+- [注意力机制](NLP/attention.md)
 - [注意力分数](attention_score.md)
 
 ## 学习资源

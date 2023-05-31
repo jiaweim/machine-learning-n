@@ -186,7 +186,7 @@ for image, label in tfds.as_numpy(ds):
 
 ### as batch tf.Tensor(batch_size=-1)
 
-使用 `batch_size=-1`，可以将整个数据集以单个批处理加载完。将其与 `as_supervised=True` 和 [tfds.as_numpy](../../api/tfds/as_numpy.md) 结合使用，可以获得 `(np.array, np.array)` 形式的数据：
+使用 `batch_size=-1`，可以将整个数据集以单个批处理加载完。将其与 `as_supervised=True` 和 [tfds.as_numpy](as_numpy.md) 结合使用，可以获得 `(np.array, np.array)` 形式的数据：
 
 ```python
 image, label = tfds.as_numpy(tfds.load(
@@ -259,7 +259,7 @@ tfds.as_dataframe(ds.take(4), info)
 
 ### tfds.show_examples
 
-[tfds.show_examples](../../api/tfds.visualization/show_examples.md) 返回 `matplotlib.figure.Figure`（目前只支持图像数据集）：
+[tfds.show_examples](show_examples.md) 返回 `matplotlib.figure.Figure`（目前只支持图像数据集）：
 
 ```python
 ds, info = tfds.load('mnist', split='train', with_info=True)

@@ -300,7 +300,7 @@ Open a group in the file, creating it if it doesn’t exist. TypeError is raised
 create_dataset(name, shape=None, dtype=None, data=None, **kwds)
 ```
 
-创建新的数据集。选择说明可以参考 [Dataset](dataset.md)。
+创建新的数据集。选择说明可以参考 [Dataset](FileFormat/HDF5/python/dataset.md)。
 
 参数：
 
