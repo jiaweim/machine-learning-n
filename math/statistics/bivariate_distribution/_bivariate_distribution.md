@@ -21,4 +21,3 @@
 - https://online.stat.psu.edu/stat414/
 - https://www.worldcampus.psu.edu/degrees-and-certificates/penn-state-online-applied-statistics-masters-degree
 - https://mathworld.wolfram.com/topics/ProbabilityandStatistics.html
-- 

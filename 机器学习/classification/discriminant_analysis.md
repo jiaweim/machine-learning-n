@@ -15,9 +15,8 @@
 
 不过在某些程序中依然可能遇到 LDA，，而且 LDA 可以作为其它技术的基础，如 PCA。
 
-```ad-attention
-Latent Dirichlet Allocation 的缩写也是 LDA，但是 Latent Dirichlet Allocation 用于文本和自然语言处理，与线性判别分析无关。
-```
+!!! attention
+    Latent Dirichlet Allocation 的缩写也是 LDA，但是 Latent Dirichlet Allocation 用于文本和自然语言处理，与线性判别分析无关。
 
 ## 协方差矩阵
 
