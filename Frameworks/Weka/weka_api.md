@@ -26,7 +26,7 @@ Weka API 常使用的组件包括：
 - `Instances`，数据
 - `Filter`，数据预处理
 - `Classifier/Clusterer`，在处理后的数据上构建模型
-- `Evaluating`，评价 classifier/clusterer 的性能
+- `Evaluating`，评估分类器/聚类器的性能
 - `Attribute selection`，从数据中移除无关属性
 
 下面解释如何使用这些内容。

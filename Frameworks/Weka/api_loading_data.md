@@ -3,6 +3,9 @@
 - [加载数据](#加载数据)
   - [简介](#简介)
   - [从文件加载数据](#从文件加载数据)
+    - [ARFF 文件](#arff-文件)
+    - [CSV 文件](#csv-文件)
+    - [设置分类属性](#设置分类属性)
   - [从数据库加载数据](#从数据库加载数据)
 
 2023-12-12, 10:00
@@ -15,7 +18,7 @@
 
 Weka 使用如下类存储数据：
 
-- `weka.core.Instances` - 表示整个数据集。该数据结构基于行
+- `weka.core.Instances` - 表示数据集。该数据结构基于行
   - 使用 `instance(int)` 访问单行（0-based）
   - 使用 `attribute(int)` 返回 `weka.core.Attribute`，包含列的信息
 - `weka.core.Instance` - 表示单行，即一个样本。它封装了一个 double 数组
@@ -25,9 +28,7 @@ Weka 使用如下类存储数据：
 
 ## 从文件加载数据
 
-从文件加载数据，可以由 WEKA 根据文件扩展名选择合适的加载器（`weka.core.converters` 包），也可以直接对应的加载器。
-
-`eka.core.converters.ConverterUtils` 的内部类 `DataSource` 可以根据文件扩展名自动读取数据。例如：
+`weka.core.converters.ConverterUtils` 的内部类 `DataSource` 可以根据文件扩展名识别文件类型，然后调用特定的加载器读取数据。例如：
 
 ```java
 import weka.core.converters.ConverterUtils.DataSource;
@@ -38,29 +39,72 @@ Instances data2 = DataSource.read("/some/where/dataset.csv");
 Instances data3 = DataSource.read("/some/where/dataset.xrff");
 ```
 
-如果通过文件扩展名无法识别文件类型，就需要直接调用对应的加载器：
+### ARFF 文件
 
 ```java
-import weka.core.converters.CSVLoader;
-import weka.core.Instances;
-import java.io.File;
-...
-CSVLoader loader = new CSVLoader();
-loader.setSource(new File("/some/where/some.data"));
-Instances data = loader.getDataSet();
+ArffLoader loader = new ArffLoader();
+loader.setFile(new File("C:\\Program Files\\Weka-3-9-6\\data\\iris.arff"));
+Instances dataSet = loader.getDataSet();
+System.out.println(new Instances(dataSet, 0));
 ```
 
-!!! note
-    不是所有文件格式都存储类别属性的信息，如 ARFF 不包含类别属性信息，而 XRFF 包含。如果需要类别属性信息，如使用分类器，可以使用 `setClassIndex(int)` 显式设置。
+```
+@relation iris
+
+@attribute sepallength numeric
+@attribute sepalwidth numeric
+@attribute petallength numeric
+@attribute petalwidth numeric
+@attribute class {Iris-setosa,Iris-versicolor,Iris-virginica}
+
+@data
+```
+
+说明：
+
+- `ArffLoader` 支持多种数据源，包括 `File`, `URL`, `InputStream` 等；
+- `new Instances(dataSet, 0)` 以 `dataSet` 为模板创建新的空数据集，用来打印标题信息，否则还会输出所有样本数据。
+
+### CSV 文件
 
 ```java
-// uses the first attribute as class attribute
+CSVLoader loader = new CSVLoader();
+loader.setSource(new File("D:\\iris.csv"));
+Instances dataSet = loader.getDataSet();
+System.out.println("\nHeader of dataset:\n");
+System.out.println(new Instances(dataSet, 0));
+```
+
+```
+Header of dataset:
+
+@relation iris
+
+@attribute sepallength numeric
+@attribute sepalwidth numeric
+@attribute petallength numeric
+@attribute petalwidth numeric
+@attribute class {Iris-setosa,Iris-versicolor,Iris-virginica}
+
+@data
+```
+
+说明：
+
+- iris.csv 文件是用 weka 安装包自带的 iris.arff 转换而来
+
+### 设置分类属性
+
+不是所有文件格式都存储类别属性信息，如 ARFF 不包含类别属性信息，而 XRFF 包含。如果需要类别属性信息，如使用分类器，可以使用 `setClassIndex(int)` 显式设置。
+
+```java
+// 将第一个属性设置为类别属性
 if (data.classIndex() == -1)
-data.setClassIndex(0);
+    data.setClassIndex(0);
 ...
-// uses the last attribute as class attribute
+// 将最后一个属性设置为类别属性
 if (data.classIndex() == -1)
-data.setClassIndex(data.numAttributes() - 1);
+    data.setClassIndex(data.numAttributes() - 1);
 ```
 
 ## 从数据库加载数据

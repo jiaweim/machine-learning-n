@@ -13,6 +13,11 @@ Weka 是 (Waikato Environment for Knowledge Analysis) 的缩写，是一个基�
   - [随机化数据](data_randomizing.md)
   - [过滤器](data_filter.md)
   - [分类](api_classification.md)
+  - [聚类](api_clustering.md)
+  - [选择属性](api_selecting_attributes.md)
+  - [保存数据](api_save_data.md)
+  - [可视化](api_visualization.md)
+  - [序列化](api_serialization.md)
 
 ## 参考
 
