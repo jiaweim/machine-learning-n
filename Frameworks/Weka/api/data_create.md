@@ -40,7 +40,7 @@ WEKA 支持 5 种类型的数据。
 
 ### numeric
 
-最简单的属性类型，只需要提供属性名称：
+数字是最简单的属性类型，只需提供属性名称定义：
 
 ```java
 Attribute numeric = new Attribute("name_of_attr");
@@ -77,6 +77,12 @@ Attribute string = new Attribute("name_of_attr", (ArrayList<String>)null);
 ```
 
 ### relational
+
+定义流程：
+
+- 定义 `ArrayList<Attribute>`
+- 定义 `Instances`
+- 定义 relational `Attribute`
 
 这类属性使用另一个 `weka.core.Instances` 对象定义关系。例如，下面生成一个包含 numeric 属性和 nominal 属性之间的关系属性：
 
@@ -144,7 +150,7 @@ DenseInstance(int numAttributes)
 
 以 weight 1.0 和 all missing values 创建 `DenseInstance`。
 
-这个构造函数使用可能更方便，但是设置属性值操作比较昂贵，特别是添加大量 row 的情况。因此建议使用第一个构造函数。
+这个构造函数使用可能更方便，但是设置属性值操作比较昂贵，特别是添加大量 row 的情况。因此**建议使用第一个构造函数**。
 
 ### 创建数据
 
@@ -211,12 +217,6 @@ data.add(inst);
 ## 示例
 
 ```java
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-
-import java.util.ArrayList;
-
 public class CreateInstances {
 
     /**

@@ -6,7 +6,7 @@
 
 ## 简介
 
-WEKA 包含机器学习算法和相关的数据预处理工具，由新西兰的怀卡托大学开发，全称为 Waikato Environment for Knowledge Analysis。WEKA 用 Java 编写，GNU 许可。近年来，WEKA还添加了对大数据，如 Hadoop 的支持。
+WEKA 包含机器学习算法和相关的数据预处理工具，由新西兰的怀卡托大学开发，全称为 Waikato Environment for Knowledge Analysis，即怀卡托智能分析环境。WEKA 用 Java 编写，GNU 许可。近年来，WEKA还添加了对大数据，如 Hadoop 的支持。
 
 WEKA 支持大量机器学习相关的算法：
 

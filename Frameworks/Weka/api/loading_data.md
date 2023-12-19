@@ -1,12 +1,16 @@
-# 加载数据
+# 数据读写
 
-- [加载数据](#加载数据)
+- [数据读写](#数据读写)
   - [简介](#简介)
   - [从文件加载数据](#从文件加载数据)
     - [ARFF 文件](#arff-文件)
     - [CSV 文件](#csv-文件)
     - [设置分类属性](#设置分类属性)
   - [从数据库加载数据](#从数据库加载数据)
+  - [保存到文件](#保存到文件)
+    - [保存为 ARFF](#保存为-arff)
+    - [保存为 CSV](#保存为-csv)
+  - [保存到数据库](#保存到数据库)
 
 2023-12-12, 10:00
 @author Jiawei Mao
@@ -31,9 +35,6 @@ Weka 使用如下类存储数据：
 `weka.core.converters.ConverterUtils` 的内部类 `DataSource` 可以根据文件扩展名识别文件类型，然后调用特定的加载器读取数据。例如：
 
 ```java
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.Instances;
-...
 Instances data1 = DataSource.read("/some/where/dataset.arff");
 Instances data2 = DataSource.read("/some/where/dataset.csv");
 Instances data3 = DataSource.read("/some/where/dataset.xrff");
@@ -163,3 +164,94 @@ while ((inst = loader.getNextInstance(structure)) != null)
     - 并非所有数据库支持增量检索
     - 并非所有查询都有唯一键来增量检索 row。此时，可以使用 `setKeys(String)` 提供必要的 columns
     - 如果不能增量检索，则可以将其完全加载到内存
+
+
+## 保存到文件
+
+使用 `DataSink` （`weka.core.converters.ConverterUtils` 内部类）根据扩展名自动保存到指定文件：
+
+```java
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSink;
+...
+// data structure to save
+Instances data = ...
+// save as ARFF
+DataSink.write("/some/where/data.arff", data);
+// save as CSV
+DataSink.write("/some/where/data.csv", data);
+```
+
+### 保存为 ARFF
+
+```java
+Instances dataset = ...;
+ArffSaver saver = new ArffSaver();
+saver.setInstances(dataset);
+saver.setFile(new File("out/path"));
+saver.writeBatch();
+```
+
+### 保存为 CSV
+
+**示例**：显式调用 `CSVSaver` 保存到 CSV 文件
+
+```java
+Instances data = ...
+CSVSaver saver = new CSVSaver();
+saver.setInstances(data);
+saver.setFile(new File("/some/where/data.csv"));
+saver.writeBatch();
+```
+
+## 保存到数据库
+
+除了 KnowledgeFlow，在 weka 中将数据保存到数据库的功能不明显。和 DatabaseLoader 一样，保存数据也分为 batch 模式和增量模式。
+
+**示例：** 批量模式，比较简单
+
+```java
+import weka.core.Instances;
+import weka.core.converters.DatabaseSaver;
+...
+// data structure to save
+Instances data = ...
+// store data in database
+DatabaseSaver saver = new DatabaseSaver();
+saver.setDestination("jdbc_url", "the_user", "the_password");
+// we explicitly specify the table name here:
+saver.setTableName("whatsoever2");
+saver.setRelationForTableName(false);
+// or we could just update the name of the dataset:
+// saver.setRelationForTableName(true);
+// data.setRelationName("whatsoever2");
+saver.setInstances(data);
+saver.writeBatch();
+```
+
+**示例：** 增量模式，稍微麻烦一点
+
+```java
+import weka.core.Instances;
+import weka.core.converters.DatabaseSaver;
+...
+// data structure to save
+Instances data = ...
+// store data in database
+DatabaseSaver saver = new DatabaseSaver();
+saver.setDestination("jdbc_url", "the_user", "the_password");
+// we explicitly specify the table name here:
+saver.setTableName("whatsoever2");
+saver.setRelationForTableName(false);
+// or we could just update the name of the dataset:
+// saver.setRelationForTableName(true);
+// data.setRelationName("whatsoever2");
+saver.setRetrieval(DatabaseSaver.INCREMENTAL);
+saver.setStructure(data);
+count = 0;
+for (int i = 0; i < data.numInstances(); i++) {
+    saver.writeIncremental(data.instance(i));
+}
+// notify saver that we’re finished
+saver.writeIncremental(null);
+```

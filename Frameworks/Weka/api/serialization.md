@@ -16,15 +16,10 @@
 
 ## 序列化分类器
 
-`weka.core.SerializationHelper` 的 write 用于序列化：
+`weka.core.SerializationHelper` 的 `write` 用于序列化：
 
 ```java
-import weka.classifiers.Classifier;
-import weka.classifiers.trees.J48;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.SerializationHelper;
-...
-// load data
+// 加载数据
 Instances inst = DataSource.read("/some/where/data.arff");
 inst.setClassIndex(inst.numAttributes() - 1);
 // train J48
@@ -37,9 +32,6 @@ SerializationHelper.write("/some/where/j48.model", cls);
 ## 反序列化分类器
 
 ```java
-import weka.classifiers.Classifier;
-import weka.core.SerializationHelper;
-...
 // deserialize model
 Classifier cls = (Classifier) SerializationHelper.read(
     "/some/where/j48.model");

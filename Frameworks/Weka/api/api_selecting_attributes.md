@@ -44,20 +44,15 @@ weka 提供了三种执行属性选择的方式：
 **示例：** 使用 J48 作为基本分类器，CfsSubsetEval 作为评估器，GreedyStepwise 作为搜索算法
 
 ```java
-import weka.attributeSelection.CfsSubsetEval;
-import weka.attributeSelection.GreedyStepwise;
-import weka.classifiers.Evaluation;
-import weka.classifiers.meta.AttributeSelectedClassifier;
-import weka.classifiers.trees.J48;
-import weka.core.Instances;
-...
 Instances data = ... // from somewhere
-// setup meta-classifier
-AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
+
 CfsSubsetEval eval = new CfsSubsetEval();
 GreedyStepwise search = new GreedyStepwise();
 search.setSearchBackwards(true);
 J48 base = new J48();
+
+// 配置元分类器
+AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
 classifier.setClassifier(base);
 classifier.setEvaluator(eval);
 classifier.setSearch(search);
@@ -69,25 +64,21 @@ System.out.println(evaluation.toSummaryString());
 
 ## 过滤器
 
-如果数据只需要降维，不用于训练分类器，那么使用过滤器最合适。
+如果数据只需要降维，不用于训练分类器，可以使用过滤器。
 
 `AttributeSelection` 过滤器以评估器和搜索算法为参数。
 
-**示例：** 以 CfsSubsetEval 为评估器，GreedyStepwise 为搜索算法，输出过滤后的简化数据
+**示例：** 以 `CfsSubsetEval` 为评估器，`GreedyStepwise` 为搜索算法，输出过滤后的简化数据
 
 ```java
-import weka.attributeSelection.CfsSubsetEval;
-import weka.attributeSelection.GreedyStepwise;
-import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.AttributeSelection;
-...
 Instances data = ... // from somewhere
-// setup filter
-AttributeSelection filter = new AttributeSelection();
+
 CfsSubsetEval eval = new CfsSubsetEval();
 GreedyStepwise search = new GreedyStepwise();
 search.setSearchBackwards(true);
+
+// 设置过滤器
+AttributeSelection filter = new AttributeSelection();
 filter.setEvaluator(eval);
 filter.setSearch(search);
 filter.setInputFormat(data);
@@ -100,14 +91,9 @@ System.out.println(newData);
 
 使用元分类器或过滤器选择属性很容易，但可能无法满足所有人的需求。例如，想获取属性排序（使用 Ranker）或检索所选属性的索引，而不是简化数据。
 
-**示例：** 使用 CfsSubsetEval 评估器和 GreedyStepwise 检索算法，在控制台输出选择的索引
+**示例：** 使用 `CfsSubsetEval` 评估器和 `GreedyStepwise` 检索算法，在控制台输出选择的索引
 
 ```java
-import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.CfsSubsetEval;
-import weka.attributeSelection.GreedyStepwise;
-import weka.core.Instances;
-...
 Instances data = ... // from somewhere
 // setup attribute selection
 AttributeSelection attsel = new AttributeSelection();

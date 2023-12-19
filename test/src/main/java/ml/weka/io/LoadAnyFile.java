@@ -4,7 +4,9 @@ package ml.weka.io;
 import org.junit.jupiter.api.Test;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
+import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
+import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.File;
@@ -39,5 +41,24 @@ public class LoadAnyFile {
         Instances dataSet = loader.getDataSet();
         System.out.println("\nHeader of dataset:\n");
         System.out.println(new Instances(dataSet, 0));
+    }
+
+    @Test
+    void writeAny() throws Exception {
+        Instances dataset = DataSource.read("D:\\iris.arff");
+        DataSink.write("D:\\iris2.arff", dataset);
+    }
+
+    @Test
+    void writeArff() throws IOException {
+        ArffLoader loader = new ArffLoader();
+        loader.setSource(new File(""))
+        ;
+
+        Instances dataset = null;
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(dataset);
+        saver.setFile(new File("out/path"));
+        saver.writeBatch();
     }
 }

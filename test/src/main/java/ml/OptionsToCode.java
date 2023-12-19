@@ -28,7 +28,7 @@ public class OptionsToCode {
         // instantiate scheme
         String classname = args[0];
         args[0] = "";
-        Object scheme = Class.forName(classname).newInstance();
+        Object scheme = Class.forName(classname).getDeclaredConstructor().newInstance();
         if (scheme instanceof OptionHandler)
             ((OptionHandler) scheme).setOptions(args);
 
@@ -39,8 +39,7 @@ public class OptionsToCode {
         buf.append("  public static void main(String[] args) throws Exception {\n");
         buf.append("    // create new instance of scheme\n");
         buf.append("    " + classname + " scheme = new " + classname + "();\n");
-        if (scheme instanceof OptionHandler) {
-            OptionHandler handler = (OptionHandler) scheme;
+        if (scheme instanceof OptionHandler handler) {
             buf.append("    \n");
             buf.append("    // set options\n");
             buf.append("    scheme.setOptions(weka.core.Utils.splitOptions(\"" + Utils.backQuoteChars(Utils.joinOptions(handler.getOptions())) + "\"));\n");

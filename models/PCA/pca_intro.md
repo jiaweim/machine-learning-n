@@ -287,7 +287,6 @@ scikit-learn 提供了 `PCA` 类进行主成分分析。下面首先使用训练
 ```python
 from matplotlib.colors import ListedColormap
 
-
 def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
     # setup marker generator and color map
     markers = ('o', 's', '^', 'v', '<')

@@ -34,9 +34,6 @@
 **示例：** 构建 EM 聚类器（最多迭代 100 次）
 
 ```java
-import weka.clusterers.EM;
-import weka.core.Instances;
-...
 Instances data = ... // from somewhere
 String[] options = new String[2];
 options[0] = "-I"; // max. iterations
@@ -54,19 +51,15 @@ clusterer.buildClusterer(data); // build the clusterer
 2. 更新：调用 `updateClusterer(Instance)` 逐个样本更新模型
 3. 完成：调用 `updateFinished()` 完成模型。
 
-**示例：** 使用 `ArffLoader` 迭代数据，增量构建 Cobweb 聚类器
+**示例：** 使用 `ArffLoader` 迭代数据，增量构建 `Cobweb` 聚类器
 
 ```java
-import weka.clusterers.Cobweb;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.ArffLoader;
-...
 // 加载数据
 ArffLoader loader = new ArffLoader();
 loader.setFile(new File("/some/where/data.arff"));
 Instances structure = loader.getStructure();
-// train Cobweb
+
+// 训练 Cobweb
 Cobweb cw = new Cobweb();
 cw.buildClusterer(structure);
 Instance current;
@@ -79,14 +72,36 @@ cw.updateFinished();
 
 聚类的评估不如分类那么全面。由于聚类是无监督的，所以很难确定一个模型有多好。
 
-由 `ClusterEvaluation` 类评估聚类。
+使用 `ClusterEvaluation` 评估聚类模型。
 
-**示例：** 为了生成和 Explorer 或命令行一样的输出，可以按如下方式使用 `evaluateClusterer` 方法：
+**示例：** 查看 cluster 数目
 
 ```java
-import weka.clusterers.EM;
-import weka.clusterers.ClusterEvaluation;
-...
+Clusterer clusterer = new EM();     // new clusterer instance, default options
+clusterer.buildClusterer(data);     // build clusterer
+
+ClusterEvaluation eval = new ClusterEvaluation();
+eval.setClusterer(clusterer);       // the cluster to evaluate
+eval.evaluateClusterer(newData);     // data to evaluate the clusterer on
+System.out.println("# of clusters: " + eval.getNumClusters());  // output # of clusters
+```
+
+**示例：** 基于密度的聚类器的交叉验证，获得对数似然
+
+基于密度的聚类器，即实现 `DensityBasedClusterer` 接口的算法，可以交叉验证，获得 log-likelyhood。`MakeDensityBasedClusterer` 可以将不是基于密度的聚类器转换为这类聚类器。
+
+```java
+Instances data = ... // from somewhere
+DensityBasedClusterer clusterer = new ... // the clusterer to evaluate
+double logLikelyhood = ClusterEvaluation.crossValidateModel( // cross-validate
+            clusterer, data, 
+            10, // with 10 folds
+            new Random(1));
+```
+
+**示例：** 生成和 Explorer 或命令行一样的输出。
+
+```java
 String[] options = new String[2];
 options[0] = "-t";
 options[1] = "/some/where/somefile.arff";
@@ -96,10 +111,6 @@ System.out.println(ClusterEvaluation.evaluateClusterer(new EM(), options));
 **示例：** 如果数据集已载入内存，可以使用如下方式
 
 ```java
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.EM;
-import weka.core.Instances;
-...
 Instances data = ... // from somewhere
 EM cl = new EM();
 cl.buildClusterer(data);
@@ -109,28 +120,9 @@ eval.evaluateClusterer(new Instances(data));
 System.out.println(eval.clusterResultsToString());
 ```
 
-基于密度的聚类器，即实现 `DensityBasedClusterer` 接口的算法，可以交叉验证，获得 log-likelyhood。使用 `MakeDensityBasedClusterer` 可以将不是基于密度的聚类器转换为这类聚类器。
-
-**示例：** 基于密度的聚类器的交叉验证，获得对数似然
-
-```java
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.DensityBasedClusterer;
-import weka.core.Instances;
-import java.util.Random;
-...
-Instances data = ... // from somewhere
-DensityBasedClusterer clusterer = new ... // the clusterer to evaluate
-double logLikelyhood =
-ClusterEvaluation.crossValidateModel( // cross-validate
-    clusterer, data, 10, // with 10 folds
-    new Random(1)); // and random number generator
-    // with seed 1
-```
-
 ### classes to clusters
 
-监督学习算法的数据集，也可以用来评估聚类算法。这种评估方式称为 classes-to-clusters，因为 clusterr 被映射回 classes。
+如果数据集包含 class 属性，那么可以分析生成的 clusters 与 classes 的匹配情况。这种评估方式称为 classes-to-clusters。
 
 这种方式的评估流程如下：
 

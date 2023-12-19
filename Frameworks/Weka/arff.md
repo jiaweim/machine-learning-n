@@ -64,13 +64,13 @@ ARFF文件可以分为两部分：
 
 ### @relation
 
-`@relation` 是 ARFF 文件第一个有效行：
+`@relation` 是 ARFF 文件第一个有效行，用于声明数据集名称：
 
 ```arff
 @relation <relation-name>
 ```
 
-关系声明，或数据集名称，是 ARFF 文件的第一个有效行。如果包含空格，需要加引号。
+如果名称包含空格，需要加引号。
 
 relation-names 或 attribute-names不能以如下字符开头：
 
