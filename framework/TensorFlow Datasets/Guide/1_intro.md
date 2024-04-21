@@ -232,7 +232,7 @@ Examples/sec (First only) 2565.71 ex/sec (total: 32 ex, 0.01 sec)
 Examples/sec (First excluded) 323686.12 ex/sec (total: 59968 ex, 0.19 sec)
 ```
 
-![](images/2022-01-18-16-17-55.png)
+![](2022-01-18-16-17-55.png)
 
 要点：
 
@@ -255,7 +255,7 @@ ds, info = tfds.load('mnist', split='train', with_info=True)
 tfds.as_dataframe(ds.take(4), info)
 ```
 
-![](images/2022-01-18-16-49-42.png)
+![](2022-01-18-16-49-42.png)
 
 ### tfds.show_examples
 
@@ -267,7 +267,7 @@ ds, info = tfds.load('mnist', split='train', with_info=True)
 fig = tfds.show_examples(ds, info)
 ```
 
-![](images/2022-01-18-16-54-25.png)
+![](2022-01-18-16-54-25.png)
 
 ## 访问数据集元数据
 

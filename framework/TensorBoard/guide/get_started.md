@@ -82,7 +82,7 @@ model.fit(x=x_train,
 %tensorboard --logdir logs/fit
 ```
 
-![](images/2022-06-16-13-30-14.png)
+![](2022-06-16-13-30-14.png)
 
 TensorBoard 主要包括：
 

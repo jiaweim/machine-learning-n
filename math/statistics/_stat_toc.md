@@ -1,5 +1,11 @@
 # 统计学
 
+## 概率论
+
+- [[properties_probability|概率的属性]]
+- [[conditional_probability|条件概率]]
+- 
+
 ## 描述统计学
 
 - [期望值](expectation.md)

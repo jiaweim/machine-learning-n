@@ -41,7 +41,7 @@ axes[1].imshow(np.squeeze(lossy_image.numpy()), cmap='gray')
 axes[1].set_title('lossy image');
 ```
 
-![](images/2023-02-01-09-52-55.png)
+![](2023-02-01-09-52-55.png)
 
 ## 参考
 
