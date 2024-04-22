@@ -7,16 +7,18 @@
     - [协方差快捷公式](#协方差快捷公式)
   - [3. X 和 Y 的相关系数](#3-x-和-y-的相关系数)
     - [相关系数的定义](#相关系数的定义)
+    - [样本相关系数](#样本相关系数)
     - [相关系数的解释](#相关系数的解释)
-  - [4. 理解 Rho](#4-理解-rho)
+    - [计算样本相关系数](#计算样本相关系数)
+  - [4. 理解 ρ](#4-理解-ρ)
     - [独立随机变量的相关系数为 0](#独立随机变量的相关系数为-0)
     - [相关系数为 0 不能说明相互独立](#相关系数为-0-不能说明相互独立)
     - [相互系数不为 0 说明相关](#相互系数不为-0-说明相关)
-  - [5. Rho 进阶](#5-rho-进阶)
+  - [5. ρ 进阶](#5-ρ-进阶)
     - [问题 1](#问题-1)
     - [问题 2,3,4](#问题-234)
 
-2023-05-26
+2023-05-26🧡
 @author Jiawei Mao
 ****
 ## 1. 简介
@@ -44,16 +46,31 @@
 ### 协方差的定义
 
 假设 $X$ 和 $Y$ 是两个随机变量（离散或连续都行），均值分别为 $\mu_X$ 和 $\mu_Y$。$X$ 和 $Y$ 的协方差记为 $Cov(X,Y)$ 或 $\sigma_{XY}$，定义为：
-$$Cov(X,Y)=\sigma_{XY}=E[(X-\mu_X)(Y-\mu_Y)]$$
+
+$$
+Cov(X,Y)=\sigma_{XY}=E[(X-\mu_X)(Y-\mu_Y)]
+$$
+
 因此，如果 $X$ 和 $Y$ 是离散随机变量，联合支集为 $S$，则 $X$ 和 $Y$ 的协方差为：
-$$Cov(X,Y)=\sum\sum_{(x,y)\in S}(x-\mu_X)(y-\mu_Y)f(x,y)$$
+
+$$
+Cov(X,Y)=\sum\sum_{(x,y)\in S}(x-\mu_X)(y-\mu_Y)f(x,y)
+$$
+
 如果 $X$ 和 $Y$ 是连续随机变量，支集分别为 $S_1$ 和 $S_2$，则 $X$ 和 $Y$ 的协方差为：
-$$Cov(X,Y)=\int_{S_2}\int_{S_1}(x-\mu_X)(y-\mu_Y)f(x,y)dxdy$$
+
+$$
+Cov(X,Y)=\int_{S_2}\int_{S_1}(x-\mu_X)(y-\mu_Y)f(x,y)dxdy
+$$
+
 **例如：** 假设 $X$ 和 $Y$ 具有如下的联合 PMF
+
 $$
 \begin{array}{cc|ccc|c} & f(x, y) & 1 & 2 & 3 & f_{X}(x) \\ \hline x & 1 & 0.25 & 0.25 & 0 & 0.5 \\ & 2 & 0 & 0.25 & 0.25 & 0.5 \\ \hline & f_{Y}(y) & 0.25 & 0.5 & 0.25 & 1 \end{array}
 $$
+
 那么 $X$ 和 $Y$ 的协方差是多少？
+
 $$
 \begin{aligned}
 Cov(X,Y)=\sigma_{XY}&=\sum_{x,y\in S}(x-\mu_X)(y-\mu_Y)f(x,y)\\
@@ -75,19 +92,26 @@ $$
 
 **定理：** 对任意两个随机变量 $X$ 和 $Y$（离散或连续），均值分别为 $\mu_X$ 和 $\mu_Y$，则 $X$ 和 $Y$ 的协方差为：
 
-$$Cov(X,Y)=E(XY)-\mu_X\mu_Y$$
+$$
+Cov(X,Y)=E(XY)-\mu_X\mu_Y
+$$
+
 **证明：** 为了证明该定理，我们需要用到一个事实，即在二元情况下，期望仍然是一个线性算子
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 Cov(X,Y)&=E[(X-\mu_X)(Y-\mu_Y)]\\
 &=E[XY-\mu_YX-\mu_XY+\mu_X\mu_Y]\\
 &=E(XY)-\mu_YE(X)-\mu_XE(Y)+E(\mu_X\mu_Y)\\
 &=E(XY)-\mu_X\mu_Y-\mu_X\mu_Y+\mu_X\mu_Y\\
 &=E(XY)-\mu_X\mu_Y
-\end{aligned}$$
+\end{aligned}
+$$
+
 假设 $X$ 和 $Y$ 的联合 PMF 如下：
 
 $$\begin{array}{cc|ccc|c} & f(x, y) & 1 & 2 & 3 & f_{X}(x) \\ \hline x & 1 & 0.25 & 0.25 & 0 & 0.5 \\ & 2 & 0 & 0.25 & 0.25 & 0.5 \\ \hline & f_{Y}(y) & 0.25 & 0.5 & 0.25 & 1 \end{array}$$
+
 使用刚刚证明的定理计算 $X$ 和 $Y$ 的协方差：
 
 $$
@@ -109,8 +133,13 @@ $X$ 和 $Y$ 的协方差带有两个随机变量的单位，而显然无量纲�
 ### 相关系数的定义
 
 设 $X$ 和 $Y$ 为两个随机变量（离散或连续），标准差分别为 $\sigma_X$ 和 $\sigma_Y$。$X$ 和 $Y$ 的相关系数，一般记为 $Corr(X,Y)$ 或 $\rho_{XY}$（希腊字母 "rho"），定义为：
-$$\rho_{XY}=Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{\sigma_{XY}}{\sigma_X\sigma_Y}$$
+
+$$
+\rho_{XY}=Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{\sigma_{XY}}{\sigma_X\sigma_Y}
+$$
+
 例如，设 $X$ 和 $Y$ 的联合 PMF 如下：
+
 $$
 \begin{array}{cc|ccc|c}&f(x,y)& 1 & 2 & 3 & f_X(x) \\ \hline
 x & 1 & 0.25 & 0.25 & 0 & 0.5 \\ \hline
@@ -118,12 +147,31 @@ x & 1 & 0.25 & 0.25 & 0 & 0.5 \\ \hline
 & f_Y(y) & 0.25 & 0.5 & 0.25 & 1
 \end{array}
 $$
+
 计算得 $\mu_X=\frac{3}{2}$, $\mu_Y=2$, $\sigma_X=\frac{1}{2}$, $\sigma_Y=\sqrt{\frac{1}{2}}$。
 
 上一节已经得到 $X$ 和 $Y$ 的协方差为 $\frac{1}{4}$。因此，$X$ 和 $Y$ 的相关系数为：
 
-$$\rho_{XY}=\frac{\frac{1}{4}}{(\frac{1}{2})(\sqrt{\frac{1}{2}})}=0.71$$
+$$
+\rho_{XY}=\frac{\frac{1}{4}}{(\frac{1}{2})(\sqrt{\frac{1}{2}})}=0.71
+$$
+
+使用相关系数的前提：
+
+1. 样本数据 X 和 Y 是随机的；
+2. X 和 Y 满足二元正态分布。
+
 现在的问题是，这个相关系数有什么意义？
+
+### 样本相关系数
+
+$$
+r=\frac{n\sum xy-(\sum x)(\sum y)}{\sqrt{n\sum x^2-(\sum x)^2}\sqrt{n\sum y^2-(\sum y)^2}}
+$$
+
+其中：
+
+- n 为样本数；
 
 ### 相关系数的解释
 
@@ -137,7 +185,21 @@ $$\rho_{XY}=\frac{\frac{1}{4}}{(\frac{1}{2})(\sqrt{\frac{1}{2}})}=0.71$$
 
 由此我们可以判断，上例中 $X$ 和 $Y$ 是正线性相关（$\rho_{XY}=0.71$），但不是完美相关。
 
-## 4. 理解 Rho
+### 计算样本相关系数
+
+1. 计算 x 的加和 $\sum x$
+2. 计算 y 的加和 $\sum y$
+3. 计算 xy 乘积的加和 $\sum xy$
+4. 计算 $x^2$ 的加和 $\sum x^2$
+5. 计算 $y^2$ 的加和 $\sum y^2$
+6. 使用这些值计算相关系数
+
+$$
+r=\frac{n\sum xy-(\sum x)(\sum y)}{\sqrt{n\sum x^2-(\sum x)^2}\sqrt{n\sum y^2-(\sum y)^2}}
+$$
+
+
+## 4. 理解 ρ
 
 ### 独立随机变量的相关系数为 0
 
@@ -145,7 +207,10 @@ $$\rho_{XY}=\frac{\frac{1}{4}}{(\frac{1}{2})(\sqrt{\frac{1}{2}})}=0.71$$
 
 **定理：** 如果 $X$ 和 $Y$ 是相互独立的随机变量（离散或连续），则：
 
-$$Corr(X,Y)=Cov(X,Y)=0$$
+$$
+Corr(X,Y)=Cov(X,Y)=0
+$$
+
 **证明：** 为了便于证明，这里假设 $X$ 和 $Y$ 是离散的（对 $X$ 和 $Y$ 连续的情况，稍微修改一下证明过程即可）。我们从 $XY$ 的期望开始，看看当 $X$ 和 $Y$ 相互独立时 $XY$ 的期望值：
 
 $$
@@ -166,41 +231,71 @@ Cov(X,Y)&=E(XY)-\mu_X\mu_Y\\
 &=\mu_X\mu_Y-\mu_X\mu_Y=0
 \end{aligned}
 $$
+
 因此：
 
-$$Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{0}{\sigma_X\sigma_Y}=0$$
+$$
+Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{0}{\sigma_X\sigma_Y}=0
+$$
 
 **示例：** 设 $X$ 是投掷一枚均匀黑色六面骰子的结果。因为骰子是均匀的，所以六种结果出现的概率相同，即 $X$ 的 PMF 为：
 
-$$f_X(x)=\frac{1}{6}, \qquad x=1,...,6.$$
+$$
+f_X(x)=\frac{1}{6}, \qquad x=1,...,6.
+$$
+
 设 $Y$ 是投掷一枚均匀红色四面骰子的结果。同样，因为骰子是均匀的，所以四种结果出现的概率相同，即 $Y$ 的 PMF 为：
 
-$$f_Y(y)=\frac{1}{4},\qquad y=1,...,4.$$
+$$
+f_Y(y)=\frac{1}{4},\qquad y=1,...,4.
+$$
+
 投掷这一对骰子，有 24 种可能的结果 $(1,1)(1,2)...(1,4)(6,1)...(6,4)$，每种结果出现的概率相同。即 $X$ 和 $Y$ 的联合 PMF 为：
 
-$$f(x,y)=\frac{1}{24},\qquad x=1,2,...,6;y=1,...,4.$$
+$$
+f(x,y)=\frac{1}{24},\qquad x=1,2,...,6;y=1,...,4.
+$$
+
 凭直觉我们就知道黑骰子和红骰子的结果是独立的，现在正式证明 $X$ 和 $Y$ 是独立的：
-$$f(x,y)=\frac{1}{24}=f_X(x)f_Y(y)=\frac{1}{6} \cdot \frac{1}{4} \qquad \forall x,y$$
+
+$$
+f(x,y)=\frac{1}{24}=f_X(x)f_Y(y)=\frac{1}{6} \cdot \frac{1}{4} \qquad \forall x,y
+$$
+
 **证明：** $X$ 的均值为：
 
-$$\mu_X=E(X)=\sum_xxf(x)=1(\frac{1}{6})+\cdots+6(\frac{1}{6})=\frac{21}{6}=3.5$$
+$$
+\mu_X=E(X)=\sum_xxf(x)=1(\frac{1}{6})+\cdots+6(\frac{1}{6})=\frac{21}{6}=3.5
+$$
+
 $Y$ 均值为：
 
-$$\mu_Y=E(Y)=\sum_yyf(y)=1(\frac{1}{4})+\cdots+4(\frac{1}{4})=\frac{10}{4}=2.5$$
+$$
+\mu_Y=E(Y)=\sum_yyf(y)=1(\frac{1}{4})+\cdots+4(\frac{1}{4})=\frac{10}{4}=2.5
+$$
+
 $XY$ 的期望值为：
 
-$$E(XY)=\sum_x\sum_yxyf(x,y)=(1)(1)(\frac{1}{24})+(1)(2)(\frac{1}{24})+\cdots+(6)(4)(\frac{1}{24})=\frac{210}{24}=8.75$$
+$$
+E(XY)=\sum_x\sum_yxyf(x,y)=(1)(1)(\frac{1}{24})+(1)(2)(\frac{1}{24})+\cdots+(6)(4)(\frac{1}{24})=\frac{210}{24}=8.75
+$$
+
 因此，$X$ 和 $Y$ 的协方差为：
 
-$$Cov(X,Y)=E(XY)-\mu_X\mu_Y=8.75-(3.5)(2.5)=0$$
+$$
+Cov(X,Y)=E(XY)-\mu_X\mu_Y=8.75-(3.5)(2.5)=0
+$$
+
 因此，$X$ 和 $Y$ 的相关系数也是 0：
 
-$$Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{0}{\sigma_X\sigma_Y}=0$$
+$$
+Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{0}{\sigma_X\sigma_Y}=0
+$$
+
 该例子说明，当 $X$ 和 $Y$ 相互独立，$X$ 和 $Y$ 的相关性为 0，与定理一致。
 
-```ad-warning
-这个定理的逆命题不一定正确，即协方差和相关系数为 0，也不能说明独立。下面用个例子来说明。
-```
+!!! warning
+  这个定理的逆命题不一定正确，即协方差和相关系数为 0，也不能说明独立。下面用个例子来说明。
 
 ### 相关系数为 0 不能说明相互独立
 
@@ -235,6 +330,7 @@ E(XY)&=(-1)(-1)\left(\dfrac{1}{5}\right)+(-1)(1)\left(\dfrac{1}{5}\right)+(0)(0)
 &=\frac{1}{5}-\frac{1}{5}+0-\frac{1}{5}+\frac{1}{5}=0
 \end{aligned}
 $$
+
 因此，$X$ 和 $Y$ 的协方差为 0：
 
 $$Cov(X,Y)=E(XY)-\mu_X\mu_Y=0$$
@@ -303,7 +399,7 @@ $X$ 和 $Y$ 的相关系数为 -0.61：
 $$Corr(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{-0.24}{(0.69)(0.57)}=-0.61$$
 总之，这是一个 $X$ 和 $Y$ 相关系数不为 0，且 $X$ 和 $Y$ 相关的例子。
 
-## 5. Rho 进阶
+## 5. ρ 进阶
 
 相关系数的定义为：
 $$Corr(X,Y)=\rho=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{\sum_x\sum_y(x-\mu_X)(y-\mu_Y)f(x,y)}{\sigma_X\sigma_Y}$$
@@ -325,26 +421,33 @@ $$(x-\mu_X)(y-\mu_Y)$$
 
 假设我们研究大气压强 $X$ 和水的沸点 $Y$ 之间的关系。可能获得类似下面的图形：
 
-![[Pasted image 20230525193639.png|350]]
+<img src="images/Pasted image 20230525193639.png" style="zoom:67%;" />
 
 即随着大气压增加，水的沸点也随之增加。我们来看图中下面的乘积：
-$$(x-\mu_X)(y-\mu_Y)$$
+
+$$
+(x-\mu_X)(y-\mu_Y)
+$$
 
 如下所示：
 
-![[Pasted image 20230525193841.png|350]]
+<img src="images/Pasted image 20230525193841.png" style="zoom:67%;" />
 
 在右上象限，$(x,y)$ 数据点与直线 $x=\mu_X$ 的差值为正，与直线 $y=\mu_Y$ 的差值也为正。因此，右上象限数据点的 $(x-\mu_X)(y-\mu_Y)$ 乘积为正数。同理，左下象限的两个差值为负，乘积为正。因此，上图中每个数据点产生的乘积都是正数，将这些正数加起来，自然得到一个正相关系数。一般来说，当 $X$ 和 $Y$ 之间为正线性关系，计算得到的相关系数为正数。
 
 我们再来看一个 $X$ 和 $Y$ 负相关的例子。假设 IQ $X$ 和犯罪指数 $Y$ 具有如下所示的关系图：
 
-![[Pasted image 20230525195723.png|350]]
+<img src="images/Pasted image 20230525195723.png" style="zoom:67%;" />
+
 该图显示随着 IQ 增加，犯罪指数下降。即存在负相关性。再来看乘积：
-$$(x-\mu_X)(y-\mu_Y)$$
+
+$$
+(x-\mu_X)(y-\mu_Y)
+$$
 
 如下图所示：
 
-![[Pasted image 20230525200245.png|350]]
+<img src="images/Pasted image 20230525200245.png" style="zoom:67%;" />
 
 左上象限，$(x,y)$ 与直线 $x=\mu_X$ 的差值为负，与直线 $y=\mu_Y$ 的差值为正，因此乘积为负。右下象限，$(x,y)$ 与直线 $x=\mu_X$ 的差值为正，与直线 $y=\mu_Y$ 的差值为负，因此乘积为负。左下和右上还有少数点，乘积为正。由于大多数据点产生的乘积为负，乘积的和依然为负数。一般来说，当 $X$ 和 $Y$ 之间存在负线性相关，相关系数为负数。
 
@@ -352,32 +455,42 @@ $$(x-\mu_X)(y-\mu_Y)$$
 
 假设随机变量 $X$ 和 $Y$ 为三项分布，其中 $n=2$, $p_1=\frac{1}{4}$, $p_2=\frac{1}{2}$, $0\le x+y\le 2$。对三项随机变量，通常用公式来表示联合 PMF，但这里我们用图来表示联合 PMF：
 
-![[Pasted image 20230525201121.png|350]]
+<img src="images/Pasted image 20230525201121.png" style="zoom:67%;" />
 
 图中每个黑点表示联合支集 $S$ 中的一个元素。正如所预期的，三项分布的支集为三角。$X=x$, $Y=y$ 的概率用蓝色显示，例如，$X=0, Y=1$ 处的概率为 $\frac{4}{16}$，如果有兴趣，你可以用三项 PMF 公式验证这些概率值。通过支集数据点 $(x,y)$ 的最佳拟合直线可以了解相关性，具体来说，考虑通过 $(\mu_X, \mu_Y)$ 的最佳拟合直线。目前我们还不知道最佳拟合线，先大致画一条，如下所示：
 
-![[Pasted image 20230525202934.png|350]]
+<img src="images/Pasted image 20230525202934.png" style="zoom:67%;" />
 
 $X$ 的均值为 $\frac{1}{2}$，$Y$ 的均值为 1（因为 $X$ 是 $n=2, p_1=\frac{1}{4}$ 的二项分布，$Y$ 是 $n=2, p_2=\frac{1}{2}$ 的二项分布）。现在，要找到通过点 $(\mu_X,\mu_Y)$  的最佳拟合直线。两点确定一条直线，因此除了 $(\mu_X,\mu_Y)$ ，再任意取一点：
 
-![[Pasted image 20230525203448.png|350]]
+<img src="images/Pasted image 20230525203448.png" style="zoom:67%;" />
 
 计算斜率：
-$$slope=\frac{rise}{run}=\frac{y-\mu_Y}{x-\mu_X}=b$$
+
+$$
+slope=\frac{rise}{run}=\frac{y-\mu_Y}{x-\mu_X}=b
+$$
+
 因此，直线的形式为：
 
 $$y=\mu_Y+b(x-\mu_X)$$
 
 使用最小二乘找最佳拟合线。即找到斜率 $b$，使得联合支集 $S$ 中的每个点 $(x_0,y_0)$ 到直线的垂直距离最短，对应直线上的点为：
 
-$$(x_0, \mu_Y+b(x_0-\mu_X))$$
+$$
+(x_0, \mu_Y+b(x_0-\mu_X))
+$$
+
 示意图如绿色部分所示：
 
-![[Pasted image 20230525204752.png|350]]
+<img src="images/Pasted image 20230525204752.png" style="zoom:67%;" />
 
 也就是说，需要找到 $b$ 来最小化下面的值：
 
-$$K(b)=E\{[(Y-\mu_Y)-b(X-\mu_X)]^2\}$$
+$$
+K(b)=E\{[(Y-\mu_Y)-b(X-\mu_X)]^2\}
+$$
+
 得到的直线称为最小二乘回归线。
 
 **解：** 先简化上式
@@ -390,21 +503,36 @@ K(b)&=E\{[(Y-\mu_Y)-b(X-\mu_X)]^2\} \\
 &=\sigma_Y^2-2b\rho\sigma_X\sigma_Y+b^2\sigma_X^2
 \end{aligned}
 $$
+
 为了求斜率 $b$ 使得 $K(b)$ 最小，需要将 $K(b)$ 对 $b$ 求导，并令其导数为 0。得到：
 
-$$K'(b)=-2\rho \sigma_X\sigma_Y+2b\sigma^2_X\equiv 0$$
+$$
+K'(b)=-2\rho \sigma_X\sigma_Y+2b\sigma^2_X\equiv 0
+$$
+
 即：
 
-$$b\sigma^2_X=\rho\sigma_X\sigma_Y$$
+$$
+b\sigma^2_X=\rho\sigma_X\sigma_Y
+$$
+
 因此：
 
-$$b=\rho\frac{\sigma_Y}{\sigma_X}$$
+$$
+b=\rho\frac{\sigma_Y}{\sigma_X}
+$$
+
 注意到，此时的 $b$ 确实使 $K(b)$ 最小，因为 $K(b)$ 的二阶导数为正。即：
 
-$$K''(b)=2\sigma^2_X>0$$
+$$
+K''(b)=2\sigma^2_X>0
+$$
+
 将获得的斜率 $b$ 带入直线方程 $y=\mu_Y+b(x-\mu_X)$，获得最小二乘回归线：
 
-$$y=\mu_Y+\rho(\frac{\sigma_Y}{\sigma_X})(x-\mu_X)$$
+$$
+y=\mu_Y+\rho(\frac{\sigma_Y}{\sigma_X})(x-\mu_X)
+$$
 
 顺便说一下，因为 $X$ 和 $Y$ 的标准差为正数，如果相关系数 $\rho_{XY}$ 为正，则最小二乘线的斜率也是正的；如果相关系数为负，则最小二乘线为负。
 
@@ -419,24 +547,39 @@ K(\rho\frac{\sigma_Y}{\sigma_X})&=\sigma^2_Y-2(\rho\frac{\sigma_Y}{\sigma_X})\rh
 &=\sigma^2_Y(1-\rho^2)
 \end{aligned}
 $$
+
 即：
 
-$$K(\rho\frac{\sigma_Y}{\sigma_X})=\sigma^2_Y(1-\rho^2)$$
+$$
+K(\rho\frac{\sigma_Y}{\sigma_X})=\sigma^2_Y(1-\rho^2)
+$$
 
 到这里，我们开始回答后面的三个问题。
 
 为什么 $-1\le \rho_{XY}\le 1$？$K(b)$ 是平方项的期望值，因此 $K(b)$ 非负，即：
 
-$$K(b)=\sigma^2_Y(1-\rho^2)\ge 0$$
+$$
+K(b)=\sigma^2_Y(1-\rho^2)\ge 0
+$$
+
 然后，方差 $\sigma^2_Y$ 也是非负，所以：
 
-$$(1-\rho^2)\ge 0$$
+$$
+(1-\rho^2)\ge 0
+$$
 
 由此得到：
 
-$$\rho^2\le 1$$
+$$
+\rho^2\le 1
+$$
+
 所以：
-$$-1\le \rho \le 1$$
+
+$$
+-1\le \rho \le 1
+$$
+
 回答了第三个问题。再来看第二个和第四个问题。
 
 为什么 $\rho_{XY}$ 衡量的是线性相关？为什么 $\rho_{XY}$ 接近 -1 或 +1 表示强线性关系？定义的 $K(b)$ 衡量联合支集 $S$ 中的点 $(x_0, y_0)$ 到一条线的距离，因此，$\rho_{XY}$ 必然是与线性有关，而不是其它关系。而 $K(b)$ 越小，点到直线的距离越近：
