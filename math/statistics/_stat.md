@@ -4,7 +4,6 @@
 
 - [[properties_probability|概率的属性]]
 - [[conditional_probability|条件概率]]
-- 
 
 ## 描述统计学
 
@@ -18,18 +17,17 @@
 - [卡方检验](chi_square.md)
 - [内核密度估计](kernel_density_estimation.md)
 
-## 离散部分
 
 - [[poisson|泊松分布]]
-
-## 连续分布
-
 - [[multivariate-normal-distribution | 多元正态分布]]
 
 ## [**概率论导论**](https://online.stat.psu.edu/stat414/)
 
 - [联合分布](_bivariate_distribution.md)
 
+## 相关性和回归
+
+- [相关系数](./bivariate_distribution/2_correlation_coefficient.md)
 
 ## Reference
 
