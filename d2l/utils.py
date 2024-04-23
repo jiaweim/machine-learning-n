@@ -1510,6 +1510,7 @@ def train_concise_ch11(trainer_fn, hyperparams, data_iter, num_epochs=4):
 
 class Benchmark:
     """计算运行时间"""
+
     def __init__(self, description='Done'):
         self.description = description
 
@@ -2778,7 +2779,7 @@ concat = torch.cat
 stack = torch.stack
 abs = torch.abs
 eye = torch.eye
-numpy = lambda x, *args, **kwargs: x.detach().numpy(*args, **kwargs) # 将张量转换为 numpy 数组
+numpy = lambda x, *args, **kwargs: x.detach().numpy(*args, **kwargs)  # 将张量转换为 numpy 数组
 size = lambda x, *args, **kwargs: x.numel(*args, **kwargs)
 reshape = lambda x, *args, **kwargs: x.reshape(*args, **kwargs)
 to = lambda x, *args, **kwargs: x.to(*args, **kwargs)
