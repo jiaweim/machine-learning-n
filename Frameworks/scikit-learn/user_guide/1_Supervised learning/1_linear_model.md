@@ -30,10 +30,11 @@ array([0.5, 0.5])
 ```
 
 普通最小二乘（Ordinary Least Squares）的系数估计依赖于 features 的独立性。当 feature 之间相关且设计矩阵（design matrix） $X$ 的 column 之间具有近似线性关系，此时设计矩阵近似为奇异（singular）矩阵，从而导致最小二乘对 target 的随机错误十分敏感，产生较大的方差。在没有仔细设计实验的情况下收集数据，可能会出现这种多重共线性（*multicollinearity*）的情况。
+## 11. 逻辑回归
 
-## 逻辑回归
+逻辑回归实现为 [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)。虽然叫逻辑回归，但是它是线性分类模型。logistic-regression 在文献中也称为 logit-regression，maximum-entropy classification 或 log-linear classifier。在该模型中，使用逻辑函数建模单个试验的概率。
 
-逻辑回归实现为 [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)。虽然叫逻辑回归，但是它是一个线性模型，
+
 
 ## 参考
 

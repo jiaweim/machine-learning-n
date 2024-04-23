@@ -28,15 +28,18 @@
 
 二项分布是最有名的离散概率模型，其次是 Poisson 分布，它可以看作二项分布的一种极限情形。
 
-假设某公司的总机在一个短时间 $\Delta t$内接到一次电话的概率与 $\triangle t$ 成正比：
+假设某公司的总机在一个短时间 $\Delta t$ 内接到一次电话的概率与 $\triangle t$ 成正比：
 
-$$p=\alpha \Delta t$$
+$$
+p=\alpha \Delta t
+$$
 
 $\alpha$ 是一个常数。又假定在此短时间内接到多于一个电话的概率极小，可以忽略不计。那么在时间 t 内，接到 x 次电话的概率分布如何？
 
 我们可以把 t 分成 n 个小段，每小段长度为 $\Delta t=t/n$。上述问题就变为：在每个 $\Delta t$事件内，我们做一次试验，其成功的概率为 p。如此做了 n 次，那么成功了 x 次的概率为何？所以我们要的概率分布为二项分布 $b(x;n,p)$。现在令 $\lambda=\alpha t=n\alpha \Delta t=np$，则有：
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 b(x;n,p)
 &=\frac{n!}{x!(n-x)!}p^x(1-p)^{n-x}\\
 &=\frac{n(n-1)(n-2)...(n-x-1)}{x!}(\frac{\lambda}{n})^x(1-\frac{\lambda}{n})^{n-x}\\
@@ -59,20 +62,15 @@ $$
 $$
 (1-\frac{\lambda}{n})^{-x}\rightarrow 1
 $$
-
 所以：
-
 $$
 b(x;n,p)\rightarrow \frac{\lambda ^xe^{-\lambda}}{x!}
 $$
-
-以 $p(x;\lambda)$ 表示，这里 p 表示 Poisson，即泊松分布为：
-
+以 $p(x;\lambda)$ 表示，这里 p 表示 Poisson，即**泊松分布**为：
 $$
 p(x;\lambda)=\frac{\lambda ^xe^{-\lambda}}{x!}
 $$
-
-因为：
+表述为 x 为服从参数为 $\lambda$ 的泊松分布。因为：
 
 $\displaystyle\sum_{x=0}^{\infty}p(x;\lambda)=e^{-\lambda}\sum_{x=0}^{\infty}\frac{\lambda ^x}{x!}=e^{-\lambda}e^{\lambda}=1$
 
@@ -119,16 +117,13 @@ Poisson 分布既然是二项分布的极限情形，反过来Poisson分布也�
 |$\vdots$|$\vdots$|$\vdots$|
 
 我们发现对应的值相当接近。一般，若用列表形式，二项分布 $b(x;n,p)$ 要兼顾三个变量 x,n,p，而 Poisson 只要两个 x,λ，所以比较方便。若直接计算，则因为：
-
 $$
 b(x;49,0.04)=\binom{49}{x}0.04^x0.96^{49-x}
 $$
-
 二项分布计算起来很费事。而 $p(x;\lambda)$ 的值可用递归快速计算：
 $$
 \frac{p(x+1;\lambda)}{p(x;\lambda)}=\frac{\lambda}{x}+1
 $$
-
 而 $p(0;\lambda)=e^{-1}$。因此只要情况适合，我们当然就舍二项分布而使用 Poisson 分布。
 
 通常只有 n 很大,p很小，$\lambda=np$不大不小而且是个常数，就可以用 Poisson 分布代替二项分布。
@@ -147,14 +142,18 @@ Poisson 分布还有种种的用途：放射性物质的蜕变、细胞间因受
 
 ## 泊松分布应用情形
 
-泊松试验常见于指定单位时间、单位距离、单位面积或单位体积内发生的事件个数这种场合。
+泊松试验常见于指定单位时间、单位距离、单位面积或单位体积内发生的事件个数这种场合。例如：
+
+- 一本书一页中的印刷错误数；
+- 某地区一天丢失的邮件数；
+- 某医院一天内的急诊病人数；
+- 某地区一个时间间隔内发生交通事故的次数。
 
 当 n 足够大，p 很小，$\lambda=np$ 不大不小且是个常数时，就可以用 Poisson 分布。
 
 ## 泊松分布属性
 
 由 $p(x;\lambda)=\lambda ^xe^{-\lambda}/x!$ 有：
-
 $$
 \begin{aligned}
 \mu=\sum_{x=0}^{\infty}xp(x;\lambda)=\lambda e^\lambda\sum_{x=1}^{\infty}\frac{\lambda^{x-1}}{(x-1)!}=\lambda e^{-\lambda}e^\lambda=\lambda
@@ -170,19 +169,19 @@ $$
 \end{aligned}
 $$
 
-所以，泊松分布均值：
+所以，泊松分布**均值**：
 
 $$\mu=\lambda$$
 
-方差：
+**方差**：
 
 $$\sigma^2=\lambda$$
 
-标准差：
+**标准差**：
 
 $$\sigma=\sqrt{\lambda}$$
 
-## R 函数
+## R 实现
 
 `dpois` 计算概率密度，`ppois` 计算累积分布函数，`qpois` 给出分位数，`rpois` 生成随机数。
 
@@ -213,18 +212,14 @@ ppois(q, lambda, lower.tail = TRUE, log.p = FALSE)
 
 `q` 为成功次数，`lambda` 为平均成功次数，即 $\lambda$。
 
-例1：
-
-假设某店平均每小时卖出10个产品，则在某个小时，该店卖出产品个数不超过 8 个的概率？
+**例1：** 假设某店平均每小时卖出10个产品，则在某个小时，该店卖出产品个数不超过 8 个的概率？
 
 ```r
 > ppois(q = 8, lambda = 10)
 [1] 0.3328197
 ```
 
-例2：
-
-现在需要 100 个符合规格的元件，从市场上买的该元件有 0.01 的废品率。所以如果只买100个，它们全部符合规则的机会不大，因此，我们要买 100+a 个，要求“在 100+a 个元件中至少有 100 个符合规格”这件事的概率不小于0.95.问 a 多大？
+**例2：** 现在需要 100 个符合规格的元件，从市场上买的该元件有 0.01 的废品率。所以如果只买100个，它们全部符合规则的机会不大，因此，我们要买 100+a 个，要求“在 100+a 个元件中至少有 100 个符合规格”这件事的概率不小于0.95.问 a 多大？
 
 这就是个累积概率问题，要求 100+a 中有 $\geq a$ 个废品的概率小于 0.05。
 
@@ -260,4 +255,8 @@ rpois(n, lambda)
 ```
 
 随机数生成器，`n` 为生成随机数的个数，`lambda` 是平均成功次数。
+
+## hipparchus 实现
+
+`org.hipparchus.distribution.discrete.PoissonDistribution`
 
