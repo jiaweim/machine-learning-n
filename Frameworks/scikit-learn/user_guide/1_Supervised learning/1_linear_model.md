@@ -34,6 +34,20 @@ array([0.5, 0.5])
 
 逻辑回归实现为 [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)。虽然叫逻辑回归，但是它是线性分类模型。logistic-regression 在文献中也称为 logit-regression，maximum-entropy classification 或 log-linear classifier。在该模型中，使用逻辑函数建模单个试验的概率。
 
+## 16. 稳健回归
+
+稳健回归旨在拟合存在离群值（outlier）或存在模型错误的数据。
+
+### 不同场景和概念
+
+当处理包含离群值的数据，需要考虑以下几点：
+
+- **离群值是 X 还是 y?**
+
+|y 方向的离群值|X 方向的离群值|
+|---|---|
+|![y_outliers](./images/sphx_glr_plot_robust_fit_003.png)|![X_outliers](./images/sphx_glr_plot_robust_fit_002.png)|
+
 
 
 ## 参考

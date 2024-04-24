@@ -10,6 +10,10 @@
 - [期望值](expectation.md)
 - [方差](variance.md)
 
+## 统计推断
+
+- [均值置信区间（σ 已知）](./confidence_interval/mean_with_sigma.md)
+
 ## 统计学笔记
 
 - [简介](math/statistics/1_intro.md)
