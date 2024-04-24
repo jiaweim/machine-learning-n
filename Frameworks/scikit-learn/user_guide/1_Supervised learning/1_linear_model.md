@@ -36,7 +36,7 @@ array([0.5, 0.5])
 
 ## 16. 稳健回归
 
-稳健回归旨在拟合存在离群值（outlier）或存在模型错误的数据。
+稳健回归旨在拟合存在离群值（outlier）或模型错误的数据。
 
 ### 不同场景和概念
 
@@ -48,7 +48,33 @@ array([0.5, 0.5])
 |---|---|
 |![y_outliers](./images/sphx_glr_plot_robust_fit_003.png)|![X_outliers](./images/sphx_glr_plot_robust_fit_002.png)|
 
+- 离群值与误差幅度
 
+离群点的数量很重要，离群点的离群幅度也很重要。
+
+|Small outliers|Large outliers|
+|---|---|
+|![y_outliers](https://scikit-learn.org/stable/_images/sphx_glr_plot_robust_fit_003.png)|![large_y_outliers](https://scikit-learn.org/stable/_images/sphx_glr_plot_robust_fit_005.png)|
+
+稳健拟合的一个重要概念是 breakdown-point：估计器在给出错误模型估计之前，离群数据的最大比例。breakdown-point 代表估计器对离群数据的最大容忍度。
+
+> **注意**
+> 在高维设置（`n_features` 很大）中进行稳健拟合非常困难，此时采用稳健模型可能效果不好。
+
+**估计器选择**
+
+Scikit-learn 提供了 3 个稳健回归估计器：RANSAC, Theil Sen 和 HuberRegressor
+
+- `HuberRegressor` 通常比 `RANSAC` 和 `Theil Sen` 快，除非样本量很大，即 `n_samples` >> `n_features`。而且，默认参数下 `RANSAC` 和 `Theil Sen` 没有 `HuberRegressor` 稳健；
+- `RANSAC` 比 `Theil Sen` 快，并且对样本数的变化 scale 更好；
+- `RANSAC` 能更好处理 y 方向的较大离群值；
+- `Theil Sen` 能更好处理 X 方向的中等大小离群值，但该优势在高维环境就没了。
+
+如果不确定，就用 `RANSAC`。
+
+### RANSAC
+
+RANSAC（RANdom SAmple Consesnsus）随机样本一致性，
 
 ## 参考
 
