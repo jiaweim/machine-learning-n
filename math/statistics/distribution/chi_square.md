@@ -1,6 +1,6 @@
-# Chi-Square Statistic
+# 卡方分布
 
-- [Chi-Square Statistic](#chi-square-statistic)
+- [卡方分布](#卡方分布)
   - [简介](#简介)
   - [Parametric and Nonparametric Statistical Tests](#parametric-and-nonparametric-statistical-tests)
 
@@ -8,6 +8,8 @@
 ***
 
 ## 简介
+
+若 $X_1,\cdots,X_n$ 相互独立，都服从正态分布 $N(0,1)$，则 
 
 ## Parametric and Nonparametric Statistical Tests
 
