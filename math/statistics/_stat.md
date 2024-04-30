@@ -10,12 +10,12 @@
 - [期望值](expectation.md)
 - [方差](variance.md)
 
-
 ## 统计推断
 
 - [样本](./sample_distribution/sample.md)
 - [均值置信区间（σ 已知）](./confidence_interval/mean_with_sigma.md)
-- [单样本假设检验](./hypothesis_test/test_one_sample.md)
+- [假设检验](./hypothesis_test/test_intro.md)
+- [均值检验（σ 已知）](./hypothesis_test/test_mean_with_sigma.md)
 
 ## 统计学笔记
 
@@ -23,8 +23,6 @@
 - [数据分布](_distribution.md)
 - [卡方检验](chi_square.md)
 - [内核密度估计](kernel_density_estimation.md)
-
-
 - [[poisson|泊松分布]]
 - [[multivariate-normal-distribution | 多元正态分布]]
 
