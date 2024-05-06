@@ -2,16 +2,48 @@
 
 - [卡方分布](#卡方分布)
   - [简介](#简介)
-  - [Parametric and Nonparametric Statistical Tests](#parametric-and-nonparametric-statistical-tests)
+  - [参考](#参考)
 
 2020-04-16, 18:52
 ***
 
 ## 简介
 
-若 $X_1,\cdots,X_n$ 相互独立，都服从正态分布 $N(0,1)$，则 
+卡方分布是一种抽样分布。
 
-## Parametric and Nonparametric Statistical Tests
+设 $X_1,\cdots,X_n$ 相互独立，都是来自总体 $N(0,1)$ 的样本，则称统计量：
 
-t 检验评估有关总体均值（μ）或均值的差值（$\mu_1 - \mu_2$）的假设；方差分析（ANalysis Of VAriance, ANOVA）假设总体为正态分布，且方差是同质的。因为这类检验都涉及参数，并且需要有关参数的假设，因此称为参数检验。
+$$
+\chi^2=X_1^2+X_2^2+\cdots+X_n^2
+$$
 
+服从自由度为 $n$ 的 $\chi^2(n )$ 分布。其概率密度函数为：
+
+$$
+f(x)=\begin{cases}
+    \frac{1}{2^{n/2}\Gamma(n/2)}x^{n/2-1}e^{-x/2}\\
+    0
+\end{cases}
+$$
+
+分布图如下所示（k 为自由度）：
+
+<img src="./images/600px-Chi-square_pdf.svg.png" alt="File:Chi-square pdf.svg" style="zoom:80%;" />
+
+卡方分布具有如下重要性质：
+
+1. 设 $X_1$, $X_2$ 独立，$X_1～\chi^2(m)$, $X_2～\chi^2(n)$，则 $X_1+X_2～\chi^2(m+n)$
+
+直接从卡方分布的定义，很容易证明该式。
+
+2. 若 $X_1,\cdots,X_n$ 独立，且都服从指数分布，则
+
+$$
+X=2\lambda (X_1+\cdots+X_n) ～\chi^2(2n)
+$$
+
+
+
+## 参考
+
+- https://en.wikipedia.org/wiki/Chi-squared_distribution

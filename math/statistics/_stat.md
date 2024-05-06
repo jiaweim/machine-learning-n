@@ -1,5 +1,14 @@
 # 统计学
 
+- [统计学导论](./intro/stat_intro.md)
+- [数据的集中趋势](./descriptive/central.md)
+
+## 连续型分布
+
+- [指数分布](./distribution/exponential.md)
+
+## 离散型分布
+
 ## 概率论
 
 - [[properties_probability|概率的属性]]
@@ -15,7 +24,7 @@
 - [样本](./sample_distribution/sample.md)
 - [均值置信区间（σ 已知）](./confidence_interval/mean_with_sigma.md)
 - [假设检验](./hypothesis_test/test_intro.md)
-- [均值检验（σ 已知）](./hypothesis_test/test_mean_with_sigma.md)
+  - [单样本均值检验（σ 已知）](./hypothesis_test/test_mean_with_sigma.md)
 
 ## 统计学笔记
 
