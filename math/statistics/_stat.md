@@ -24,7 +24,7 @@
 - [样本](./sample_distribution/sample.md)
 - [均值置信区间（σ 已知）](./confidence_interval/mean_with_sigma.md)
 - [假设检验](./hypothesis_test/test_intro.md)
-  - [单样本均值检验（σ 已知）](./hypothesis_test/test_mean_with_sigma.md)
+  - [单样本正态总体均值检验（σ 已知）](./hypothesis_test/test_mean_with_sigma.md)
 
 ## 统计学笔记
 
@@ -52,3 +52,6 @@ Seeing Theory是一个在线学习概率论与数理统计的学习平台，涉�
 - [STATOLOGY](https://www.statology.org/about/)
 
 包含一些还不错的统计学教程。
+
+- [Statistics: Data analysis and modelling](https://mspeekenbrink.github.io/sdam-book/index.html)
+- https://rcompute.nursing.umich.edu/DistributionCalculator/
