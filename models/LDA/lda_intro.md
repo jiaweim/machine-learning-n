@@ -19,8 +19,9 @@ LDA (Linear Discriminant Analysis) 可以看作一种的特征提取技术，能
 
 PCA 和 LDA 都是线性变换技术，可以用来减少数据集的维度；其中 PCA 是一种无监督算法，而 LDA 是一种有监督算法。LDA 是一种用于分类任务的特征提取技术。
 
-!!! note
-    LDA 也称为 Fisher's LDA。Ronald A. Fisher 在 1936 年首次提出二分类问题的 Fisher 判别分析。1948 年，C. Radhakrishna Rao 在类协方差相等、且满足正态分布的假设下将 Fisher 判别分析推广到多分类问题，即现在的 LDA。
+> [!NOTE]
+>
+> LDA 也称为 Fisher's LDA。Ronald A. Fisher 在 1936 年首次提出二分类问题的 Fisher 判别分析。1948 年，C. Radhakrishna Rao 在类协方差相等、且满足正态分布的假设下将 Fisher 判别分析推广到多分类问题，即现在的 LDA。
 
 下图总结了二分类问题中的 LDA 概念。
 
