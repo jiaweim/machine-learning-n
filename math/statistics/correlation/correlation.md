@@ -52,7 +52,9 @@ $$\rho_{xy}=\frac{Cov(X,Y)}{\sqrt{D(X)}\sqrt{D(Y)}}$$
 $$\begin{aligned}
 r 
   &=\frac{n\sum xy-(\sum x)(\sum y)}{\sqrt{n\sum x^2-(\sum x)^2}\sqrt{n\sum y^2-(\sum y)^2}}
-\end{aligned}$$
+\end{aligned}
+
+$$
 
 其中 $n$ 是数据对数。总体相关系数一般用希腊字母 $\rho$ (row) 表示。该相关系数的正式名称为皮尔逊相关系数（Pearson correlation coefficient, PCC）。
 
