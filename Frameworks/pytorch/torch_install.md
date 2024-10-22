@@ -14,12 +14,44 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvi
 
 ## GPU
 
-**安装 CUDA**
+1. 驱动
+2. cuDNN
+3. CUDA
 
-1. 根据 https://pytorch.org/get-started/locally/ 选择 cuda 版本
-2. 下载 cuda: https://developer.nvidia.com/cuda-gpus
-3. 安装 cuda
-4. 验证 cuda 是否安装好
+> [!NOTE]
+>
+> 现在 PyTorch 不需要单独安装 cuDNN 和 CUDA，`conda` 会自动安装相关依赖项。
+
+### 安装驱动
+
+根据显卡类型，安装驱动：
+
+https://www.nvidia.com/en-us/drivers/
+
+<img src="./images/image-20241022105419897.png" alt="image-20241022105419897" style="zoom:50%;" />
+
+在 NVIDIA 控制面板 -> Help -> System Information 查看驱动版本：
+
+<img src="./images/image-20241022110653005.png" alt="image-20241022110653005" style="zoom: 67%;" />
+
+根据驱动版本确定兼容的 CUDA 版本：
+
+![image-20241022110815888](./images/image-20241022110815888.png)
+
+在 PyTorch 安装页面，查看兼容的 CUDA 版本：
+
+![image-20241022111019119](./images/image-20241022111019119.png)
+
+这里 CUDA 12.4 符合显卡和 PyTorch 要求。
+
+下载 CUDA:
+
+https://developer.nvidia.com/cuda-toolkit-archive
+
+### 安装 CUDA
+
+1. 安装 cuda
+2. 验证 cuda 是否安装好
 
 ```powershell
 $nvcc -V

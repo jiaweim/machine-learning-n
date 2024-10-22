@@ -1,32 +1,7 @@
 # torch.Tensor
 
-- [torch.Tensor](#torchtensor)
-  - [简介](#简介)
-  - [数据类型](#数据类型)
-  - [初始化和基础操作](#初始化和基础操作)
-  - [Tensor](#tensor)
-    - [Tensor.new\_tensor](#tensornew_tensor)
-    - [repeat](#repeat)
-    - [numpy](#numpy)
-    - [scatter\_](#scatter_)
-    - [Tensor.to](#tensorto)
-    - [Tensor.byte](#tensorbyte)
-    - [Tensor.clone](#tensorclone)
-    - [Tensor.contiguous](#tensorcontiguous)
-    - [Tensor.cpu](#tensorcpu)
-    - [Tensor.cuda](#tensorcuda)
-    - [Tensor.detach](#tensordetach)
-    - [Tensor.float](#tensorfloat)
-    - [Tensor.item](#tensoritem)
-    - [Tensor.numpy](#tensornumpy)
-    - [Tensor.permute](#tensorpermute)
-    - [Tensor.size](#tensorsize)
-    - [Tensor.tolist](#tensortolist)
-    - [Tensor.type](#tensortype)
-    - [Tensor.view](#tensorview)
-  - [参考](#参考)
-
-Last updated: 2022-12-13, 17:34
+2022-12-13 ⭐
+@author Jiawei Mao
 ****
 
 ## 简介
@@ -1873,9 +1848,22 @@ Tensor.normal_
 
 Fills self tensor with elements samples from the normal distribution parameterized by mean and std.
 
-Tensor.numel
+### Tensor.numel
 
-See torch.numel()
+等价于 `torch.numel()`。
+
+返回张量所含元素总数。
+
+例如：
+
+```python
+>>> a = torch.randn(1, 2, 3, 4, 5)
+>>> torch.numel(a)
+120
+>>> a = torch.zeros(4,4)
+>>> torch.numel(a)
+16
+```
 
 ### Tensor.numpy
 
@@ -2047,9 +2035,13 @@ Tensor.requires_grad_
 
 Change if autograd should record operations on this tensor: sets this tensor's requires_grad attribute in-place.
 
-Tensor.reshape
+### Tensor.reshape
 
-Returns a tensor with the same data and number of elements as self but with the specified shape.
+> 2024年10月22日 ⭐
+
+返回数据相同但 shape 不同的 tensor。如果新的 `shape` 与当前 `shape` 兼容，则返回一个 view。
+
+等同于 `torch.reshape()`。
 
 Tensor.reshape_as
 
@@ -2206,6 +2198,20 @@ See torch.arcsinh()
 Tensor.arcsinh_
 
 In-place version of arcsinh()
+
+### Tensor.shape
+
+> 2024年10月22日 ⭐
+
+返回 tensor 的 size，同 `size`。
+
+```python
+>>> t = torch.empty(3, 4, 5)
+>>> t.size()
+torch.Size([3, 4, 5])
+>>> t.shape
+torch.Size([3, 4, 5])
+```
 
 ### Tensor.size
 

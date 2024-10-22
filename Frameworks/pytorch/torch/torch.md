@@ -1,62 +1,5 @@
 # torch
 
-- [torch](#torch)
-  - [Tensors](#tensors)
-  - [创建张量](#创建张量)
-    - [torch.tensor](#torchtensor)
-    - [torch.as\_tensor](#torchas_tensor)
-    - [torch.from\_numpy](#torchfrom_numpy)
-    - [torch.zeros](#torchzeros)
-    - [torch.zeros\_like](#torchzeros_like)
-    - [torch.ones](#torchones)
-    - [torch.ones\_like](#torchones_like)
-    - [torch.linspace](#torchlinspace)
-    - [torch.empty](#torchempty)
-    - [torch.empty\_like](#torchempty_like)
-    - [torch.ones](#torchones-1)
-  - [索引、切片、连接和突变](#索引切片连接和突变)
-    - [torch.adjoint](#torchadjoint)
-    - [torch.argwhere](#torchargwhere)
-    - [torch.cat](#torchcat)
-    - [torch.concat](#torchconcat)
-    - [torch.nonzero](#torchnonzero)
-    - [torch.permute](#torchpermute)
-    - [torch.split](#torchsplit)
-    - [torch.squeeze](#torchsqueeze)
-    - [torch.unsqueeze](#torchunsqueeze)
-  - [随机采样](#随机采样)
-    - [torch.manual\_seed](#torchmanual_seed)
-    - [torch.rand](#torchrand)
-    - [torch.randn](#torchrandn)
-    - [torch.rand\_like](#torchrand_like)
-    - [原地随机采样](#原地随机采样)
-  - [局部禁用梯度计算](#局部禁用梯度计算)
-  - [数学运算](#数学运算)
-    - [Pointwise Ops](#pointwise-ops)
-    - [约简操作](#约简操作)
-      - [torch.amin](#torchamin)
-    - [比较](#比较)
-      - [torch.eq](#torcheq)
-      - [torch.isin](#torchisin)
-    - [Spectral Ops](#spectral-ops)
-    - [其它操作](#其它操作)
-      - [torch.clone](#torchclone)
-      - [torch.flip](#torchflip)
-    - [BLAS and LAPACK Operations](#blas-and-lapack-operations)
-      - [torch.bmm](#torchbmm)
-      - [torch.mm](#torchmm)
-  - [Utilities](#utilities)
-    - [use\_deterministic\_algorithms](#use_deterministic_algorithms)
-  - [Operator Tags](#operator-tags)
-  - [操作](#操作)
-    - [torch.mean](#torchmean)
-    - [torch.reshape](#torchreshape)
-    - [torch.sqrt](#torchsqrt)
-    - [torch.sum](#torchsum)
-    - [torch.t](#torcht)
-    - [torch.var](#torchvar)
-  - [参考](#参考)
-
 Last updated: 2023-02-13, 10:24
 ***
 
@@ -64,7 +7,7 @@ Last updated: 2023-02-13, 10:24
 
 |操作|说明|
 |---|---|
-|is_tensor|`obj` 是否为 PyTorch tensor|
+|`is_tensor`|`obj` 是否为 PyTorch tensor|
 |is_storage|`obj` 是否为 PyTorch storage 对象|
 |is_complex|`input` 的数据类型是否为复数类型，即 `torch.complex64` 和 `torch.complex128`|
 |is_conj|`input` 是否为共轭张量，即其 conjugate bit 是否设为 True|
@@ -81,6 +24,8 @@ Last updated: 2023-02-13, 10:24
 
 ### torch.tensor
 
+> 2024年10月22日 ⭐
+
 ```python
 torch.tensor(data, *, 
     dtype=None, 
@@ -91,8 +36,8 @@ torch.tensor(data, *,
 
 **复制** `data` 的数据创建张量，该张量没有 autograd 历史，也称为叶张量（leaf tensor）。
 
-> **WARNING**
-> 建议使用 `torch.Tensor.clone()`, `torch.Tensor.detach()` 和 `torch.Tensor.requires_grad_()`。假设 `t` 是一个张量，则 `torch.tensor(t)` 等价于 `t.clone().detach()`；而 `torch.tensor(t, requires_grad=True)` 等价于 `t.clone().detach().requires_grad_(True)`。
+> [!WARNING]
+> 对张量类参数，建议使用 `torch.Tensor.clone()`, `torch.Tensor.detach()` 和 `torch.Tensor.requires_grad_()`。设 `t` 为张量，则 `torch.tensor(t)` 等价于 `t.clone().detach()`；而 `torch.tensor(t, requires_grad=True)` 等价于 `t.clone().detach().requires_grad_(True)`。
 
 **参数：**
 
@@ -100,7 +45,12 @@ torch.tensor(data, *,
 
 张量的初始化数据。支持 `list`, `tuple`, `ndarray`, scalar 等类型。
 
-**示例：**
+**关键字参数：**
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 设置张量类型。`None` 表示从 `data` 推断类型。
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。`None` 且 `data` 为 tensor，则使用 `data` 所在 device。`None` 且 `data` 不是 tensor，则使用当前 device。
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – autograd 是否记录返回的 tensor 上的操作。默认 `False`
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否将返回的 tensor 放在 pinned memory，仅用于 CPU tensor。默认 `False`.
 
 ```python
 >>> torch.tensor([[0.1, 1.2], [2.2, 3.1], [4.9, 5.2]])
@@ -254,8 +204,6 @@ torch.zeros(*size, *,
 
 支持梯度。默认 `False`。
 
-例如：
-
 ```python
 >>> torch.zeros(2, 3)
 tensor([[ 0.,  0.,  0.],
@@ -333,21 +281,42 @@ tensor([[ 1.,  1.,  1.],
         [ 1.,  1.,  1.]])
 ```
 
-arange
+### torch.arange
 
-Returns a 1-D tensor of size \left\lceil \frac{\text{end} - \text{start}}{\text{step}} \right\rceil⌈ 
-step
-end−start
-​
- ⌉ with values from the interval [start, end) taken with common difference step beginning from start.
+```python
+torch.arange(start=0, end, step=1, *, out=None, dtype=None, layout=torch.strided, 
+             device=None, requires_grad=False) → Tensor
+```
 
-range
+创建一个 1D tensor，即在区间 `[start, end)` 以步长 `step` 创建大小为 $\lceil\frac{\text{end}-\text{start}}{\text{step}}\rceil$ 的 tensor。
 
-Returns a 1-D tensor of size \left\lfloor \frac{\text{end} - \text{start}}{\text{step}} \right\rfloor + 1⌊ 
-step
-end−start
-​
- ⌋+1 with values from start to end with step step.
+如果 `step` 为非整数，在与 `end` 比较时会有浮点数 round-error 问题；为了避免该问题，建议从 `end` 中减去一个 epsilon 值。
+$$
+\text{out}_{i+1}=\text{out}_i+\text{step}
+$$
+**参数：**
+
+- `start` (Number): 起点值，默认 0
+- `end` (Number)：重点值
+- `step` (Number): 步长，默认 1 
+
+**关键字参数：**
+
+- **out** (`Tensor`, optional)：输出张量。
+- **dtype** (`torch.dtype`, optional)：tensor 类型。默认：如果为 `None`，则使用全局默认，即 `torch.set_default_dtype()`，如果不指定 `dtype`，从输入参数推断类型。如果 `start`, `end` 或 `step` 任意值为 float，则 `dtype` 为默认 `dtype`，参考 `get_default_dtype()`。否则 `dtype` 为 `torch.int64`。
+
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 返回 tensor 的 layout。默认 `torch.strided`
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) –  设置 device。`None` 表示使用当前设备，参考 `torch.set_default_device()`。`device` 对 CPU-tensor 为 CPU，对 CUDA-tensor 为 CUDA。
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – autograd 需要记录 tensor 上的操作，默认  `False`.
+
+```python
+>>> torch.arange(5)
+tensor([ 0,  1,  2,  3,  4])
+>>> torch.arange(1, 4)
+tensor([ 1,  2,  3])
+>>> torch.arange(1, 2.5, 0.5)
+tensor([ 1.0000,  1.5000,  2.0000])
+```
 
 ### torch.linspace
 
@@ -592,6 +561,8 @@ tensor([[0, 0],
 
 ### torch.cat
 
+> 2024年10月22日 ⭐
+
 ```python
 torch.cat(tensors, dim=0, *, out=None) → Tensor
 ```
@@ -599,6 +570,10 @@ torch.cat(tensors, dim=0, *, out=None) → Tensor
 将张量序列 `tensors` 沿指定维度串联起来。所有张量的 shape 必须相同（除了连接的维度）或 empty。
 
 `torch.cat()` 可以看作 `torch.split()` 和 `torch.chunk()` 的逆操作。
+
+> [!TIP]
+>
+> `torch.stack()` 沿着新维度串联。
 
 **参数：**
 
@@ -608,8 +583,6 @@ torch.cat(tensors, dim=0, *, out=None) → Tensor
 **关键字参数：**
 
 - **out** (`Tensor`, optional) – 输出张量。
-
-**示例：**
 
 ```python
 >>> x = torch.randn(2, 3)
@@ -632,75 +605,81 @@ tensor([[ 0.6580, -1.0969, -0.4614,  0.6580, -1.0969, -0.4614,  0.6580,
 
 ### torch.concat
 
-`torch.cat()` 的别名。
+> 2024年10月22日 ⭐
 
-concatenate
+[torch.cat()](#torchcat) 的别名。
 
-Alias of torch.cat().
+### torch.concatenate
 
-conj
+> 2024年10月22日 ⭐
+
+[torch.cat()](#torchcat) 的别名。
+
+### conj
 
 Returns a view of input with a flipped conjugate bit.
 
-chunk
+### chunk
 
 Attempts to split a tensor into the specified number of chunks.
 
-dsplit
+### dsplit
 
 Splits input, a tensor with three or more dimensions, into multiple tensors depthwise according to indices_or_sections.
 
-column_stack
+### column_stack
 
 Creates a new tensor by horizontally stacking the tensors in tensors.
 
-dstack
+### dstack
 
 Stack tensors in sequence depthwise (along third axis).
 
-gather
+### gather
 
 Gathers values along an axis specified by dim.
 
-hsplit
+### hsplit
 
 Splits input, a tensor with one or more dimensions, into multiple tensors horizontally according to indices_or_sections.
 
-hstack
+### hstack
 
 Stack tensors in sequence horizontally (column wise).
 
-index_add
+### index_add
 
 See index_add_() for function description.
 
-index_copy
+### index_copy
 
 See index_add_() for function description.
 
-index_reduce
+### index_reduce
 
 See index_reduce_() for function description.
 
-index_select
+### index_select
 
 Returns a new tensor which indexes the input tensor along dimension dim using the entries in index which is a LongTensor.
 
-masked_select
+### masked_select
 
 Returns a new 1-D tensor which indexes the input tensor according to the boolean mask mask which is a BoolTensor.
 
-movedim
+### movedim
 
 Moves the dimension(s) of input at the position(s) in source to the position(s) in destination.
 
-moveaxis
+### moveaxis
 
 Alias for torch.movedim().
 
-narrow
+### narrow
 
 Returns a new tensor that is a narrowed version of input tensor.
+
+### narrow_copy
 
 ### torch.nonzero
 
@@ -734,39 +713,39 @@ torch.Size([2, 3, 5])
 torch.Size([5, 2, 3])
 ```
 
-reshape
+### reshape
 
 Returns a tensor with the same data and number of elements as input, but with the specified shape.
 
-row_stack
+### row_stack
 
 Alias of torch.vstack().
 
-select
+### select
 
 Slices the input tensor along the selected dimension at the given index.
 
-scatter
+### scatter
 
 Out-of-place version of torch.Tensor.scatter_()
 
-diagonal_scatter
+### diagonal_scatter
 
 Embeds the values of the src tensor into input along the diagonal elements of input, with respect to dim1 and dim2.
 
-select_scatter
+### select_scatter
 
 Embeds the values of the src tensor into input at the given index.
 
-slice_scatter
+### slice_scatter
 
 Embeds the values of the src tensor into input at the given dimension.
 
-scatter_add
+### scatter_add
 
 Out-of-place version of torch.Tensor.scatter_add_()
 
-scatter_reduce
+### scatter_reduce
 
 Out-of-place version of torch.Tensor.scatter_reduce_()
 
@@ -856,45 +835,49 @@ torch.Size([2, 1, 2, 1, 2])
 torch.Size([2, 2, 1, 2])
 ```
 
-stack
+### stack
 
 Concatenates a sequence of tensors along a new dimension.
 
-swapaxes
+### swapaxes
 
 Alias for torch.transpose().
 
-swapdims
+### swapdims
 
 Alias for torch.transpose().
 
-t
+### t
 
 Expects input to be <= 2-D tensor and transposes dimensions 0 and 1.
 
-take
+### take
 
 Returns a new tensor with the elements of input at the given indices.
 
-take_along_dim
+### take_along_dim
 
 Selects values from input at the 1-dimensional indices from indices along the given dim.
 
-tensor_split
+### tensor_split
 
 Splits a tensor into multiple sub-tensors, all of which are views of input, along dimension dim according to the indices or number of sections specified by indices_or_sections.
 
-tile
+### tile
 
 Constructs a tensor by repeating the elements of input.
 
-transpose
+### transpose
 
 Returns a tensor that is a transposed version of input.
 
-unbind
+### unbind
 
 Removes a tensor dimension.
+
+### unravel_index
+
+[`unravel_index`](https://pytorch.org/docs/stable/generated/torch.unravel_index.html#torch.unravel_index)
 
 ### torch.unsqueeze
 
@@ -926,15 +909,15 @@ tensor([[ 1],
         [ 4]])
 ```
 
-vsplit
+### vsplit
 
 Splits input, a tensor with two or more dimensions, into multiple tensors vertically according to indices_or_sections.
 
-vstack
+### vstack
 
 Stack tensors in sequence vertically (row wise).
 
-where
+### where
 
 Return a tensor of elements selected from either x or y, depending on condition.
 
@@ -1184,17 +1167,58 @@ Returns True if inference mode is currently enabled.
 
 ## 数学运算
 
+对任何具有相同 shape 的张量，常见的标准算法运算符（+, -, *, / 和 **） 都可以升级为逐元素运算。
+
+```python
+x = torch.tensor([1.0, 2, 4, 8])
+y = torch.tensor([2, 2, 2, 2])
+x + y, x - y, x * y, x / y, x ** y
+```
+
+```
+(tensor([ 3.,  4.,  6., 10.]),
+ tensor([-1.,  0.,  2.,  6.]),
+ tensor([ 2.,  4.,  8., 16.]),
+ tensor([0.5000, 1.0000, 2.0000, 4.0000]),
+ tensor([ 1.,  4., 16., 64.]))
+```
+
+
+
 ### Pointwise Ops
 
-|操作|说明|
-|---|---|
-abs
+#### abs
 
-Computes the absolute value of each element in input.
+> 2024年10月22日 ⭐
 
-absolute
+```python
+torch.abs(input, *, out=None) → Tensor
+```
 
-Alias for torch.abs()
+计算 `input` 中每个元素的绝对值。
+$$
+\text{out}_i=|\text{input}_i|
+$$
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入 tensor
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出 tensor
+
+```python
+>>> torch.abs(torch.tensor([-1, -2, 3]))
+tensor([ 1,  2,  3])
+```
+
+#### absolute
+
+> 2024年10月22日 ⭐
+
+[torch.abs()](#abs) 的别名。
+
+
 
 acos
 
@@ -1212,9 +1236,55 @@ arccosh
 
 Alias for torch.acosh().
 
-add
+#### add
 
-Adds other, scaled by alpha, to input.
+> 2024年10月22日 ⭐
+
+```python
+torch.add(input, other, *, alpha=1, out=None) → Tensor
+```
+
+计算：
+$$
+\text{out}_i=\text{input}_i+\text{alpha}\times\text{other}_i
+$$
+
+支持常见 shape 广播、类型提升以及 integer, float 和 complex 输入。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入 tensor
+- **other** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor) *or* *Number*) – 加到 `input` 的 tensor 或数字
+
+**关键字参数：**
+
+- **alpha** (*Number*) – `other` 的系数
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出 tensor
+
+```python
+>>> a = torch.randn(4)
+>>> a
+tensor([ 0.0202,  1.0985,  1.3506, -0.6056])
+>>> torch.add(a, 20)
+tensor([ 20.0202,  21.0985,  21.3506,  19.3944])
+
+>>> b = torch.randn(4)
+>>> b
+tensor([-0.9732, -0.3497,  0.6245,  0.4022])
+>>> c = torch.randn(4, 1)
+>>> c
+tensor([[ 0.3743],
+        [-1.7724],
+        [-0.5811],
+        [-0.8017]])
+>>> torch.add(b, c, alpha=10)
+tensor([[  2.7695,   3.3930,   4.3672,   4.1450],
+        [-18.6971, -18.0736, -17.0994, -17.3216],
+        [ -6.7845,  -6.1610,  -5.1868,  -5.4090],
+        [ -8.9902,  -8.3667,  -7.3925,  -7.6147]])
+```
+
+
 
 addcdiv
 
@@ -1354,9 +1424,35 @@ erfinv
 
 Alias for torch.special.erfinv().
 
-exp
+#### exp
 
-Returns a new tensor with the exponential of the elements of the input tensor input.
+> 2024年10月22日 ⭐
+
+```python
+torch.exp(input, *, out=None) → Tensor
+```
+
+计算 `input` 的自然指数，得到一个新张量。
+$$
+y_i=e^{x_i}
+$$
+
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入 tensor
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出 tensor
+
+```python
+>>> torch.exp(torch.tensor([0, math.log(2.)]))
+tensor([ 1.,  2.])
+```
+
+
+
+
 
 exp2
 
@@ -2374,11 +2470,30 @@ tensor([[-0.0163],
 
 ### torch.reshape
 
+> 2024年10月22日 ⭐
+
 ```python
 torch.reshape(input, shape) → Tensor
 ```
 
-返回一个与输入张量具有相同数据、元素和指定 shape 的张量。尽可能返回 `input` 的输入，否则返回副本。连续输入和 stride 兼容的输入可以不复制数据返回 reshape 视图，但是不应该依赖该行为，是 view 还是 copy 对 `reshape` 不确定。
+返回一个与输入张量具有相同数据、元素个数和指定 shape 的张量。尽可能返回 `input` 的 view，否则返回副本。连续输入和 stride 兼容的输入可以不复制数据返回 reshape 视图，但是不应该依赖该行为，是 view 还是 copy 对 `reshape` 不确定。
+
+其中一个维度可以指定为 -1，表示根据剩余维度和输入元素推断。
+
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – the tensor to be reshaped
+- **shape** ([*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* [*int*](https://docs.python.org/3/library/functions.html#int)) – the new shape
+
+```python
+>>> a = torch.arange(4.)
+>>> torch.reshape(a, (2, 2))
+tensor([[ 0.,  1.],
+        [ 2.,  3.]])
+>>> b = torch.tensor([[0, 1], [2, 3]])
+>>> torch.reshape(b, (-1,))
+tensor([ 0,  1,  2,  3])
+```
 
 ### torch.sqrt
 

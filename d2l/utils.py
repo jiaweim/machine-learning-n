@@ -6,6 +6,7 @@ DATA_URL = 'http://d2l-data.s3-accelerate.amazonaws.com/'
 import numpy as np
 import torch
 import torchvision
+from PIL import Image
 from torch import nn
 from torch.nn import functional as F
 from torch.utils import data
@@ -24,6 +25,7 @@ import sys
 import tarfile
 import time
 import zipfile
+from collections import defaultdict
 import pandas as pd
 import requests
 from IPython import display

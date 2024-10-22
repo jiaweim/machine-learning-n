@@ -1,10 +1,7 @@
 # Tensor Attributes
 
-- [Tensor Attributes](#tensor-attributes)
-  - [torch.device](#torchdevice)
-  - [torch.memory\_format](#torchmemory_format)
-  - [参考](#参考)
-
+2024-10-22
+@author Jiawei Mao
 ***
 
 ## torch.device
