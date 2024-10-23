@@ -1719,7 +1719,7 @@ xlogy
 Alias for torch.special.xlogy().
 
 
-### 约简操作
+### 降维操作
 
 argmax
 
@@ -1805,7 +1805,70 @@ logsumexp
 
 Returns the log of summed exponentials of each row of the input tensor in the given dimension dim.
 
-|[mean](#torchmean)|返回输入张量所有元素的均值|
+#### torch.mean
+
+> 2024年10月23日⭐
+
+```python
+torch.mean(input, *, dtype=None) → Tensor
+```
+
+返回 `input` 张量所有元素的均值。`input` 张量必须诶 float 或 complex 类型。
+
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量，float 或 complex dtype
+
+关键字参数：
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 返回张量的类型。如果指定类型，在操作前将 input 张量转换为 `dtype`。这对防止数据类型溢出很有用。默认 `None`
+
+```python
+>>> a = torch.randn(1, 3)
+>>> a
+tensor([[ 0.2294, -0.5481,  1.3288]])
+>>> torch.mean(a)
+tensor(0.3367)
+```
+
+```python
+torch.mean(input, dim, keepdim=False, *, dtype=None, out=None) → Tensor
+```
+
+返回 `input` 张量在 `dim` 维度的均值。如果 `dim` 为列表，则对所有这些维度降维。
+
+如果 `keepdim` 为 `True`，则输出张量与 `input` 张量除了 `dim` 维度为 1，其它维度 size 相同。否则，`dim` 被压缩（参考 `torch.squeeze()`），使得输出张量维度数降低 `len(dim)`。
+
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int) *or* [*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* *ints,* *optional*) – 要降维的维度。`None` 表示对所有维度降维。
+- **keepdim** ([*bool*](https://docs.python.org/3/library/functions.html#bool)) – 是否保留 `dim` 维度
+
+关键字参数：
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 返回张量的类型。如果指定类型，在操作前将 input 张量转换为 `dtype`。这对防止数据类型溢出很有用。默认 `None`
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> a = torch.randn(4, 4)
+>>> a
+tensor([[-0.3841,  0.6320,  0.4254, -0.7384],
+        [-0.9644,  1.0131, -0.6549, -1.4279],
+        [-0.2951, -1.3350, -0.7694,  0.5600],
+        [ 1.0842, -0.9580,  0.3623,  0.2343]])
+>>> torch.mean(a, 1) # 对 row 求均值
+tensor([-0.0163, -0.5085, -0.4599,  0.1807])
+>>> torch.mean(a, 1, True)
+tensor([[-0.0163],
+        [-0.5085],
+        [-0.4599],
+        [ 0.1807]])
+```
+
+
+
+
 
 
 nanmean
@@ -1824,9 +1887,23 @@ mode
 
 Returns a namedtuple (values, indices) where values is the mode value of each row of the input tensor in the given dimension dim, i.e. a value which appears most often in that row, and indices is the index location of each mode value found.
 
-norm
+#### torch.norm
 
-Returns the matrix norm or vector norm of a given tensor.
+> 2024年10月23日⭐
+
+```python
+torch.norm(input, p='fro', dim=None, keepdim=False, out=None, dtype=None)
+```
+
+返回指定张量的矩阵范数或向量范数。
+
+> [!WARNING]
+>
+> `torch.norm` 已弃用，在未来可能会从 PyTorch 中删除。其文档和行为可能不正确，且不再主动维护。
+>
+> 使用 `torch.linalg.vector_norm()` 计算向量范数，使用 `torch.linalg.matrix_norm()` 计算矩阵范数。函数 `torch.linalg.norm()` 与 `torch.norm()` 功能类似。
+
+
 
 nansum
 
@@ -1852,9 +1929,67 @@ std_mean
 
 If unbiased is True, Bessel's correction will be used to calculate the standard deviation.
 
-sum
+#### torch.sum
 
-Returns the sum of all elements in the input tensor.
+> 2024年10月23日⭐
+
+```python
+torch.sum(input, *, dtype=None) → Tensor
+```
+
+返回 `input` 张量所有元素和。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量。
+
+**关键字参数：**
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 返回张量的类型。如果指定类型，在操作前将 input 张量转换为 `dtype`。这对防止数据类型溢出很有用。默认 `None`
+
+```python
+>>> a = torch.randn(1, 3)
+>>> a
+tensor([[ 0.1133, -0.9567,  0.2958]])
+>>> torch.sum(a)
+tensor(-0.5475)
+```
+
+```python
+torch.sum(input, dim, keepdim=False, *, dtype=None) → Tensor
+```
+
+返回 `input` 张量在 `dim` 维度的加和。如果 `dim` 为列表，则对所有这些维度降维。
+
+如果 `keepdim` 为 `True`，则输出张量与 `input` 张量除了 `dim` 维度为 1，其它维度 size 相同。否则，`dim` 倍压缩（参考 `torch.squeeze()`），使得输出张量维度数降低 `len(dim)`。
+
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int) *or* [*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* *ints,* *optional*) – 要降维的维度。`None` 表示对所有维度降维。
+- **keepdim** ([*bool*](https://docs.python.org/3/library/functions.html#bool)) – 是否保留 `dim` 维度
+
+关键字参数：
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 返回张量的类型。如果指定类型，在操作前将 input 张量转换为 `dtype`。这对防止数据类型溢出很有用。默认 `None`
+
+```python
+>>> a = torch.randn(4, 4)
+>>> a
+tensor([[ 0.0569, -0.2475,  0.0737, -0.3429],
+        [-0.2993,  0.9138,  0.9337, -1.6864],
+        [ 0.1132,  0.7892, -0.1003,  0.5688],
+        [ 0.3637, -0.9906, -0.4752, -1.5197]])
+>>> torch.sum(a, 1) # 4x4 变为 4x0
+tensor([-0.4598, -0.1381,  1.3708, -2.6217])
+>>> b = torch.arange(4 * 5 * 6).view(4, 5, 6)
+>>> torch.sum(b, (2, 1))
+tensor([  435.,  1335.,  2235.,  3135.])
+```
+
+
+
+
 
 unique
 
@@ -2170,9 +2305,39 @@ cumprod
 
 Returns the cumulative product of elements of input in the dimension dim.
 
-cumsum
+#### torch.cumsum
 
-Returns the cumulative sum of elements of input in the dimension dim.
+> 2024年10月23日⭐
+
+```python
+torch.cumsum(input, dim, *, dtype=None, out=None) → Tensor
+```
+
+返回 `input` 张量在 `dim` 维度的累计加和。
+
+例如，如果 `input` 是 size 为 N 的向量，那么结果也是 size 为 N 的向量，元素为：
+$$
+y_i=x_1+x_2+x_3+\cdots+x_i
+$$
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 执行操作的维度
+
+关键字参数：
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 返回张量的类型。如果指定类型，在操作前将 input 张量转换为 `dtype`。这对防止数据类型溢出很有用。默认 `None`
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> a = torch.randint(1, 20, (10,))
+>>> a
+tensor([13,  7,  3, 10, 13,  3, 15, 10,  9, 10])
+>>> torch.cumsum(a, dim=0)
+tensor([13, 20, 23, 33, 46, 49, 64, 74, 83, 93])
+```
+
+
 
 diag
 
@@ -2350,7 +2515,7 @@ resolve_neg
 
 Returns a new tensor with materialized negation if input's negative bit is set to True, else returns input.
 
-### BLAS and LAPACK Operations
+### BLAS 和 LAPACK 操作
 
 #### torch.bmm
 
@@ -2382,6 +2547,48 @@ $$out_i=input_i @ mat2_i$$
 torch.Size([10, 3, 5])
 ```
 
+
+
+| [`addbmm`](https://pytorch.org/docs/stable/generated/torch.addbmm.html#torch.addbmm) | Performs a batch matrix-matrix product of matrices stored in `batch1` and `batch2`, with a reduced add step (all matrix multiplications get accumulated along the first dimension). |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`addmm`](https://pytorch.org/docs/stable/generated/torch.addmm.html#torch.addmm) | Performs a matrix multiplication of the matrices `mat1` and `mat2`. |
+| [`addmv`](https://pytorch.org/docs/stable/generated/torch.addmv.html#torch.addmv) | Performs a matrix-vector product of the matrix `mat` and the vector `vec`. |
+| [`addr`](https://pytorch.org/docs/stable/generated/torch.addr.html#torch.addr) | Performs the outer-product of vectors `vec1` and `vec2` and adds it to the matrix `input`. |
+| [`baddbmm`](https://pytorch.org/docs/stable/generated/torch.baddbmm.html#torch.baddbmm) | Performs a batch matrix-matrix product of matrices in `batch1` and `batch2`. |
+| [`bmm`](https://pytorch.org/docs/stable/generated/torch.bmm.html#torch.bmm) | Performs a batch matrix-matrix product of matrices stored in `input` and `mat2`. |
+| [`chain_matmul`](https://pytorch.org/docs/stable/generated/torch.chain_matmul.html#torch.chain_matmul) | Returns the matrix product of the N*N* 2-D tensors.          |
+| [`cholesky`](https://pytorch.org/docs/stable/generated/torch.cholesky.html#torch.cholesky) | Computes the Cholesky decomposition of a symmetric positive-definite matrix A*A* or for batches of symmetric positive-definite matrices. |
+| [`cholesky_inverse`](https://pytorch.org/docs/stable/generated/torch.cholesky_inverse.html#torch.cholesky_inverse) | Computes the inverse of a complex Hermitian or real symmetric positive-definite matrix given its Cholesky decomposition. |
+| [`cholesky_solve`](https://pytorch.org/docs/stable/generated/torch.cholesky_solve.html#torch.cholesky_solve) | Computes the solution of a system of linear equations with complex Hermitian or real symmetric positive-definite lhs given its Cholesky decomposition. |
+| [`dot`](https://pytorch.org/docs/stable/generated/torch.dot.html#torch.dot) | Computes the dot product of two 1D tensors.                  |
+| [`geqrf`](https://pytorch.org/docs/stable/generated/torch.geqrf.html#torch.geqrf) | This is a low-level function for calling LAPACK's geqrf directly. |
+| [`ger`](https://pytorch.org/docs/stable/generated/torch.ger.html#torch.ger) | Alias of [`torch.outer()`](https://pytorch.org/docs/stable/generated/torch.outer.html#torch.outer). |
+| [`inner`](https://pytorch.org/docs/stable/generated/torch.inner.html#torch.inner) | Computes the dot product for 1D tensors.                     |
+| [`inverse`](https://pytorch.org/docs/stable/generated/torch.inverse.html#torch.inverse) | Alias for [`torch.linalg.inv()`](https://pytorch.org/docs/stable/generated/torch.linalg.inv.html#torch.linalg.inv) |
+| [`det`](https://pytorch.org/docs/stable/generated/torch.det.html#torch.det) | Alias for [`torch.linalg.det()`](https://pytorch.org/docs/stable/generated/torch.linalg.det.html#torch.linalg.det) |
+| [`logdet`](https://pytorch.org/docs/stable/generated/torch.logdet.html#torch.logdet) | Calculates log determinant of a square matrix or batches of square matrices. |
+| [`slogdet`](https://pytorch.org/docs/stable/generated/torch.slogdet.html#torch.slogdet) | Alias for [`torch.linalg.slogdet()`](https://pytorch.org/docs/stable/generated/torch.linalg.slogdet.html#torch.linalg.slogdet) |
+| [`lu`](https://pytorch.org/docs/stable/generated/torch.lu.html#torch.lu) | Computes the LU factorization of a matrix or batches of matrices `A`. |
+| [`lu_solve`](https://pytorch.org/docs/stable/generated/torch.lu_solve.html#torch.lu_solve) | Returns the LU solve of the linear system Ax=b*A**x*=*b* using the partially pivoted LU factorization of A from [`lu_factor()`](https://pytorch.org/docs/stable/generated/torch.linalg.lu_factor.html#torch.linalg.lu_factor). |
+| [`lu_unpack`](https://pytorch.org/docs/stable/generated/torch.lu_unpack.html#torch.lu_unpack) | Unpacks the LU decomposition returned by [`lu_factor()`](https://pytorch.org/docs/stable/generated/torch.linalg.lu_factor.html#torch.linalg.lu_factor) into the P, L, U matrices. |
+| [`matmul`](https://pytorch.org/docs/stable/generated/torch.matmul.html#torch.matmul) | Matrix product of two tensors.                               |
+| [`matrix_power`](https://pytorch.org/docs/stable/generated/torch.matrix_power.html#torch.matrix_power) | Alias for [`torch.linalg.matrix_power()`](https://pytorch.org/docs/stable/generated/torch.linalg.matrix_power.html#torch.linalg.matrix_power) |
+| [`matrix_exp`](https://pytorch.org/docs/stable/generated/torch.matrix_exp.html#torch.matrix_exp) | Alias for [`torch.linalg.matrix_exp()`](https://pytorch.org/docs/stable/generated/torch.linalg.matrix_exp.html#torch.linalg.matrix_exp). |
+| [`orgqr`](https://pytorch.org/docs/stable/generated/torch.orgqr.html#torch.orgqr) | Alias for [`torch.linalg.householder_product()`](https://pytorch.org/docs/stable/generated/torch.linalg.householder_product.html#torch.linalg.householder_product). |
+| [`ormqr`](https://pytorch.org/docs/stable/generated/torch.ormqr.html#torch.ormqr) | Computes the matrix-matrix multiplication of a product of Householder matrices with a general matrix. |
+| [`outer`](https://pytorch.org/docs/stable/generated/torch.outer.html#torch.outer) | Outer product of `input` and `vec2`.                         |
+| [`pinverse`](https://pytorch.org/docs/stable/generated/torch.pinverse.html#torch.pinverse) | Alias for [`torch.linalg.pinv()`](https://pytorch.org/docs/stable/generated/torch.linalg.pinv.html#torch.linalg.pinv) |
+| [`qr`](https://pytorch.org/docs/stable/generated/torch.qr.html#torch.qr) | Computes the QR decomposition of a matrix or a batch of matrices `input`, and returns a namedtuple (Q, R) of tensors such that input=QRinput=*QR* with Q*Q* being an orthogonal matrix or batch of orthogonal matrices and R*R* being an upper triangular matrix or batch of upper triangular matrices. |
+| [`svd`](https://pytorch.org/docs/stable/generated/torch.svd.html#torch.svd) | Computes the singular value decomposition of either a matrix or batch of matrices `input`. |
+| [`svd_lowrank`](https://pytorch.org/docs/stable/generated/torch.svd_lowrank.html#torch.svd_lowrank) | Return the singular value decomposition `(U, S, V)` of a matrix, batches of matrices, or a sparse matrix A*A* such that A≈Udiag⁡(S)VH*A*≈*U*diag(*S*)*V*H. |
+| [`pca_lowrank`](https://pytorch.org/docs/stable/generated/torch.pca_lowrank.html#torch.pca_lowrank) | Performs linear Principal Component Analysis (PCA) on a low-rank matrix, batches of such matrices, or sparse matrix. |
+| [`lobpcg`](https://pytorch.org/docs/stable/generated/torch.lobpcg.html#torch.lobpcg) | Find the k largest (or smallest) eigenvalues and the corresponding eigenvectors of a symmetric positive definite generalized eigenvalue problem using matrix-free LOBPCG methods. |
+| [`trapz`](https://pytorch.org/docs/stable/generated/torch.trapz.html#torch.trapz) | Alias for [`torch.trapezoid()`](https://pytorch.org/docs/stable/generated/torch.trapezoid.html#torch.trapezoid). |
+| [`trapezoid`](https://pytorch.org/docs/stable/generated/torch.trapezoid.html#torch.trapezoid) | Computes the [trapezoidal rule](https://en.wikipedia.org/wiki/Trapezoidal_rule) along `dim`. |
+| [`cumulative_trapezoid`](https://pytorch.org/docs/stable/generated/torch.cumulative_trapezoid.html#torch.cumulative_trapezoid) | Cumulatively computes the [trapezoidal rule](https://en.wikipedia.org/wiki/Trapezoidal_rule) along `dim`. |
+| [`triangular_solve`](https://pytorch.org/docs/stable/generated/torch.triangular_solve.html#torch.triangular_solve) | Solves a system of equations with a square upper or lower triangular invertible matrix A*A* and multiple right-hand sides b*b*. |
+| [`vdot`](https://pytorch.org/docs/stable/generated/torch.vdot.html#torch.vdot) | Computes the dot product of two 1D vectors along a dimension. |
+
 #### torch.mm
 
 ```python
@@ -2392,7 +2599,45 @@ torch.mm(input, mat2, *, out=None) → Tensor
 
 如果 `input` 是 $(n\times m)$ 张量，mat2 是 $(m\times p)$ 张量，则输出 `out` 为 $(n\times p)$ 张量。
 
-> **NOTE** 该函数不支持广播，对广播矩阵乘法，使用 `torch.matmul()`
+> [!NOTE]
+>
+> 该函数不支持广播，对广播矩阵乘法，使用 `torch.matmul()`
+
+支持 strided 和 sparse 2D 张量，autograd 支持 strided 输入。
+
+该操作支持
+
+#### torch.mv
+
+> 2024年10月23日⭐
+
+```python
+torch.mv(input, vec, *, out=None) → Tensor
+```
+
+对矩阵 `input` 和向量 `vec` 执行 matrix-vector 乘积。
+
+如果 `input` 为 $n\times m$ 张量，`vec` 是 size 为 $m$ 的 1D 张量，那么输出 `out` 是 size 为 $n$ 的 1D 张量。
+
+> [!NOTE]
+>
+> 该操作不支持[广播](../tutorials/notes/broadcasting.md)。
+
+参数：
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 要相乘的矩阵
+- **vec** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 要相乘的向量
+
+关键字参数：
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> mat = torch.randn(2, 3)
+>>> vec = torch.randn(3)
+>>> torch.mv(mat, vec)
+tensor([ 1.0404, -0.6361])
+```
 
 
 
