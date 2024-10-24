@@ -34,6 +34,18 @@ Torch 定义了 10 种张量类型，包含 CPU 和 GPU 变体，如下：
 
 `torch.Tensor` 的默认类型为 `torch.FloatTensor`。
 
+## 属性
+
+`Tensor` 主要有 8 大属性：
+
+| 属性                                  | 说明               |
+| ------------------------------------- | ------------------ |
+| data                                  | 多维数组，包含数据 |
+| dtype                                 | 数据类型           |
+| shape                                 | 多维数组形状       |
+| device                                | 张量所在设备       |
+| grad, grad_fn, is_leaf, requires_grad | 计算梯度所需       |
+
 ## 初始化和基础操作
 
 - 可以用 `torch.tensor()` 构造函数从 Python list 或 sequence 创建张量
@@ -107,7 +119,11 @@ tensor([[ 2.0000, -2.0000],
 
 > **WARNING** 当前 torch.Tensor 实现具有内存开销，创建大量小张量会导致高内存。对这种情况，建议使用一个大的张量结构。
 
-## Tensor
+
+
+
+
+## Tensor 参考
 
 ### Tensor.new_tensor
 
@@ -176,17 +192,23 @@ torch.Size([4, 2, 3])
 
 ### numpy
 
+> 2024-10-24 ⭐
+
 ```python
 Tensor.numpy(*, force=False) → numpy.ndarray
 ```
 
-返回张量的 numpy 形式。
+返回张量的 numpy `ndarray` 形式。
 
-如果 `force` 为 `False`（默认），则要求 tensor 位于 CPU、不需要 grad、没有设置耦合位，dtype 和 layout  NumPy 支持才执行转换。返回的 ndarray 和 tensor 共享内存，因此张量和 ndarray 变化同步。
+如果 `force` 为 `False`（默认），则要求 tensor 位于 CPU、不需要 grad、没有设置耦合位，dtype 和 layout  NumPy 支持才执行转换。返回的 `ndarray` 和 tensor 共享内存，因此张量和 `ndarray` 变化同步。
 
-如果 `force` 为 `True`，则等价于 `t.detach().cpu().resolve_conj().resolve_neg().numpy()`。如果 tensor 不在 CPU，或者设置了共轭位或负位，则张量与 ndarray 不共享内存。将 `force` 设置为 `True` 是一种获得张量 ndarray 形式的简单方法。
+如果 `force` 为 `True`，则等价于 `t.detach().cpu().resolve_conj().resolve_neg().numpy()`。如果 tensor 不在 CPU，或者设置了共轭位或负位，则张量与 `ndarray` 不共享内存。将 `force` 设置为 `True` 是一种获得张量 `ndarray` 形式的简单方法。
 
 即设置 `force=True` 返回的 ndarray 可以与张量不共享内存。
+
+参数：
+
+- **force** ([*bool*](https://docs.python.org/3/library/functions.html#bool)) – `True` 表示 `ndarray` 可能是张量副本，而总是共享内存，默认 `False`
 
 ### scatter_
 
@@ -357,9 +379,18 @@ Tensor.device
 
 Is the torch.device where this Tensor is.
 
-Tensor.grad
+### Tensor.grad
 
-This attribute is None by default and becomes a Tensor the first time a call to backward() computes gradients for self.
+> 2024-10-24⭐
+
+```python
+Tensor.grad
+```
+
+该属性默认为 `None`，在第一次调用 `backward()` 计算梯度时变为张量，保存计算出的梯度，下次调用 `backward()` 将把梯度累计 (add) 起来。
+
+与输入 `data` 的 shape 一致。
+
 
 Tensor.ndim
 
@@ -938,6 +969,8 @@ Return the number of dense dimensions in a sparse tensor self.
 
 ### Tensor.detach
 
+> 2024-10-24⭐
+
 ```python
 Tensor.detach()
 ```
@@ -946,15 +979,10 @@ Tensor.detach()
 
 返回的张量不需要梯度。
 
-该方法会影响正向模式的 AD 梯度，即结果也不会有正向模式的 AD 梯度。
+该方法会影响正向模式的 AD 梯度，并且结果也不会有正向模式的 AD 梯度。
 
-> **NOTE**
+> [!NOTE]
 > 返回的张量与原张量共享内存。对返回张量执行的原地操作，如 `resize_`, `resize_as_`, `set_`, `transpose_` 会触发错误。
-
-
-Tensor.detach_
-
-Detaches the Tensor from the graph that created it, making it a leaf.
 
 Tensor.diag
 
@@ -1410,9 +1438,46 @@ Tensor.is_inference
 
 See torch.is_inference()
 
-Tensor.is_leaf
+### Tensor.is_leaf
 
-All Tensors that have requires_grad which is False will be leaf Tensors by convention.
+> 2024-10-24⭐
+
+```python
+Tensor.is_leaf
+```
+
+按照惯例，所有 `requires_grad`  为 `False` 的张量都是 leaf 张量。
+
+对 `requires_grad` 为 `True` 的张量，如果它们是由用户创建的，则为 leaf 张量。这意味着它们不是操作的结果，因此 `grad_fn` 为 `None`。
+
+只有 leaf 张量在调用 `backward()` 才会填充 `grad` 值。对非 leaf 张量，需要调用 `retain_grad()` 才会保留其 `grad` 值。
+
+```python
+>>> a = torch.rand(10, requires_grad=True)
+>>> a.is_leaf
+True
+>>> b = torch.rand(10, requires_grad=True).cuda()
+>>> b.is_leaf
+False
+# b 是通过将 cpu 张量转换为 cuda 张量的操作创建的
+>>> c = torch.rand(10, requires_grad=True) + 2
+>>> c.is_leaf
+False
+# c 是通过加法操作创建的
+>>> d = torch.rand(10).cuda()
+>>> d.is_leaf
+True
+# d 不需要梯度，因此没有创建它的操作（由 autograd 跟踪的操作）
+>>> e = torch.rand(10).cuda().requires_grad_()
+>>> e.is_leaf
+True
+# e 需要梯度，且没有创建它的操作
+>>> f = torch.rand(10, requires_grad=True, device="cuda")
+>>> f.is_leaf
+True
+# f 要求梯度，且没有创建它的操作
+```
+
 
 Tensor.is_pinned
 
@@ -1867,6 +1932,8 @@ Fills self tensor with elements samples from the normal distribution parameteriz
 
 ### Tensor.numpy
 
+> 2024-10-24⭐
+
 ```python
 Tensor.numpy(*, force=False) → numpy.ndarray
 ```
@@ -1879,9 +1946,7 @@ Tensor.numpy(*, force=False) → numpy.ndarray
 
 **参数：**
 
-- **force** (`bool`)
-
-`True` 时 ndarray 可能是张量的副本，不一定共享内存。
+- **force** (`bool`) `True` 时 `ndarray` 可能是张量的副本，不一定共享内存。
 
 Tensor.orgqr
 
@@ -2059,9 +2124,16 @@ Tensor.retain_grad
 
 Enables this Tensor to have their grad populated during backward().
 
-Tensor.retains_grad
+### Tensor.retains_grad
 
-Is True if this Tensor is non-leaf and its grad is enabled to be populated during backward(), False otherwise.
+> 2024-10-24⭐
+
+```python
+Tensor.retains_grad
+```
+
+如果该张量为 non-leaf，且其 `grad` 在 `backward()` 期间保存，则为 `True`。否则为 `False`。
+
 
 Tensor.roll
 

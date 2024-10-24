@@ -41,24 +41,22 @@ torch.tensor(data, *,
 
 **参数：**
 
-- **data** (`array_like`)
-
-张量的初始化数据。支持 `list`, `tuple`, `ndarray`, scalar 等类型。
+- **data** (`array_like`) - 张量的初始化数据。支持 `list`, `tuple`, `ndarray`, scalar 等类型。
 
 **关键字参数：**
 
 - **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 设置张量类型。`None` 表示从 `data` 推断类型。
 - **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。`None` 且 `data` 为 tensor，则使用 `data` 所在 device。`None` 且 `data` 不是 tensor，则使用当前 device。
 - **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – autograd 是否记录返回的 tensor 上的操作。默认 `False`
-- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否将返回的 tensor 放在 pinned memory，仅用于 CPU tensor。默认 `False`.
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否将返回的张量放在 pinned memory，仅用于 cpu 张量。默认 `False`.
 
 ```python
->>> torch.tensor([[0.1, 1.2], [2.2, 3.1], [4.9, 5.2]])
+>>> torch.tensor([[0.1, 1.2], [2.2, 3.1], [4.9, 5.2]]) # 从 list 创建张量
 tensor([[ 0.1000,  1.2000],
         [ 2.2000,  3.1000],
         [ 4.9000,  5.2000]])
 
->>> torch.tensor([0, 1])  # Type inference on data
+>>> torch.tensor([0, 1])  # 根据数据推断类型
 tensor([ 0,  1])
 
 >>> torch.tensor([[0.11111, 0.222222, 0.3333333]],
@@ -129,29 +127,29 @@ Create a view of an existing torch.Tensor input with specified size, stride and 
 
 ### torch.from_numpy
 
+> 2024-10-24⭐
+
 ```python
 torch.from_numpy(ndarray) → Tensor
 ```
 
 使用 `numpy.ndarray` 创建 `Tensor`。
 
-返回的张量与 `ndarray` 共享内存。返回的张量不能调整大小。
+返回的张量与 `ndarray` 共享内存。修改张量 `ndarray` 随之改变，反之亦然。返回的张量不能调整大小。
 
-目前支持的 `ndarray` 类型：`numpy.float64`, `numpy.float32`, `numpy.float16`, `numpy.complex64`, `numpy.complex128`, `numpy.int64`, `numpy.int32`, `numpy.int16`, `numpy.int8`, `numpy.uint8`, and `numpy.bool`。
+目前支持的 `ndarray` 类型：`numpy.float64`, `numpy.float32`, `numpy.float16`, `numpy.complex64`, `numpy.complex128`, `numpy.int64`, `numpy.int32`, `numpy.int16`, `numpy.int8`, `numpy.uint8` 和 `numpy.bool`。
 
-> **WARNING**
-> 从只读 `ndarray` 创建的张量不支持写入。
-
-**示例：**
+> [!WARNING]
+> 从 read-only `ndarray` 创建的张量不支持写入。
 
 ```python
 >>> a = numpy.array([1, 2, 3])
 >>> t = torch.from_numpy(a)
 >>> t
 tensor([ 1,  2,  3])
->>> t[0] = -1
->>> a
-array([-1,  2,  3])
+>>> t[0] = -1 # 修改张量
+>>> a # ndarray 随之变化
+array([-1,  2,  3]) 
 ```
 
 from_dlpack
@@ -164,45 +162,31 @@ Creates a 1-dimensional Tensor from an object that implements the Python buffer 
 
 ### torch.zeros
 
+> 2024-10-24⭐
+
 ```python
 torch.zeros(*size, *, 
     out=None, 
     dtype=None, 
     layout=torch.strided, 
     device=None, 
-    requires_grad=False) → Tensor
+    requires_grad=False
+) → Tensor
 ```
 
-创建张量，并以 0 初始化。张量 shape 由参数 `size` 定义。
-
+创建以 0 填充的张量，其 shape 由参数 `size` 定义。
 
 **参数：**
 
-- **size** (`int`...)
-
-整数序列，定义输出张量 shape。支持可变参数、list 和 tuple。
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 定义输出张量 shape 的整数序列。支持可变参数、list 和 tuple。
 
 **关键字参数：**
 
-- **out** (`Tensor`, optional)
-
-输出张量。
-
-- **dtype** (`torch.dtype`, optional)
-
-指定张量类型。默认：`None` 表示使用全局默认类型 (`torch.set_default_tensor_type()`)。
-
-- **layout** (`torch.layout`, optional)
-
-指定张量 layout。默认 `torch.strided`。
-
-- **device** (`torch.device`, optional)
-
-指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (`torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为 CUDA。
-
-- **requires_grad** (`bool`, optional)
-
-支持梯度。默认 `False`。
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 期望张量类型。默认：`None` 表示使用全局默认类型 (参考 [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 指定张量 layout。默认 `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). [`device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device) 对 CPU 张量类型为 CPU，对 CUDA 张量类型为当前 CUDA device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录返回张量上的操作。默认 `False`.
 
 ```python
 >>> torch.zeros(2, 3)
@@ -215,6 +199,8 @@ tensor([ 0.,  0.,  0.,  0.,  0.])
 
 ### torch.zeros_like
 
+> 2024-10-24⭐
+
 ```python
 torch.zeros_like(input, *, 
     dtype=None, 
@@ -224,9 +210,22 @@ torch.zeros_like(input, *,
     memory_format=torch.preserve_format) → Tensor
 ```
 
-创建shape 与 `input` 相同的张量，并以 0 初始化。`torch.zeros_like(input)` 等价于 `torch.zeros(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
+创建以 0 填充的张量，其 shape 与 `input` 相同。`torch.zeros_like(input)` 等价于 `torch.zeros(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
 
-**例如：**
+> [!WARNING]
+> 从 0.4 开始，此函数不再支持 `out` 关键字。作为替代方案，旧版 `torch.zeros_like(input, out=output)` 相当于 `torch.zeros(input.size(), out=output)`.
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – `input` 的 size 决定输出张量的 size
+
+**关键字参数：**
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 返回张量类型。默认: `None` 表示采用 `input` 的 dtype
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 指定张量的 layout。默认：`None` 表示采用 `input` 的 layout
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 指定张量的 device。默认：`None` 表示 `input` 的 device
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录张量上的操作。默认 `False`.
+- **memory_format** ([`torch.memory_format`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.memory_format), optional) – 指定张量的内存格式。默认 `torch.preserve_format`.
 
 ```python
 >>> input = torch.empty(2, 3)
@@ -237,6 +236,8 @@ tensor([[ 0.,  0.,  0.],
 
 ### torch.ones
 
+> 2024-10-24⭐
+
 ```python
 torch.ones(*size, *, 
     out=None, 
@@ -246,9 +247,19 @@ torch.ones(*size, *,
     requires_grad=False) → Tensor
 ```
 
-创建张量，并以 1 初始化。张量 shape 由参数 `size` 定义。
+创建以 1 填充的张量，其 shape 由参数 `size` 定义。
 
-**例如：**
+**参数：**
+
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 定义输出张量 shape 的整数序列。支持可变参数、list 和 tuple。
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 期望张量类型。默认：`None` 表示使用全局默认类型 (参考 [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 指定张量 layout。默认 `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). [`device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device) 对 CPU 张量类型为 CPU，对 CUDA 张量类型为当前 CUDA device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录返回张量上的操作。默认 `False`.
 
 ```python
 >>> torch.ones(2, 3)
@@ -261,6 +272,8 @@ tensor([ 1.,  1.,  1.,  1.,  1.])
 
 ### torch.ones_like
 
+> 2024-10-24⭐
+
 ```python
 torch.ones_like(input, *, 
     dtype=None, 
@@ -270,9 +283,22 @@ torch.ones_like(input, *,
     memory_format=torch.preserve_format) → Tensor
 ```
 
-创建 `size` 与 `input` 相同的张量，并用 1 初始化。`torch.ones_like(input)` 等价于 `torch.ones(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
+创建以 1 填充的张量，其 shape 与 `input` 相同。`torch.ones_like(input)` 等价于 `torch.ones(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
 
-**例如：**
+> [!WARNING]
+> 从 0.4 开始，此函数不再支持 `out` 关键字。作为替代方案，旧版 `torch.ones_like(input, out=output)` 相当于 `torch.ones(input.size(), out=output)`.
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – `input` 的 size 决定输出张量的 size
+
+**关键字参数：**
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 指定张量类型。默认: `None` 表示采用 `input` 的 dtype
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 指定张量 layout。默认：`None` 表示采用 `input` 的 layout
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 指定张量 device。默认：`None` 表示 `input` 的 device
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录张量上的操作。默认 `False`.
+- **memory_format** ([`torch.memory_format`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.memory_format), optional) – 指定张量的内存格式。默认 `torch.preserve_format`.
 
 ```python
 >>> input = torch.empty(2, 3)
@@ -281,11 +307,19 @@ tensor([[ 1.,  1.,  1.],
         [ 1.,  1.,  1.]])
 ```
 
-### torch.arange
+### arange
+
+> 2024-10-24⭐
 
 ```python
-torch.arange(start=0, end, step=1, *, out=None, dtype=None, layout=torch.strided, 
-             device=None, requires_grad=False) → Tensor
+torch.arange(start=0, 
+        end, 
+        step=1, *, 
+        out=None, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False) → Tensor
 ```
 
 创建一个 1D tensor，即在区间 `[start, end)` 以步长 `step` 创建大小为 $\lceil\frac{\text{end}-\text{start}}{\text{step}}\rceil$ 的 tensor。
@@ -304,7 +338,6 @@ $$
 
 - **out** (`Tensor`, optional)：输出张量。
 - **dtype** (`torch.dtype`, optional)：tensor 类型。默认：如果为 `None`，则使用全局默认，即 `torch.set_default_dtype()`，如果不指定 `dtype`，从输入参数推断类型。如果 `start`, `end` 或 `step` 任意值为 float，则 `dtype` 为默认 `dtype`，参考 `get_default_dtype()`。否则 `dtype` 为 `torch.int64`。
-
 - **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 返回 tensor 的 layout。默认 `torch.strided`
 - **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) –  设置 device。`None` 表示使用当前设备，参考 `torch.set_default_device()`。`device` 对 CPU-tensor 为 CPU，对 CUDA-tensor 为 CUDA。
 - **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – autograd 需要记录 tensor 上的操作，默认  `False`.
@@ -318,35 +351,60 @@ tensor([ 1,  2,  3])
 tensor([ 1.0000,  1.5000,  2.0000])
 ```
 
-### torch.linspace
+### range
+
+> 2024-10-24⭐
 
 ```python
-torch.linspace(
-    start, end, steps, *, out=None, dtype=None, 
-    layout=torch.strided, 
-    device=None, 
-    requires_grad=False) → Tensor
+torch.range(start=0, 
+        end, 
+        step=1, *, 
+        out=None, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False) → Tensor
 ```
 
-创建一个长度为 `steps` 的一维张量，张量值从 `start` 到 `end` （inclusive）均匀分布。即：
+> [!WARNING]
+> 已弃用。该函数与 Python 内置的 `range` 不一致，改用 [torch.arange](#arange)，它会生成 [start, end) 范围的值。
 
-$$(start,start+\frac{end-start}{steps-1},...,start+(steps-2)*\frac{end-start}{steps-1},end)$$
+### linspace
 
-从 PyTorch 1.11 开始，linspace 需要 steps 参数。使用 `steps=100` 重现之前版本的行为。 
+> 2024-10-24⭐
+
+```python
+torch.linspace(start, 
+        end, 
+        steps, *, 
+        out=None, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False) → Tensor
+```
+
+创建一个长度为 `steps` 的 1D 张量，张量值从 `start` 到 `end` （inclusive）等距分布。即：
+
+$$
+(\text{start},\text{start}+\frac{\text{end}-\text{start}}{\text{steps}-1},\cdots,\text{start}+(\text{steps}-2)*\frac{\text{end}-\text{start}}{\text{steps}-1},\text{end})
+$$
+
+从 PyTorch 1.11 开始，`linspace` 需要 `steps` 参数。使用 `steps=100` 重现之前版本的行为。 
 
 **参数：**
 
-- **start** (`float`)：起始值
-- **end** (`float`)：末尾值
-- **steps** (`int`)：数据个数
+- **start** ([*float*](https://docs.python.org/3/library/functions.html#float) *or* [*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 起始值，如果是 `Tensor`，必须是 0D
+- **end** ([*float*](https://docs.python.org/3/library/functions.html#float) *or* [*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 末尾值，如果使用 `Tensor`，必须是 0D
+- **steps** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 张量 size
 
 **关键字参数：**
 
-- **out** (`Tensor`, optional)：输出张量。
-- **dtype** (`torch.dtype`, optional) ：数据类型。默认：当 `start` 和 `end` 为实数为全局默认类型 `torch.get_default_dtype()`，其中一个为复数时则 dtype 为复数。
-- **layout** (`torch.layout`, optional)：期望 layout，默认 `torch.strided`。
-- **device** (`torch.device`, optional)：期望 device。`None` 指对默认张量类型使用当前设备 (参考 `torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为当前 CUDA 设备。
-- **requires_grad** (`bool`, optional)：如果 autograd 则应该记录返回张量上的操作，默认 `False`
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([*torch.dtype*](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype)*,* *optional*) – 数据类型。默认：`None` 表示当 `start` 和 `end` 都是实数时使用全局默认 dtype (see torch.get_default_dtype())，当其中一个为复数，则使用相应的复数 dtype
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量为 cpu，对 cuda 张量为当前 cuda device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 时候记录操作。默认: `False`.
 
 ```python
 >>> torch.linspace(3, 10, steps=5)
@@ -359,19 +417,103 @@ tensor([-10.,  -5.,   0.,   5.,  10.])
 tensor([-10.])
 ```
 
-logspace
+### logspace
 
-Creates a one-dimensional tensor of size steps whose values are evenly spaced from {{\text{{base}}}}^{{\text{{start}}}}base 
-start
-  to {{\text{{base}}}}^{{\text{{end}}}}base 
-end
- , inclusive, on a logarithmic scale with base base.
+> 2024-10-24⭐
 
-eye
+```python
+torch.logspace(start, 
+        end, 
+        steps, 
+        base=10.0, *, 
+        out=None, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False) → Tensor
+```
 
-Returns a 2-D tensor with ones on the diagonal and zeros elsewhere.
+创建 size 为 `steps` 的张量，其值在 $\text{base}^{\text{start}}$ 到 $\text{base}^{\text{end}}$ (inclusive) 之间以底数为 `base` 的对数均匀分布。即：
 
-### torch.empty
+$$
+(\text{base}^{\text{start}},\text{base}^{(\text{start}+\frac{\text{end}-\text{start}}{\text{steps}-1})},\cdots,\text{base}^{(\text{start}+(\text{steps}-2)*\frac{\text{end}-\text{start}}{\text{steps}-1})},\text{base}^{\text{end}})
+$$
+
+从 PyTorch 1.11 开始，`logspace` 需要 `steps` 参数。使用 `steps=100` 可以恢复之前的行为。
+
+**参数：**
+
+- **start** ([*float*](https://docs.python.org/3/library/functions.html#float) *or* [*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 起始值，使用 `Tensor` 必须是 0D
+- **end** ([*float*](https://docs.python.org/3/library/functions.html#float) *or* [*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 末尾值，使用 `Tensor` 必须是 0D
+- **steps** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 张量 size
+- **base** ([*float*](https://docs.python.org/3/library/functions.html#float)*,* *optional*) – 底数，默认: `10.0`.
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([*torch.dtype*](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype)*,* *optional*) – 数据类型。默认：`None` 表示当 `start` 和 `end` 都是实数时使用全局默认 dtype (see torch.get_default_dtype())，当其中一个为复数，则使用相应的复数 dtype
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量为 cpu，对 cuda 张量为当前 cuda device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录操作。默认: `False`.
+
+```python
+>>> torch.logspace(start=-10, end=10, steps=5)
+tensor([ 1.0000e-10,  1.0000e-05,  1.0000e+00,  1.0000e+05,  1.0000e+10])
+>>> torch.logspace(start=0.1, end=1.0, steps=5)
+tensor([  1.2589,   2.1135,   3.5481,   5.9566,  10.0000])
+>>> torch.logspace(start=0.1, end=1.0, steps=1)
+tensor([1.2589])
+>>> torch.logspace(start=2, end=2, steps=1, base=2)
+tensor([4.0])
+```
+
+### eye
+
+> 2024-10-24⭐
+
+```python
+torch.eye(n, 
+          m=None, *, 
+          out=None, 
+          dtype=None, 
+          layout=torch.strided, 
+          device=None, 
+          requires_grad=False) → Tensor
+```
+
+创建一个二维张量，对角线上值为 1，其它地方为 0.
+
+**参数：**
+
+- **n** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 行数
+- **m** ([*int*](https://docs.python.org/3/library/functions.html#int)*,* *optional*) – 列数，默认为 `n`
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量类型。默认：`None` 表示 global 默认 (see [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 设置 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 设置 device。默认：`None` 表示对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型使用 cpu，对 cuda 张量类型使用当前 cuda device。
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录操作。默认: `False`.
+
+**返回：**
+
+- 2D 张量，对角线上为 1，其它地方为 0.
+
+**返回类型：**
+
+- `Tensor`
+
+```python
+>>> torch.eye(3)
+tensor([[ 1.,  0.,  0.],
+        [ 0.,  1.,  0.],
+        [ 0.,  0.,  1.]])
+```
+
+### empty
+
+> 2024-10-24⭐
 
 ```python
 torch.empty(*size, *, 
@@ -384,45 +526,24 @@ torch.empty(*size, *,
     memory_format=torch.contiguous_format) → Tensor
 ```
 
-创建一个张量，其值未初始化。张量 shape 由 `size` 参数定义。
+创建一个未初始化的张量，其 shape 由 `size` 定义。
+
+> [!NOTE]
+> 如果 `torch.use_deterministic_algorithms()` 和 `torch.utils.deterministic.fill_uninitialized_memory` 都设置为 `True`，则将初始化输出张量，以防止任何可能的不确定行为将数据用作操作的输入。浮点数和 complex 张量用 NaN 填充，整数张量用其 Integet.Max 填充。
 
 **参数：**
 
-- **size** (`int`...)
-
-整数序列，定义输出张量 shape。支持可变参数、list 和 tuple。
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 整数序列，定义张量 shape。支持可变参数和 list, tuple 等集合
 
 **关键字参数：**
 
-- **out** (`Tensor`, optional)
-
-输出张量。
-
-- **dtype** (`torch.dtype`, optional)
-
-指定张量类型。默认：`None` 表示使用全局默认类型 (`torch.set_default_tensor_type()`)。
-
-- **layout** (`torch.layout`, optional)
-
-指定张量 layout。默认 `torch.strided`。
-
-- **device** (`torch.device`, optional)
-
-指定张量 device。默认：`None` 表示使用默认张量类型的当前 device (`torch.set_default_tensor_type()`)。对 CPU 张量类型 `device` 为 CPU，对 CUDA 张量类型为 CUDA。
-
-- **requires_grad** (`bool`, optional)
-
-支持梯度。默认 `False`。
-
-- **pin_memory** (`bool`, optional)
-
-`True` 表示是否在锁业内存中分配张量。仅用于 CPU 张量，默认 `False`。
-
-- **memory_format** (`torch.memory_format`, optional)
-
-指定张量的内存格式。默认 `torch.contiguous_format`。
-
-例如：
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量类型。默认：`None` 使用 global 默认 (see [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 表示对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型使用 cpu，对 cuda 张量类型使用当前 cuda device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 支持梯度。默认: `False`.
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – `True` 表示是否在锁页内存中分配张量。仅用于 cpu 张量，默认 `False`。
+- **memory_format** ([`torch.memory_format`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.memory_format), optional) – 张量内存格式。默认: `torch.contiguous_format`.
 
 ```python
 >>> torch.empty((2,3), dtype=torch.int64)
@@ -430,7 +551,9 @@ tensor([[ 9.4064e+13,  2.8000e+01,  9.3493e+13],
         [ 7.5751e+18,  7.1428e+18,  7.5955e+18]])
 ```
 
-### torch.empty_like
+### empty_like
+
+> 2024-10-24⭐
 
 ```python
 torch.empty_like(input, *, 
@@ -440,6 +563,8 @@ torch.empty_like(input, *,
     requires_grad=False, 
     memory_format=torch.preserve_format) → Tensor
 ```
+
+参考 [zeros_like](#torchzeros_like)。
 
 返回一个 `size` 与 `input` 相同的张量，值未初始化。`torch.empty_like(input)` 等价于 `torch.empty(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
 
@@ -458,17 +583,104 @@ tensor([[0, 0, 0],
         [0, 0, 0]], device='cuda:0', dtype=torch.int32)
 ```
 
-empty_strided
+### empty_strided
 
-Creates a tensor with the specified size and stride and filled with undefined data.
+> 2024-10-24⭐
 
-full
+```python
+torch.empty_strided(size, 
+                    stride, *, 
+                    dtype=None, 
+                    layout=None, 
+                    device=None, 
+                    requires_grad=False, 
+                    pin_memory=False) → Tensor
+```
 
-Creates a tensor of size size filled with fill_value.
+创建指定 `size` 和 `stride` 的张量，不初始化。
 
-full_like
+> [!WARNING]
+> 如果创建的张量出现 overlapped (多个 indices 引用内存中的同一个元素)，则其行为不确定。
 
-Returns a tensor with the same size as input filled with fill_value.
+> [!NOTE]
+> 如果 `torch.use_deterministic_algorithms()` 和 `torch.utils.deterministic.fill_uninitialized_memory` 都设置为 `True`，则将初始化输出张量，以防止任何可能的不确定行为将数据用作操作的输入。浮点数和 complex 张量用 NaN 填充，整数张量用其 Integet.Max 填充。
+
+**参数：**
+
+- **size** ([*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* [*int*](https://docs.python.org/3/library/functions.html#int)) – 张量 shape
+- **stride** ([*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* [*int*](https://docs.python.org/3/library/functions.html#int)) – 张量 strides
+
+**关键字参数：**
+
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量类型。默认：`None` 使用 global 默认 (see [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 表示对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型使用 cpu，对 cuda 张量类型使用当前 cuda device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 支持梯度。默认: `False`.
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – `True` 表示在锁业内存中分配张量。仅用于 cpu 张量，默认 `False`。
+
+```python
+>>> a = torch.empty_strided((2, 3), (1, 2))
+>>> a
+tensor([[8.9683e-44, 4.4842e-44, 5.1239e+07],
+        [0.0000e+00, 0.0000e+00, 3.0705e-41]])
+>>> a.stride()
+(1, 2)
+>>> a.size()
+torch.Size([2, 3])
+```
+
+### full
+
+> 2024-10-24⭐
+
+```python
+torch.full(size, 
+        fill_value, *, 
+        out=None, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False) → Tensor
+```
+
+创建以 `fill_value` 填充大小为 `size` 的张量。张量的 dtype 从 `fill_value` 推断出来。
+
+**参数：**
+
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 定义张量 shape，支持包含整数的 list, tuple 和 [`torch.Size`](https://pytorch.org/docs/stable/size.html#torch.Size).
+- **fill_value** (*Scalar*) – 用来填充张量的值.
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量类型，默认：`None` 表示使用 global 默认 (see [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 表示使用默认张量类型的当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). [`device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device) 对 cpu 张量类型为 cpu，对 cuda 张量类型为当前 CUDA device
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否记录操作。默认: `False`.
+
+```python
+>>> torch.full((2, 3), 3.141592)
+tensor([[ 3.1416,  3.1416,  3.1416],
+        [ 3.1416,  3.1416,  3.1416]])
+```
+
+### full_like
+
+> 2024-10-24⭐
+
+```python
+torch.full_like(input, 
+        fill_value, \*, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False, 
+        memory_format=torch.preserve_format) → Tensor
+```
+
+参考 [zeros_like](#torchzeros_like)。
+
+
 
 quantize_per_tensor
 
@@ -493,14 +705,6 @@ Constructs a complex tensor whose elements are Cartesian coordinates correspondi
 heaviside
 
 Computes the Heaviside step function for each element in input.
-
-### torch.ones
-
-```python
-torch.ones(*size, *, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) → Tensor
-```
-
-创建所有值为 1 的张量，张量大小为 `size`。
 
 
 ## 索引、切片、连接和突变
@@ -952,9 +1156,104 @@ multinomial
 
 Returns a tensor where each row contains num_samples indices sampled from the multinomial probability distribution located in the corresponding row of tensor input.
 
-normal
+### normal
 
-Returns a tensor of random numbers drawn from separate normal distributions whose mean and standard deviation are given.
+> 2024-10-24⭐
+
+```python
+torch.normal(mean, std, *, generator=None, out=None) → Tensor
+```
+
+对每个元素使用指定平均值和标准差从正态分布抽取随机数。
+
+`mean` 为张量，指定每个正态分布的平均值。
+
+`std` 为张量，给出每个正态分布的标准差。
+
+`mean` 和 `std` 的 shape 不需要匹配，但是每个张量中的元素总数要相同。
+
+> [!NOTE]
+> 当 shape 不匹配，`mean`  的 shape 作为返回张量的 shape。
+> 当 `std` 是 CUDA-tensor，该函数将其 device 与 CPU 同步。
+
+根据 `mean` 和 `std` 取张量还是标准，有 4 种组合形式，下面依次描述。
+
+**参数：**
+
+- **mean** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 包含每个元素的平均值的张量
+- **std** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 包含每个元素的标准差的张量
+
+**关键字参数：**
+
+- **generator** ([`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional) – 用于抽样的伪随机数生成器
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> torch.normal(mean=torch.arange(1., 11.), std=torch.arange(1, 0, -0.1))
+tensor([  1.0425,   3.5672,   2.7969,   4.2925,   4.7229,   6.2134,
+          8.0505,   8.1408,   9.0563,  10.0566])
+```
+
+```python
+torch.normal(mean=0.0, std, *, out=None) → Tensor
+```
+
+与上面函数类似，但是所有元素共享相同的平均值。
+
+**参数：**
+
+- **mean** ([*float*](https://docs.python.org/3/library/functions.html#float)*,* *optional*) – 所有分布的平均值
+- **std** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 包含每个元素的标准差的张量
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> torch.normal(mean=0.5, std=torch.arange(1., 6.)) # 5 个元素，5 个标准差
+tensor([-1.2793, -1.0732, -2.0687,  5.1177, -1.2303])
+```
+
+```python
+torch.normal(mean, std=1.0, *, out=None) → Tensor
+```
+
+同上，但所有元素共享标准差。
+
+**参数：**
+
+- **mean** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 包含每个元素的平均值的张量
+- **std** ([*float*](https://docs.python.org/3/library/functions.html#float)*,* *optional*) – 所有分布的标准差
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> torch.normal(mean=torch.arange(1., 6.))
+tensor([ 1.1552,  2.6148,  2.6535,  5.8318,  4.2361])
+```
+
+```python
+torch.normal(mean, std, size, *, out=None) → Tensor
+```
+
+同上，但是所有元素共享平均值和标准差。返回张量的大小由 `size` 指定。
+
+**参数：**
+
+- **mean** ([*float*](https://docs.python.org/3/library/functions.html#float)) – 所有分布的平均值
+- **std** ([*float*](https://docs.python.org/3/library/functions.html#float)) – 所有分布的标准差
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 定义输出张量的 shape
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> torch.normal(2, 3, size=(1, 4))
+tensor([[-1.3987, -1.9544,  3.6048,  0.7909]])
+```
 
 poisson
 
@@ -1046,28 +1345,36 @@ tensor([[0.2332, 0.4047, 0.2162],
 
 可以看到 `random1` 和 `random3` 的值相同，`random2` 和 `random4` 的值相同。手动设置 RNG 的 seed 会重置。
 
-### torch.rand
+### rand
+
+> 2024-10-24⭐
 
 ```python
 torch.rand(*size, *, 
-    out=None, 
-    dtype=None, 
-    layout=torch.strided, 
-    device=None, 
-    requires_grad=False, pin_memory=False) → Tensor
+           generator=None, 
+           out=None, 
+           dtype=None, 
+           layout=torch.strided, 
+           device=None, 
+           requires_grad=False, 
+           pin_memory=False) → Tensor
 ```
 
-创建张量，从均匀分布 $[0,1)$ 中随机抽样填充张量。
+创建张量，从均匀分布 $[0,1)$ 中随机抽样填充张量，shape 由 `size` 定义。
 
-返回的张量大小由 `size` 定义。
+**参数：**
+
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 整数序列。支持可变参数或 list, tuple 之类的集合
 
 **关键字参数：**
 
-- **generator** (`torch.Generator`, optional)
-
-用于采样的伪随机数生成器。
-
-例如：
+- **generator** ([`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional) – 用于采样的伪随机数生成器
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量类型。默认：`None` 表示使用全局默认 (see [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 表示对默认张量类型使用当前 device(see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型使用 cpu，对 cuda 张量类型使用当前 cuda device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 支持梯度。默认: `False`.
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – `True` 表示是否在锁页内存中分配张量。仅用于 cpu 张量，默认 `False`。
 
 ```python
 >>> torch.rand(4)
@@ -1076,6 +1383,47 @@ tensor([ 0.5204,  0.2503,  0.3525,  0.5673])
 tensor([[ 0.8237,  0.5781,  0.6879],
         [ 0.3816,  0.7249,  0.0998]])
 ```
+
+### rand_like
+
+> 2024-10-24⭐
+
+```python
+torch.rand_like(input, *, 
+                dtype=None, 
+                layout=None, 
+                device=None, 
+                requires_grad=False, 
+                memory_format=torch.preserve_format) → Tensor
+```
+
+`torch.rand_like(input)` 等价于 `torch.rand(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。参考 [rand](#rand)。
+
+### randint
+
+```python
+torch.randint(low=0, 
+              high, 
+              size, \*, 
+              generator=None, 
+              out=None, 
+              dtype=None, 
+              layout=torch.strided, 
+              device=None, 
+              requires_grad=False) → Tensor
+```
+
+生成张量，使用 `low` (inclusive) 和 `high` (exclusive) 之间均分生成的随机整数填充，其 shape 由 `size` 定义。
+
+> [!NOTE]
+> 对全局默认 dtype `torch.float32`，该函数返回张量的 dtype 为 `torch.int64`
+
+**参数：**
+
+- **low** ([*int*](https://docs.python.org/3/library/functions.html#int)*,* *optional*) – Lowest integer to be drawn from the distribution. Default: 0.
+- **high** ([*int*](https://docs.python.org/3/library/functions.html#int)) – One above the highest integer to be drawn from the distribution.
+- **size** ([*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple)) – a tuple defining the shape of the output tensor.
+
 
 ### torch.randn
 
@@ -1120,20 +1468,6 @@ tensor([-0.6837, -0.0592,  1.2451, -0.8639])
 tensor([[ 0.6635, -1.0228,  0.0674],
         [ 1.4007,  1.6177, -0.7507]])
 ```
-
-### torch.rand_like
-
-```python
-torch.rand_like(input, *, 
-    dtype=None, 
-    layout=None, 
-    device=None, 
-    requires_grad=False, 
-    memory_format=torch.preserve_format) → Tensor
-```
-
-创建一个与 `input` 张量 size 相同的张量，用满足 [0,1) 均匀分布的随机数填充。`torch.rand_like(input)` 等价于 `torch.rand(input.size(), dtype=input.dtype, layout=input.layout, device=input.device)`。
-
 
 ### 原地随机采样
 
@@ -2517,6 +2851,8 @@ Returns a new tensor with materialized negation if input's negative bit is set t
 
 ### BLAS 和 LAPACK 操作
 
+
+
 #### torch.bmm
 
 ```python
@@ -2547,8 +2883,6 @@ $$out_i=input_i @ mat2_i$$
 torch.Size([10, 3, 5])
 ```
 
-
-
 | [`addbmm`](https://pytorch.org/docs/stable/generated/torch.addbmm.html#torch.addbmm) | Performs a batch matrix-matrix product of matrices stored in `batch1` and `batch2`, with a reduced add step (all matrix multiplications get accumulated along the first dimension). |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [`addmm`](https://pytorch.org/docs/stable/generated/torch.addmm.html#torch.addmm) | Performs a matrix multiplication of the matrices `mat1` and `mat2`. |
@@ -2571,7 +2905,6 @@ torch.Size([10, 3, 5])
 | [`lu`](https://pytorch.org/docs/stable/generated/torch.lu.html#torch.lu) | Computes the LU factorization of a matrix or batches of matrices `A`. |
 | [`lu_solve`](https://pytorch.org/docs/stable/generated/torch.lu_solve.html#torch.lu_solve) | Returns the LU solve of the linear system Ax=b*A**x*=*b* using the partially pivoted LU factorization of A from [`lu_factor()`](https://pytorch.org/docs/stable/generated/torch.linalg.lu_factor.html#torch.linalg.lu_factor). |
 | [`lu_unpack`](https://pytorch.org/docs/stable/generated/torch.lu_unpack.html#torch.lu_unpack) | Unpacks the LU decomposition returned by [`lu_factor()`](https://pytorch.org/docs/stable/generated/torch.linalg.lu_factor.html#torch.linalg.lu_factor) into the P, L, U matrices. |
-| [`matmul`](https://pytorch.org/docs/stable/generated/torch.matmul.html#torch.matmul) | Matrix product of two tensors.                               |
 | [`matrix_power`](https://pytorch.org/docs/stable/generated/torch.matrix_power.html#torch.matrix_power) | Alias for [`torch.linalg.matrix_power()`](https://pytorch.org/docs/stable/generated/torch.linalg.matrix_power.html#torch.linalg.matrix_power) |
 | [`matrix_exp`](https://pytorch.org/docs/stable/generated/torch.matrix_exp.html#torch.matrix_exp) | Alias for [`torch.linalg.matrix_exp()`](https://pytorch.org/docs/stable/generated/torch.linalg.matrix_exp.html#torch.linalg.matrix_exp). |
 | [`orgqr`](https://pytorch.org/docs/stable/generated/torch.orgqr.html#torch.orgqr) | Alias for [`torch.linalg.householder_product()`](https://pytorch.org/docs/stable/generated/torch.linalg.householder_product.html#torch.linalg.householder_product). |
@@ -2588,6 +2921,73 @@ torch.Size([10, 3, 5])
 | [`cumulative_trapezoid`](https://pytorch.org/docs/stable/generated/torch.cumulative_trapezoid.html#torch.cumulative_trapezoid) | Cumulatively computes the [trapezoidal rule](https://en.wikipedia.org/wiki/Trapezoidal_rule) along `dim`. |
 | [`triangular_solve`](https://pytorch.org/docs/stable/generated/torch.triangular_solve.html#torch.triangular_solve) | Solves a system of equations with a square upper or lower triangular invertible matrix A*A* and multiple right-hand sides b*b*. |
 | [`vdot`](https://pytorch.org/docs/stable/generated/torch.vdot.html#torch.vdot) | Computes the dot product of two 1D vectors along a dimension. |
+
+#### torch.matmul
+
+> 2024-10-24⭐
+
+```python
+torch.matmul(input, other, *, out=None) → Tensor
+```
+
+两个张量的矩阵乘积。
+
+具体行为取决于两个张量的维度：
+
+- 如果两个张量都是 1D，返回点积（标量）
+- 如果两个张量都是 2D，返回 matrix-matrix 乘积
+- 如果参数 1 为 1D，参数 2 为 2D，则在参数 1 前面加上 1 维以进行矩阵乘法
+- 如果参数 1 为 2D，参数 2 为 1D，则返回 matrix-vector 乘积
+- 如果两个参数都不低于 1D，且其中一个 >2D，则执行 batch 矩阵乘法。
+  - 如果参数 1 是 1D，则在前面添加 1 以执行 batch 矩阵乘法
+  - 如果参数 2 是 1D，则在前面添加 1 以执行 batch 矩阵乘法
+  - 对 non-matrix 维度（即 batch）进行广播（因此必须可广播）。例如，如果 `input` 是 $(j\times 1\times n\times n)$ 张量，`other` 是 $(k\times n\times n)$ 张量，那么 `out` 是 $(j\times k\times n\times n)$ 张量。在确定输入是否可广播时仅查看 batch 维度，不看矩阵维度。例如，如果 `input` 是 $(j\times 1\times n\times m)$ 张量，`other` 是 $(k\times m\times p)$ 张量，虽然最后两个维度不同，但是可广播的。`out` 为 $(j\times k\times n\times p)$ 张量。
+
+该操作支持 sparse-layout 参数。其中 matrix-matrix 对稀疏参数的限制与 `torch.mm` 相同。
+
+该操作支持 `TensorFloat32`。
+
+在某些 ROCm 设备，当使用 float16 输入时，该模块使用摆脱那个的精度进行后向传播。
+
+> [!NOTE]
+> 此函数的 1D dot-product 版本不支持 `out` 参数。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 乘法的第一个张量
+- **other** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 乘法的第二个张量
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> # vector x vector: dot-product
+>>> tensor1 = torch.randn(3)
+>>> tensor2 = torch.randn(3)
+>>> torch.matmul(tensor1, tensor2).size()
+torch.Size([])
+>>> # matrix x vector: (3, 4)x(4, 1)=(3, 1)
+>>> tensor1 = torch.randn(3, 4)
+>>> tensor2 = torch.randn(4)
+>>> torch.matmul(tensor1, tensor2).size()
+torch.Size([3])
+>>> # batched matrix x broadcasted vector: (10, 3, 4)x(4, 1)=(10, 3, 1)
+>>> tensor1 = torch.randn(10, 3, 4)
+>>> tensor2 = torch.randn(4)
+>>> torch.matmul(tensor1, tensor2).size()
+torch.Size([10, 3])
+>>> # batched matrix x batched matrix: (10, 3, 4)x(10, 4, 5)=(10, 3, 5)
+>>> tensor1 = torch.randn(10, 3, 4)
+>>> tensor2 = torch.randn(10, 4, 5)
+>>> torch.matmul(tensor1, tensor2).size()
+torch.Size([10, 3, 5])
+>>> # batched matrix x broadcasted matrix: (10, 3, 4)x(4, 5)=(10, 3, 5)
+>>> tensor1 = torch.randn(10, 3, 4)
+>>> tensor2 = torch.randn(4, 5)
+>>> torch.matmul(tensor1, tensor2).size()
+torch.Size([10, 3, 5])
+```
 
 #### torch.mm
 
