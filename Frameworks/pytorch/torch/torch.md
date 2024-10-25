@@ -22,7 +22,7 @@ Last updated: 2023-02-13, 10:24
 
 ## 创建张量
 
-### torch.tensor
+### tensor
 
 > 2024年10月22日 ⭐
 
@@ -79,7 +79,7 @@ asarray
 
 Converts obj to a tensor.
 
-### torch.as_tensor
+### as_tensor
 
 ```python
 torch.as_tensor(data, dtype=None, device=None) → Tensor
@@ -125,7 +125,7 @@ as_strided
 
 Create a view of an existing torch.Tensor input with specified size, stride and storage_offset.
 
-### torch.from_numpy
+### from_numpy
 
 > 2024-10-24⭐
 
@@ -160,7 +160,7 @@ frombuffer
 
 Creates a 1-dimensional Tensor from an object that implements the Python buffer protocol.
 
-### torch.zeros
+### zeros
 
 > 2024-10-24⭐
 
@@ -197,7 +197,7 @@ tensor([[ 0.,  0.,  0.],
 tensor([ 0.,  0.,  0.,  0.,  0.])
 ```
 
-### torch.zeros_like
+### zeros_like
 
 > 2024-10-24⭐
 
@@ -234,7 +234,7 @@ tensor([[ 0.,  0.,  0.],
         [ 0.,  0.,  0.]])
 ```
 
-### torch.ones
+### ones
 
 > 2024-10-24⭐
 
@@ -270,7 +270,7 @@ tensor([[ 1.,  1.,  1.],
 tensor([ 1.,  1.,  1.,  1.,  1.])
 ```
 
-### torch.ones_like
+### ones_like
 
 > 2024-10-24⭐
 
@@ -763,7 +763,7 @@ tensor([[0, 0],
         [1, 2]])
 ```
 
-### torch.cat
+### cat
 
 > 2024年10月22日 ⭐
 
@@ -771,7 +771,7 @@ tensor([[0, 0],
 torch.cat(tensors, dim=0, *, out=None) → Tensor
 ```
 
-将张量序列 `tensors` 沿指定维度串联起来。所有张量的 shape 必须相同（除了连接的维度）或 empty。
+将张量序列 `tensors` 沿指定维度拼接起来。所有张量的 shape 必须相同（除了拼接的维度）或 empty。
 
 `torch.cat()` 可以看作 `torch.split()` 和 `torch.chunk()` 的逆操作。
 
@@ -807,43 +807,273 @@ tensor([[ 0.6580, -1.0969, -0.4614,  0.6580, -1.0969, -0.4614,  0.6580,
          -0.5790,  0.1497]])
 ```
 
-### torch.concat
+### concat
 
 > 2024年10月22日 ⭐
 
-[torch.cat()](#torchcat) 的别名。
+[torch.cat()](#cat) 的别名。
 
-### torch.concatenate
+### concatenate
 
 > 2024年10月22日 ⭐
 
-[torch.cat()](#torchcat) 的别名。
+[torch.cat()](#cat) 的别名。
 
 ### conj
 
-Returns a view of input with a flipped conjugate bit.
+> 2024-10-25⭐
+
+```python
+torch.conj(input) → Tensor
+```
+
+返回 `input` 的共轭复数 view。如果 `input` 不是复数类型，直接返回 `input`。
+
+> [!NOTE]
+> `torch.conj()` 执行惰性共轭，不过实际的共轭张量可以随时使用 `torch.resolve_conj()` 得到。
+
+> [!WARNING]
+> 将来，`torch.conj()` 对非复数类型的 `input` 可能返回只读的 view。建议在输入为非复数  dtype 时不要修改 `torch.conj_physical()` 返回的张量，以与此兼容。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量
+
+```python
+>>> x = torch.tensor([-1 + 1j, -2 + 2j, 3 - 3j])
+>>> x.is_conj()
+False
+>>> y = torch.conj(x)
+>>> y.is_conj()
+True
+```
 
 ### chunk
 
-Attempts to split a tensor into the specified number of chunks.
+```python
+torch.chunk(input, chunks, dim=0) → List of Tensors
+```
+
+将张量拆分为 `chunks` 个。每个 chunk 是输入张量的一个 view。
+
+> [!NOTE]
+> 返回的 chunks 数可能少于要求的个数。
+> `torch.tensor_split()` 总是返回指定数量的 chunks。
+
+如果在指定维度 `dim` 上张量的大小可以被 `chunks` 整除，则返回的所有 chunks 大小相同。如果无法整除，则最后一个 chunk 大小不同。如果无法进行这种拆分，则返回的 chunks 可能少于 `chunks`。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 待拆分张量
+- **chunks** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 拆分的数量
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 拆分的维度
+
+```python
+>>> torch.arange(11).chunk(6) # 无法整除
+(tensor([0, 1]),
+ tensor([2, 3]),
+ tensor([4, 5]),
+ tensor([6, 7]),
+ tensor([8, 9]),
+ tensor([10]))
+>>> torch.arange(12).chunk(6) # 刚好整除
+(tensor([0, 1]),
+ tensor([2, 3]),
+ tensor([4, 5]),
+ tensor([6, 7]),
+ tensor([8, 9]),
+ tensor([10, 11]))
+>>> torch.arange(13).chunk(6)
+(tensor([0, 1, 2]),
+ tensor([3, 4, 5]),
+ tensor([6, 7, 8]),
+ tensor([ 9, 10, 11]),
+ tensor([12]))
+```
 
 ### dsplit
+
+> 2024-10-25⭐
+
+```python
+torch.dsplit(input, 
+        indices_or_sections) → List of Tensors
+```
+
+根据 `indices_or_sections` 将 `input` (三维或多维张量)按深度拆分为多个张量，每个 split 都是 `input` 的一个 view。
+
+该操作等价于 `torch.tensor_split(input, indices_or_sections, dim=2)` (沿 dim=2 拆分)，不过当 `indices_or_sections` 为整数，它必须均匀分割，否则引发运行时错误。
+
+该函数基于 `numpy.dsplit()`。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 要拆分的张量
+- **indices_or_sections** ([*int*](https://docs.python.org/3/library/functions.html#int) *or* [*list*](https://docs.python.org/3/library/stdtypes.html#list) *or* [*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* *ints*) – 参考 [`torch.tensor_split()`](https://pytorch.org/docs/stable/generated/torch.tensor_split.html#torch.tensor_split) 的参数.
+
+```python
+>>> t = torch.arange(16.0).reshape(2, 2, 4)
+>>> t
+tensor([[[ 0.,  1.,  2.,  3.],
+         [ 4.,  5.,  6.,  7.]],
+        [[ 8.,  9., 10., 11.],
+         [12., 13., 14., 15.]]])
+>>> torch.dsplit(t, 2)
+(tensor([[[ 0.,  1.],
+        [ 4.,  5.]],
+       [[ 8.,  9.],
+        [12., 13.]]]),
+ tensor([[[ 2.,  3.],
+          [ 6.,  7.]],
+         [[10., 11.],
+          [14., 15.]]]))
+```
+
+```python
+>>> torch.dsplit(t, [3, 6])
+(tensor([[[ 0.,  1.,  2.],
+          [ 4.,  5.,  6.]],
+         [[ 8.,  9., 10.],
+          [12., 13., 14.]]]),
+ tensor([[[ 3.],
+          [ 7.]],
+         [[11.],
+          [15.]]]),
+ tensor([], size=(2, 2, 0)))
+```
+
 
 Splits input, a tensor with three or more dimensions, into multiple tensors depthwise according to indices_or_sections.
 
 ### column_stack
 
-Creates a new tensor by horizontally stacking the tensors in tensors.
+> 2024-10-25⭐
+
+```python
+torch.column_stack(tensors, *, 
+        out=None) → Tensor
+```
+
+水平拼接 `tensors` 中的张量来创建新的张量。
+
+类似于 `torch.hstack(tensors)`，不同之处在于 `tensors` 中的每个 0D 或 1D 张量 `t` 在水平拼接前被重塑为 `(t.numel(), 1)` 。
+
+**参数：**
+
+- **tensors** (*sequence* *of* *Tensors*) – 待拼接张量序列
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> a = torch.tensor([1, 2, 3]) # 3x1
+>>> b = torch.tensor([4, 5, 6]) # 3x1
+>>> torch.column_stack((a, b)) # 3x2
+tensor([[1, 4],
+    [2, 5],
+    [3, 6]])
+>>> a = torch.arange(5) # 5x1
+>>> b = torch.arange(10).reshape(5, 2) # 5x2
+>>> torch.column_stack((a, b, b)) # 5x5
+tensor([[0, 0, 1, 0, 1],
+        [1, 2, 3, 2, 3],
+        [2, 4, 5, 4, 5],
+        [3, 6, 7, 6, 7],
+        [4, 8, 9, 8, 9]])
+```
 
 ### dstack
 
-Stack tensors in sequence depthwise (along third axis).
+> 2024-10-25⭐
+
+```python
+torch.dstack(tensors, *, 
+        out=None) → Tensor
+```
+
+沿深度（dim=3）拼接张量。
+
+这相当于通过 `torch.atleast_3d()` 将 1D 和 2D 张量 reshape 后沿 dim-3 拼接。
+
+**参数：**
+
+- **tensors** (*sequence* *of* *Tensors*) – 待拼接张量序列
+
+**关键字参数：**
+
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> a = torch.tensor([1, 2, 3])
+>>> b = torch.tensor([4, 5, 6])
+>>> torch.dstack((a,b))
+tensor([[[1, 4],
+         [2, 5],
+         [3, 6]]])
+>>> a = torch.tensor([[1],[2],[3]])
+>>> b = torch.tensor([[4],[5],[6]])
+>>> torch.dstack((a,b))
+tensor([[[1, 4]],
+        [[2, 5]],
+        [[3, 6]]])
+```
 
 ### gather
 
-Gathers values along an axis specified by dim.
+> 2024-10-25⭐
+
+```python
+torch.gather(input, 
+        dim, 
+        index, *, 
+        sparse_grad=False, 
+        out=None) → Tensor
+```
+
+沿指定 `dim` 收集数据。
+
+对 3D 张量输出为：
+
+```python
+out[i][j][k] = input[index[i][j][k]][j][k]  # if dim == 0
+out[i][j][k] = input[i][index[i][j][k]][k]  # if dim == 1
+out[i][j][k] = input[i][j][index[i][j][k]]  # if dim == 2
+```
+
+`input` 和 `index` 的 dim-count 必须相同。且对所有 `d != dim` 的维度，`index.size(d) <= input.size(d)`。`out` 和 `index` 的 shape 相同。此外，`input` 和 `index` 不会互相广播。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 输入张量
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 索引维度
+- **index** (*LongTensor*) – 待收集元素索引
+
+**关键字参数：**
+
+- **sparse_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – `True` 表示相对 `input` 的梯度为 sparse 张量
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 目标张量
+
+```python
+>>> t = torch.tensor([[1, 2], [3, 4]])
+>>> torch.gather(t, 1, torch.tensor([[0, 0], [1, 0]]))
+tensor([[ 1,  1],
+        [ 4,  3]])
+# out[0,0] = input[0, index[0,0]]=input[0,0]=1
+# out[0,1] = input[0, index[0,1]]=input[0,0]=1
+# out[1,0] = input[1, index[1,0]]=input[1,1]=4
+# out[1,1] = input[1, index[1,1]]=input[1,0]=3
+```
 
 ### hsplit
+
+```python
+torch.hsplit(input, 
+        indices_or_sections) → List of Tensors
+```
+
+
+
 
 Splits input, a tensor with one or more dimensions, into multiple tensors horizontally according to indices_or_sections.
 
@@ -1065,7 +1295,56 @@ Selects values from input at the 1-dimensional indices from indices along the gi
 
 ### tensor_split
 
-Splits a tensor into multiple sub-tensors, all of which are views of input, along dimension dim according to the indices or number of sections specified by indices_or_sections.
+> 2024-10-25⭐
+
+```python
+torch.tensor_split(input, 
+        indices_or_sections, dim=0) → List of Tensors
+```
+
+根据 `indices_or_sections` 指定的索引或个数，沿着 `dim` 将张量拆分为多个子张量，所有子张量均为 `input` 的 view。此函数基于 `numpy.array_split()`。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 待拆分张量
+- **indices_or_sections** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* [*int*](https://docs.python.org/3/library/functions.html#int) *or* [*list*](https://docs.python.org/3/library/stdtypes.html#list) *or* [*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple) *of* *ints*) –  
+  -  如果 `indices_or_sections` 为整数 `n` 或值为  `n` 的 0D 张量，则将 `input` 沿着 `dim` 拆分为 `n` 份。
+     -  如果 `input` 的 `dim` 维度能被 `n` 整除，在子张量大小均等，即 `input.size(dim) / n`. 
+     -  如果无法被 `n` 整除，那么前 `int(input.size(dim) % n)` 子张量的大小为 `int(input.size(dim) / n) + 1`, 余下子张量大小为 `int(input.size(dim) / n)`.
+  -  如果 `indices_or_sections` 是整数 list 或 tuple，或 1D 张量，则 `input` 沿着 `dim` 维度在 list, tuple 或张量的每个索引处拆分。例如，`indices_or_sections=[2, 3]`, `dim=0` 得到子张量  `input[:2]`, `input[2:3]` 和 `input[3:]`.
+  -  如果 `indices_or_sections` 为张量，则必须是 0D 或 1D cpu 张量
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int)*,* *optional*) – 拆分的维度。默认: `0`
+
+```python
+>>> x = torch.arange(8)
+>>> torch.tensor_split(x, 3)
+(tensor([0, 1, 2]), tensor([3, 4, 5]), tensor([6, 7]))
+
+>>> x = torch.arange(7)
+>>> torch.tensor_split(x, 3)
+(tensor([0, 1, 2]), tensor([3, 4]), tensor([5, 6]))
+>>> torch.tensor_split(x, (1, 6))
+(tensor([0]), tensor([1, 2, 3, 4, 5]), tensor([6]))
+
+>>> x = torch.arange(14).reshape(2, 7)
+>>> x
+tensor([[ 0,  1,  2,  3,  4,  5,  6],
+        [ 7,  8,  9, 10, 11, 12, 13]])
+>>> torch.tensor_split(x, 3, dim=1)
+(tensor([[0, 1, 2],
+        [7, 8, 9]]),
+ tensor([[ 3,  4],
+        [10, 11]]),
+ tensor([[ 5,  6],
+        [12, 13]]))
+>>> torch.tensor_split(x, (1, 6), dim=1)
+(tensor([[0],
+        [7]]),
+ tensor([[ 1,  2,  3,  4,  5],
+        [ 8,  9, 10, 11, 12]]),
+ tensor([[ 6],
+        [13]]))
+```
 
 ### tile
 
@@ -1127,28 +1406,82 @@ Return a tensor of elements selected from either x or y, depending on condition.
 
 ## 随机采样
 
-seed
+### seed
 
 Sets the seed for generating random numbers to a non-deterministic random number.
 
-manual_seed
+### manual_seed
 
 Sets the seed for generating random numbers.
 
-initial_seed
+### initial_seed
 
 Returns the initial seed for generating random numbers as a Python long.
 
-get_rng_state
+### get_rng_state
 
 Returns the random number generator state as a torch.ByteTensor.
 
-set_rng_state
+### set_rng_state
 
 Sets the random number generator state.
 
 torch.default_generator Returns the default CPU torch.Generator
-bernoulli
+### bernoulli
+
+> 2024-10-25⭐
+
+```python
+torch.bernoulli(input, *, 
+        generator=None, 
+        out=None) → Tensor
+```
+
+从伯努利分布中抽取 (0, 1) 随机数。
+
+`input` 张量包含概率，因此 `input` 的值必须在 $0\le \text{input}_i \le 1$ 之间。
+
+输出张量的第 $i$ 个值根据 `input` 的第 $i$ 个概率抽样：
+
+$$
+\text{out}_i\sim \text{Bernoulli}(p=\text{input}_i)
+$$
+
+返回的 `out` 张量只包含 0 和 1，并且其 shape 与 `input` 相同。
+
+`out` 的 `dtype` 可以是整数，但 `input` 的 `dtype` 必须为浮点数。
+
+**参数：**
+
+- **input** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 包含伯努利分布的概率值。
+
+**关键字参数：**
+
+- **generator** ([`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional) – 用于抽样的伪随机数生成器
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+
+```python
+>>> a = torch.empty(3, 3).uniform_(0, 1)  # generate a uniform random matrix with range [0, 1]
+>>> a
+tensor([[ 0.1737,  0.0950,  0.3609],
+        [ 0.7148,  0.0289,  0.2676],
+        [ 0.9456,  0.8937,  0.7202]])
+>>> torch.bernoulli(a)
+tensor([[ 1.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 1.,  1.,  1.]])
+
+>>> a = torch.ones(3, 3) # probability of drawing "1" is 1
+>>> torch.bernoulli(a)
+tensor([[ 1.,  1.,  1.],
+        [ 1.,  1.,  1.],
+        [ 1.,  1.,  1.]])
+>>> a = torch.zeros(3, 3) # probability of drawing "1" is 0
+>>> torch.bernoulli(a)
+tensor([[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]])
+```
 
 Draws binary random numbers (0 or 1) from a Bernoulli distribution.
 
@@ -1299,7 +1632,7 @@ randperm
 
 Returns a random permutation of integers from 0 to n - 1.
 
-### torch.manual_seed
+### manual_seed
 
 ```python
 torch.manual_seed(seed)
@@ -1401,6 +1734,8 @@ torch.rand_like(input, *,
 
 ### randint
 
+> 2024-10-25⭐
+
 ```python
 torch.randint(low=0, 
               high, 
@@ -1413,53 +1748,105 @@ torch.randint(low=0,
               requires_grad=False) → Tensor
 ```
 
-生成张量，使用 `low` (inclusive) 和 `high` (exclusive) 之间均分生成的随机整数填充，其 shape 由 `size` 定义。
+生成张量，使用 `low` (inclusive) 到 `high` (exclusive) 之间均分生成的随机整数填充，其 shape 由 `size` 定义。
 
 > [!NOTE]
 > 对全局默认 dtype `torch.float32`，该函数返回张量的 dtype 为 `torch.int64`
 
 **参数：**
 
-- **low** ([*int*](https://docs.python.org/3/library/functions.html#int)*,* *optional*) – Lowest integer to be drawn from the distribution. Default: 0.
-- **high** ([*int*](https://docs.python.org/3/library/functions.html#int)) – One above the highest integer to be drawn from the distribution.
-- **size** ([*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple)) – a tuple defining the shape of the output tensor.
+- **low** ([*int*](https://docs.python.org/3/library/functions.html#int)*,* *optional*) – 从分布抽取的最小整数。默认: 0.
+- **high** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 比从分布抽取的最大整数大 1.
+- **size** ([*tuple*](https://docs.python.org/3/library/stdtypes.html#tuple)) – 定义张量 shape.
 
+**关键字参数：**
 
-### torch.randn
+- **generator** ([`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional) – 用于采样的伪随机数生成器
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** (torch.dtype, optional) – `None` 对应 dtype `torch.int64`.
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认:  `None` 表示对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型使用 cpu，对 cuda 张量类型使用当前 cuda device。
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 支持梯度。默认: `False`.
+
+```python
+>>> torch.randint(3, 5, (3,))
+tensor([4, 3, 4])
+
+>>> torch.randint(10, (2, 2))
+tensor([[0, 2],
+        [5, 5]])
+
+>>> torch.randint(3, 10, (2, 2))
+tensor([[4, 5],
+        [6, 7]])
+```
+
+### randint_like
+
+> 2024-10-25⭐
+
+```python
+torch.randint_like(input, 
+                   low=0, 
+                   high, \*, 
+                   dtype=None, 
+                   layout=torch.strided, 
+                   device=None, 
+                   requires_grad=False, 
+                   memory_format=torch.preserve_format) → Tensor
+```
+
+类似 [zeros_like](#torchzeros_like)。
+
+### randn
+
+> 2024-10-25⭐
 
 ```python
 torch.randn(*size, *, 
-    out=None, 
-    dtype=None, 
-    layout=torch.strided, 
-    device=None, 
-    requires_grad=False, 
-    pin_memory=False) → Tensor
+        generator=None, 
+        out=None, 
+        dtype=None, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False, 
+        pin_memory=False) → Tensor
 ```
 
 返回一个由均值为0、方差为 1 的正态分布中随机数填充的张量。
 
-$$out_i ∼ N(0,1)$$
+$$
+\text{out}_i \sim N(0,1)
+$$
 
-张量的形状由参数 `size` 定义。
+对复数 dtype，张量为 i.i.d 从均值为 0 方差为 1 的[复数正态分布](https://en.wikipedia.org/wiki/Complex_normal_distribution) 中采样。如下：
+
+$$
+\text{out}_i \sim CN(0,1)
+$$
+
+这等价于从实部和虚部单独抽样：
+
+$$
+\text{Re}(\text{out}_i)\sim N(0,\frac{1}{2}), \text{Im}(\text{out}_i)\sim N(0,\frac{1}{2})
+$$
+
+张量的 shape 由参数 `size` 定义。
 
 **参数：**
 
-- **size** (`int`...)
+- **size** ([*int*](https://docs.python.org/3/library/functions.html#int)*...*) – 整数序列，定义张量 shape。支持可变参数或 list, tuple 之类的几何.
 
-整数序列，定义输出张量的形状。可以是多个可变参数，也可以是 list 或 tuple。
+**关键字参数：**
 
-- **generator** ([torch.Generator](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional)
+- **generator** ([`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional) – 用于抽样的伪随机数生成器
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量 dtype。默认：`None` 表示使用全局默认 dtype (see [`torch.set_default_dtype()`](https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype)).
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认: `None` 表示对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型为 cpu device，对 cuda 张量类型使用当前 cuda device.
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 支持梯度。默认: `False`.
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 分配到锁页内存，仅支持 cpu 张量。默认: `False`.
 
-用于抽样的伪随机数生成器。
-
-- **out** (`Tensor`, optional)
-
-输出张量。
-
-- **dtype** (`torch.dtype`, optional)
-
-返回张量的期望数据类型。如果为 `None`，则使用全局默认类型，参考 `torch.set_default_tensor_type()`。
 
 ```python
 >>> torch.randn(4)
@@ -1469,7 +1856,56 @@ tensor([[ 0.6635, -1.0228,  0.0674],
         [ 1.4007,  1.6177, -0.7507]])
 ```
 
-### 原地随机采样
+### randn_like
+
+> 2024-10-25⭐
+
+```python
+torch.randn_like(input, *, 
+        dtype=None, 
+        layout=None, 
+        device=None, 
+        requires_grad=False, 
+        memory_format=torch.preserve_format) → Tensor
+```
+
+参考 [randn](#randn)。
+
+### randperm
+
+> 2024-10-25⭐
+
+```python
+torch.randperm(n, *, 
+        generator=None, 
+        out=None, 
+        dtype=torch.int64, 
+        layout=torch.strided, 
+        device=None, 
+        requires_grad=False, 
+        pin_memory=False) → Tensor
+```
+
+返回从 0 到 `n-1` 整数的随机排列。
+
+**参数：**
+
+- **n** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 上限 (exclusive)
+
+**关键字参数：**
+
+- **generator** ([`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#torch.Generator), optional) – 用于抽样的伪随机数生成器
+- **out** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)*,* *optional*) – 输出张量
+- **dtype** ([`torch.dtype`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype), optional) – 张量 dtype。默认: `torch.int64`.
+- **layout** ([`torch.layout`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.layout), optional) – 张量 layout。默认: `torch.strided`.
+- **device** ([`torch.device`](https://pytorch.org/docs/stable/tensor_attributes.html#torch.device), optional) – 张量 device。默认：`None` 表示对默认张量类型使用当前 device (see [`torch.set_default_device()`](https://pytorch.org/docs/stable/generated/torch.set_default_device.html#torch.set_default_device)). 对 cpu 张量类型使用 cpu，对 cuda 张量类型使用当前 cuda device。
+- **requires_grad** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否支持梯度。默认: `False`.
+- **pin_memory** ([*bool*](https://docs.python.org/3/library/functions.html#bool)*,* *optional*) – 是否分配到锁页内存，仅支持 cpu 张量。默认: `False`.
+
+```python
+>>> torch.randperm(4)
+tensor([2, 1, 0, 3])
+```
 
 ## 局部禁用梯度计算
 

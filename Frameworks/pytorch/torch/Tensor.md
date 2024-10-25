@@ -213,12 +213,20 @@ Tensor.numpy(*, force=False) → numpy.ndarray
 ### scatter_
 
 ```python
-Tensor.scatter_(dim, index, src, reduce=None) → Tensor
+Tensor.scatter_(dim, 
+        index, 
+        src, 
+        reduce=None) → Tensor
 ```
 
-按照索引张量 `index` 将 `src` 张量的值写入 `self`。对 `src` 的每个值，其输出索引由 `src` 的索引（`dimension != dim`）和 `index` 中的对应值指定（`dimension = dim`）。
+按照索引张量 `index` 指定的位置用 `src` 张量的值替换 `self` 的部分值。
 
-对 3D 张量，`self` 更新方式：
+`src` 值的选择：当 `dimension != dim` 索引值同 `src` ；当 `dimension = dim` 索引由 `index` 中的对应值指定。
+
+对 3D 张量，`self` 的更新方式：
+
+- `index` 和 `src` 的索引一一对应
+- `index` 的值对应 `self` 对应维度的索引
 
 ```python
 self[index[i][j][k]][j][k] = src[i][j][k]  # if dim == 0
@@ -226,54 +234,71 @@ self[i][index[i][j][k]][k] = src[i][j][k]  # if dim == 1
 self[i][j][index[i][j][k]] = src[i][j][k]  # if dim == 2
 ```
 
-对 2D 张量，`self` 的更新方式：
-
-```python
-self[index[i][j]][j] = src[i][j] # if dim == 0
-```
-
-该操作和 `gather()` 操作相反。
+该操作为 `gather()` 的逆操作。
 
 需要注意：
 
-- `self`, `index` 和 `src` 的维数必须相同；
+- `self`, `index` 和 `src` 的 dim-count  必须相同；
 - 对所有维度 `d`，要求 `index.size(d) <= src.size(d)`；
 - 对所有 `d != dim` 的维度，要求 `index.size(d) <= self.size(d)`；
 - `index` 和 `src` 不广播
 
-> **WARNING** 当 indices 不
+此外，对 `gather()`，`index` 的值必须在 0 到 `self.size(dim)-1` (inclusive) 之间。
 
-参数：
+> [!WARNING]
+> 当索引不是 unique (为 self 同一个位置重复赋值)，其行为不确定并导致梯度不正确，即梯度将传递到 src 中同一索引的所有位置。
+> 仅对 `src.shape == index.shape` 实现反向传播。
 
-- **dim** (`int`)：索引维度；
-- **index** (`LongTensor`)：需分配元素的索引，可以为空或与 `src` 相同维度，为空时返回 `self` 不变；
-- **src** (`Tensor` 或 `float`)：待分配的元素
-- **reduce** (`str`, optional)：缩减操作，如 add 或 multiply。
+`reduce` 用于指定降维运算。即将 `index` 指定的 `src` 中所有元素通过降维运算合并到 `self` 对应位置。
 
-例如：
+对 3D 张量，使用乘法进行降维，`self` 更新方式：
 
 ```python
->>> src = torch.arange(1, 11).reshape((2, 5))
->>> src # shape (2, 5)
+self[index[i][j][k]][j][k] *= src[i][j][k]  # if dim == 0
+self[i][index[i][j][k]][k] *= src[i][j][k]  # if dim == 1
+self[i][j][index[i][j][k]] *= src[i][j][k]  # if dim == 2
+```
+
+加法降维等价于 `scatter_add_()`。
+
+> [!WARNING]
+> `reduce` 参数已弃用。使用 `scatter_reduce_()` 选项更丰富。
+
+**参数：**
+
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 索引维度
+- **index** (*LongTensor*) – 待分配元素的索引，可以为空或与 `src` 相同维度。为空时，直接返回 `self`
+- **src** ([*Tensor*](https://pytorch.org/docs/stable/tensors.html#torch.Tensor)) – 提供值的张量
+
+**关键字参数：**
+
+- **reduce** ([*str*](https://docs.python.org/3/library/stdtypes.html#str)*,* *optional*) – 引用的缩减操作，可以为 `'add'` or `'multiply'`.
+
+```python
+>>> src = torch.arange(1, 11).reshape((2, 5)) # (2,5)
+>>> src
 tensor([[ 1,  2,  3,  4,  5],
         [ 6,  7,  8,  9, 10]])
->>> index = torch.tensor([[0, 1, 2, 0]]) # (1, 4)
-# output[index[i][j]][j] = src[i][j]
-# src[0][0]=self[index[0][0]][0]=self[0][0]=1
-# src[0][1]=self[index[0][1]][1]=self[1][1]=2
-# src[0][2]=self[index[0][2]][2]=self[2][2]=3
-# src[0][3]=self[index[0][3]][3]=self[0][3]=4
->>> torch.zeros(3, 5, dtype=src.dtype).scatter_(0, index, src) # self (3, 5)
+>>> index = torch.tensor([[0, 1, 2, 0]]) # (1,4)
+>>> torch.zeros(3, 5, dtype=src.dtype).scatter_(0, index, src) # (3,5)
 tensor([[1, 0, 0, 4, 0],
         [0, 2, 0, 0, 0],
         [0, 0, 3, 0, 0]])
-
->>> index = torch.tensor([[0, 1, 2], [0, 1, 4]])
->>> torch.zeros(3, 5, dtype=src.dtype).scatter_(1, index, src)
+# self[index[0,0],0]=self[0,0]=src[0,0]=1
+# self[index[0,1],1]=self[1,1]=src[0,1]=2
+# self[index[0,2],2]=self[2,2]=src[0,2]=3
+# self[index[0,3],3]=self[0,3]=src[0,3]=4
+>>> index = torch.tensor([[0, 1, 2], [0, 1, 4]]) # (2,3)
+>>> torch.zeros(3, 5, dtype=src.dtype).scatter_(1, index, src) # (3,5)
 tensor([[1, 2, 3, 0, 0],
         [6, 7, 0, 0, 8],
         [0, 0, 0, 0, 0]])
-
+# self[0,index[0,0]]=self[0,0]=src[0,0]=1
+# self[0,index[0,1]]=self[0,1]=src[0,1]=2
+# self[0,index[0,2]]=self[0,2]=src[0,2]=3
+# self[1,index[1,0]]=self[1,0]=src[1,0]=6
+# self[1,index[1,1]]=self[1,1]=src[1,1]=7
+# self[1,index[1,2]]=self[1,4]=src[1,2]=8
 >>> torch.full((2, 4), 2.).scatter_(1, torch.tensor([[2], [3]]),
 ...            1.23, reduce='multiply')
 tensor([[2.0000, 2.0000, 2.4600, 2.0000],
@@ -282,6 +307,34 @@ tensor([[2.0000, 2.0000, 2.4600, 2.0000],
 ...            1.23, reduce='add')
 tensor([[2.0000, 2.0000, 3.2300, 2.0000],
         [2.0000, 2.0000, 2.0000, 3.2300]])
+```
+
+```python
+scatter_(dim, 
+        index, 
+        value, *, 
+        reduce=None) → Tensor:
+```
+
+同上，替换值全部指定为 `value`。
+
+**参数：**
+
+- **dim** ([*int*](https://docs.python.org/3/library/functions.html#int)) – 索引维度
+- **index** (*LongTensor*) – 索引，可以为空或与 `src` 同 dim-count。为空时返回 `self`.
+- **value** (*Scalar*) – 替换值
+
+**关键字参数：**
+
+- **reduce** ([*str*](https://docs.python.org/3/library/stdtypes.html#str)*,* *optional*) – 约简操作，可以为 `'add'` or `'multiply'`.
+
+```python
+>>> index = torch.tensor([[0, 1]])
+>>> value = 2
+>>> torch.zeros(3, 5).scatter_(0, index, value)
+tensor([[2., 0., 0., 0., 0.],
+        [0., 2., 0., 0., 0.],
+        [0., 0., 0., 0., 0.]])
 ```
 
 ### Tensor.to
@@ -1450,7 +1503,7 @@ Tensor.is_leaf
 
 对 `requires_grad` 为 `True` 的张量，如果它们是由用户创建的，则为 leaf 张量。这意味着它们不是操作的结果，因此 `grad_fn` 为 `None`。
 
-只有 leaf 张量在调用 `backward()` 才会填充 `grad` 值。对非 leaf 张量，需要调用 `retain_grad()` 才会保留其 `grad` 值。
+只有 leaf 张量在调用 `backward()` 后保留 `grad` 值。非 leaf 张量，需要调用 `retain_grad()` 才会保留其 `grad` 值。
 
 ```python
 >>> a = torch.rand(10, requires_grad=True)
