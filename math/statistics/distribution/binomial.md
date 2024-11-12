@@ -210,7 +210,7 @@ data.frame(heads = 0:10,
   )
 ```
 
-![plot](2020-08-31-09-14-20.png)
+<img src="images/2020-08-31-09-14-20.png" alt="plot" style="zoom:67%;" />
 
 - 累积概率分布
 
@@ -238,10 +238,4 @@ tibble(heads = 0:10,
   )
 ```
 
-![bar](2020-08-31-09-26-26.png)
-
-## 参考
-
-- 概率论与数理统计-陈希孺
-- [statology](https://www.statology.org/dbinom-pbinom-qbinom-rbinom-in-r/)
-- [RPubs](https://rpubs.com/mpfoley73/458411)
+<img src="images/2020-08-31-09-26-26.png" alt="bar" style="zoom:67%;" />

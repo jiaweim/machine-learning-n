@@ -5,7 +5,7 @@
 
 ## 分布
 
-离散分布
+- [离散概率分布](./discrete_distribution.md)
 
 - [均匀分布](uniform-distribution.md)
 - [伯努利分布](bernoulli.md)
