@@ -1,8 +1,6 @@
 # 假设检验
 
 - [假设检验概述](./test_intro.md)
-- [单样本正态总体均值检验（已知 σ, z-test）](./test_mean_with_sigma.md)
-- [单样本正态总体均值检验（σ 未知，t-test）](./test_mean_without_sigma.md)
 - [单样本比例检验（z-test）](./test_one_ratio.md)
 - [单样本方差检验（卡方检验）](./test_one_variance.md)
 - [双独立样本均值差异检验（σ1 和 σ2 已知：z-test）](./test_two_mean_sigma.md)

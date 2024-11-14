@@ -3,6 +3,8 @@
 - [统计学导论](./intro/stat_intro.md)
 - [数据的集中趋势](./descriptive/central.md)
 
+- [置信区间](./confidence_interval/_confidence_interval.md)
+
 ## 连续型分布
 
 - [指数分布](./distribution/exponential.md)
