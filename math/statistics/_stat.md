@@ -2,14 +2,16 @@
 
 - [统计学导论](./intro/stat_intro.md)
 - [数据的集中趋势](./descriptive/central.md)
-
+- [离散分布](./distribution/discrete_distribution.md)
+- [正态分布](./distribution/normal.md)
 - [置信区间](./confidence_interval/_confidence_interval.md)
+- [单样本假设检验](./hypothesis_test/test_one.md)
+- [双样本假设检验](./hypothesis_test/test_two.md)
+
 
 ## 连续型分布
 
 - [指数分布](./distribution/exponential.md)
-
-## 离散型分布
 
 ## 概率论
 
