@@ -7,6 +7,7 @@
 - [置信区间](./confidence_interval/_confidence_interval.md)
 - [单样本假设检验](./hypothesis_test/test_one.md)
 - [双样本假设检验](./hypothesis_test/test_two.md)
+- [相关性和回归](./correlation/correlation_regression.md)
 
 
 ## 连续型分布
