@@ -5,7 +5,7 @@
 
 ## 分布
 
-离散分布
+- [离散概率分布](./discrete_distribution.md)
 
 - [均匀分布](uniform-distribution.md)
 - [伯努利分布](bernoulli.md)
@@ -13,6 +13,8 @@
 - [泊松分布](poisson.md)
 
 连续分布
+
+- [正态分布](./normal.md)
 
 ## 数据类型
 
