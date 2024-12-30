@@ -1,4 +1,4 @@
-package ml;
+package ml.weka.core;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -10,18 +10,15 @@ import java.util.ArrayList;
  * Generates an weka.core.Instances object with different attribute types.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 6054 $
  */
 public class CreateInstances {
 
     /**
-     * Generates the Instances object and outputs it in ARFF format to stdout.
-     *
-     * @param args ignored
-     * @throws Exception if generation of instances fails
+     * 生成 Instances 对象，并输出为 ARFF 格式到 stdout
      */
     public static void main(String[] args) throws Exception {
-        // 1. set up attributes
+        // 1. 设置属性
         ArrayList<Attribute> atts = new ArrayList<>();
         // - numeric
         atts.add(new Attribute("att1"));
@@ -35,11 +32,11 @@ public class CreateInstances {
         // - date
         atts.add(new Attribute("att4", "yyyy-MM-dd"));
         // - relational
-        ArrayList<Attribute> attsRel = new ArrayList<Attribute>();
+        ArrayList<Attribute> attsRel = new ArrayList<>();
         // -- numeric
         attsRel.add(new Attribute("att5.1"));
         // -- nominal
-        ArrayList<String> attValsRel = new ArrayList<String>();
+        ArrayList<String> attValsRel = new ArrayList<>();
         for (int i = 0; i < 5; i++)
             attValsRel.add("val5." + (i + 1));
         attsRel.add(new Attribute("att5.2", attValsRel));

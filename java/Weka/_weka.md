@@ -7,12 +7,6 @@ Weka 是 (Waikato Environment for Knowledge Analysis) 的缩写，是一个基�
 - [WEKA 概述](weka_intro.md)
 - [WEKA 数据格式](arff.md)
 - [WEKA API 使用](weka_api.md)
-  - [数据读写](api_loading_data.md)
-  - [创建数据](data_create.md)
-  - [生成人工数据](data_artificial.md)
-  - [聚类](api_clustering.md)
-  - [选择属性](api_selecting_attributes.md)
-  - [可视化](api_visualization.md)
   - [序列化](api_serialization.md)
 
 ## 参考

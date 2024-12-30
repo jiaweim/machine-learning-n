@@ -33,40 +33,19 @@ zoo 数据集，包含 101 条数据，每条数据对应一个动物，包含 1
 
 ## 加载数据
 
+使用 `DataSource` 加载数据，数据集保存为 `Instances` 对象：
+
 ```java
 InputStream stream = ZooClassifier.class.getResourceAsStream("zoo.arff");
 Instances dataset = ConverterUtils.DataSource.read(stream);
-System.out.println(dataset.numInstances());
-System.out.println(new Instances(dataset, 0));
+System.out.println(dataset.numInstances()); // 样本个数
 ```
 
 ```
 101
-@relation zoo
-
-@attribute animal {aardvark,antelope,bass,bear,boar,buffalo,calf,carp,catfish,cavy,cheetah,chicken,chub,clam,crab,crayfish,crow,deer,dogfish,dolphin,dove,duck,elephant,flamingo,flea,frog,fruitbat,giraffe,girl,gnat,goat,gorilla,gull,haddock,hamster,hare,hawk,herring,honeybee,housefly,kiwi,ladybird,lark,leopard,lion,lobster,lynx,mink,mole,mongoose,moth,newt,octopus,opossum,oryx,ostrich,parakeet,penguin,pheasant,pike,piranha,pitviper,platypus,polecat,pony,porpoise,puma,pussycat,raccoon,reindeer,rhea,scorpion,seahorse,seal,sealion,seasnake,seawasp,skimmer,skua,slowworm,slug,sole,sparrow,squirrel,starfish,stingray,swan,termite,toad,tortoise,tuatara,tuna,vampire,vole,vulture,wallaby,wasp,wolf,worm,wren}
-@attribute hair {false,true}
-@attribute feathers {false,true}
-@attribute eggs {false,true}
-@attribute milk {false,true}
-@attribute airborne {false,true}
-@attribute aquatic {false,true}
-@attribute predator {false,true}
-@attribute toothed {false,true}
-@attribute backbone {false,true}
-@attribute breathes {false,true}
-@attribute venomous {false,true}
-@attribute fins {false,true}
-@attribute legs numeric
-@attribute tail {false,true}
-@attribute domestic {false,true}
-@attribute catsize {false,true}
-@attribute type {mammal,bird,reptile,fish,amphibian,insect,invertebrate}
-
-@data
 ```
 
-目的是预测 `animal` 属性，所以使用 `Remove` 过滤器删除该属性。
+建模目的是预测 `animal` 属性，所以使用 `Remove` 过滤器删除该属性。
 
 ```java
 Remove remove = new Remove();

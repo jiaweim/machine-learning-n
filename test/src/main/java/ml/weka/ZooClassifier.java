@@ -23,13 +23,11 @@ import java.util.Random;
  */
 public class ZooClassifier {
 
-    public static void main(String[] args) throws Exception {
-        DataSource source = new DataSource("C:\\repositories\\machine-learning-n\\test\\src\\main\\resources\\ml\\weka\\zoo.arff");
-        Instances data = source.getDataSet();
-        System.out.println(data.numInstances() + " instances loaded");
-        System.out.println(data);
+    static void run() throws Exception {
 
-        Random random = data.getRandomNumberGenerator(1);
+        DataSource source = new DataSource(ZooClassifier.class.getResourceAsStream("zoo.arff"));
+        Instances data = source.getDataSet();
+        System.out.println(data);
 
         Remove remove = new Remove();
         String[] opts = new String[]{"-R", "1"};
@@ -54,7 +52,6 @@ public class ZooClassifier {
         tree.setOptions(options);
         tree.buildClassifier(data);
         System.out.println(tree);
-
 
         double[] vals = new double[data.numAttributes()];
         vals[0] = 1.0; //hair {false, true}
@@ -86,6 +83,12 @@ public class ZooClassifier {
         System.out.println(eval_roc.toSummaryString());
         double[][] confusionMatrix = eval_roc.confusionMatrix();
         System.out.println(eval_roc.toMatrixString());
+    }
 
+    public static void main(String[] args) throws Exception {
+
+        Instances data = DataSource.read(ZooClassifier.class.getResourceAsStream("zoo.arff"));
+        System.out.println(data.numInstances() + " instances loaded");
+        System.out.println(data);
     }
 }
