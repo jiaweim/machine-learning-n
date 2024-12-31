@@ -1532,6 +1532,18 @@ for (int i = 0; i < dataset2.numInstances(); i++) {
 
 目前实现的大多数属性选择方案实现都是有监督的，即需要带 class 属性的数据集。
 
+所有属性评估器都继承自 `ASEvaluation`：
+
+![image-20241231103723388](./images/image-20241231103723388.png)
+
+- 其中单属性评估器实现 `AttributeEvaluator` 接口
+
+![image-20241231104029502](./images/image-20241231104029502.png)
+
+- 属性子集评估器则实现 `SubSetEvaluator` 接口
+
+<img src="./images/image-20241231104444917.png" alt="image-20241231104444917" style="zoom: 33%;" />
+
 无监督评估算法需继承以下类：
 
 - `weka.attributeSelection.UnsupervisedAttributeEvaluator`，如 `LatentSemanticAnalysis`, `PrincipalComponents`
