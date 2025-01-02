@@ -619,6 +619,31 @@ $$
 
 <img src="./images/image-20250102192537620.png" alt="image-20250102192537620" style="zoom:33%;" />
 
+上表中的值可以直接转换为概率值，例如，对 yes 类别：Sunny 的概率为 $2/9$，即 $P(E_1|H)=2/9$。
+
+对 Play，可以计算先验概率 $P(yes)=9/14$，$P(no)=5/14$。
+
+例如，现在要计算如下事件的概率：
+
+| Outlook | Temp. | Humidity | Wind | Play |
+| ------- | ----- | -------- | ---- | ---- |
+| Sunny   | Cool  | High     | True | ?    |
+
+计算两个类别的概率：
+$$
+P(\text{yes})=\frac{2}{9}\times\frac{3}{9}\times\frac{3}{9}\times\frac{3}{9}\times\frac{9}{14}=0.0053
+$$
+
+$$
+P(\text{no})=\frac{3}{5}\times\frac{1}{5}\times\frac{4}{5}\times\frac{3}{5}\times\frac{5}{14}=0.0206
+$$
+
+进行归一化：
+$$
+P(\text{yes})=\frac{}{}
+$$
+
+
 
 
 ### 3.4 决策树
