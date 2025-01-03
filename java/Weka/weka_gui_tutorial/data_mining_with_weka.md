@@ -1050,9 +1050,92 @@ Size of the tree : 	9
 
 ### 4.2 线性回归
 
+数值预测，即回归：
+$$
+x=w_0+w_1a_1+w_2a_2+\cdots+w_ka_k
+$$
+对二维平面，只有一个 $a$，图示：
+
+<img src="./images/image-20250103183309431.png" alt="image-20250103183309431" style="zoom:50%;" />
+
+线性回归模型的训练，选择合适的权重最小化训练集上的平方误差：
+$$
+\sum_{i=1}^n(x^{(i)}-\sum_{j=0}^kw_ja_j^{(i)})^2
+$$
+这是一个标准的矩阵问题，当样本数大于属性数就有解。
+
+对 nominal 属性：
+
+- 如果只有两个值，可以转换为 0 和 1
+- 如果有多个值
+
+**Weka 操作：**
+
+- 打开 cpu.arff 文件：只有数字属性和 class，class 也是数值
+- 选择 functions>**LinearRegression**
+- 运行
+
+输出如下：
+
+```
+Linear Regression Model
+
+class =
+
+      0.0491 * MYCT +
+      0.0152 * MMIN +
+      0.0056 * MMAX +
+      0.6298 * CACH +
+      1.4599 * CHMAX +
+    -56.075 
+
+Time taken to build model: 0.03 seconds
+
+=== Cross-validation ===
+=== Summary ===
+
+Correlation coefficient                  0.9012
+Mean absolute error                     41.0886
+Root mean squared error                 69.556 
+Relative absolute error                 42.6943 %
+Root relative squared error             43.2421 %
+Total Number of Instances              209     
+```
+
+<img src="./images/image-20250103190833552.png" alt="image-20250103190833552" style="zoom:50%;" />
+
+**model tree**：
+
+- 每个 leaf 是一个线性回归模型
+- 多个线性模型组成一个连续函数
+
+<img src="./images/image-20250103191522039.png" alt="image-20250103191522039" style="zoom:50%;" />
+
+在 weka 中，trees>M5P 代表 model-tree 模型：
+
+- 依然是 cpu.arff 数据集
+- 选择 trees > M5P
+- 运行
+- 可视化 tree
+
+<img src="./images/image-20250103192040691.png" alt="image-20250103192040691" style="zoom:50%;" />
+
+该 model-tree 从 LM1 到 LM5，有 5 个线性模型。在输出可以看到这几个线性模型的详细定义。交叉验证结果如下：
+
+```
+Correlation coefficient                  0.9274
+Mean absolute error                     29.8309
+Root mean squared error                 60.7112
+Relative absolute error                 30.9967 %
+Root relative squared error             37.7434 %
+Total Number of Instances              209  
+```
+
+显然，多个线性模型比一个线性模型拟合效果更好。
+
+### 4.3 使用回归进行分类
 
 
-### 4.3 回归
 
 ### 4.4 逻辑回归
 
