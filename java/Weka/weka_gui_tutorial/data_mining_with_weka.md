@@ -623,13 +623,17 @@ $$
 
 对 Play，可以计算先验概率 $P(yes)=9/14$，$P(no)=5/14$。
 
+> [!TIP]
+>
+> 不考虑特征，只看结果，统计 yes 和 no 的比例，就是先验概率。
+
 例如，现在要计算如下事件的概率：
 
 | Outlook | Temp. | Humidity | Wind | Play |
 | ------- | ----- | -------- | ---- | ---- |
 | Sunny   | Cool  | High     | True | ?    |
 
-计算两个类别的概率：
+计算两个类别的概率，基于独立假设，可以将各个概率分别相乘，然后乘以 $P(H)$：
 $$
 P(\text{yes})=\frac{2}{9}\times\frac{3}{9}\times\frac{3}{9}\times\frac{3}{9}\times\frac{9}{14}=0.0053
 $$
@@ -638,23 +642,425 @@ $$
 P(\text{no})=\frac{3}{5}\times\frac{1}{5}\times\frac{4}{5}\times\frac{3}{5}\times\frac{5}{14}=0.0206
 $$
 
-进行归一化：
+进行归一化，得到概率：
 $$
-P(\text{yes})=\frac{}{}
+P(\text{yes})=\frac{0.0053}{0.0053+0.0206}=0.205
 $$
 
+$$
+P(\text{no})=\frac{0.0206}{0.0053+0.0206}=0.795
+$$
 
+总结：{Outlook: Sunnay, Temp.: Cool, Humidity: High, Wind: True} 为证据，概率：
+$$
+\begin{aligned}
+P(yes|E)&=
+	P(\text{Outlook=Sunny|yes})\\
+	&\times P(\text{Temp.=Cool|yes})\\
+	&\times P(\text{Humidity=High|yes})\\
+	&\times P(\text{Windy=True|yes})\\
+	&\times\frac{P(yes)}{P(E)} \\
+	&=\frac{\frac{2}{9}\times\frac{3}{9}\times\frac{3}{9}\times\frac{3}{9}\times\frac{9}{14}}{P(E)}
+\end{aligned}
+$$
 
+我们不知道 $P(E)$，但是没关系，针对 $P(no|E)$ 可以进行相同的计算，因为两个概率相加为 1，分母相同，因此可以得到 $P(yes|E)$ 和 $P(no|E)$ 的概率。
+
+使用 Weka 执行 Naive Bayes：
+
+- 打开 weather.nominal.arff
+- 选择 bayes>NaiveBayes 模型
+- 运行
+
+生成的模型如下：
+
+```
+=== Classifier model (full training set) ===
+
+Naive Bayes Classifier
+
+                Class
+Attribute         yes     no
+               (0.63) (0.38)
+=============================
+outlook
+  sunny            3.0    4.0
+  overcast         5.0    1.0
+  rainy            4.0    3.0
+  [total]         12.0    8.0
+
+temperature
+  hot              3.0    3.0
+  mild             5.0    3.0
+  cool             4.0    2.0
+  [total]         12.0    8.0
+
+humidity
+  high             4.0    5.0
+  normal           7.0    2.0
+  [total]         11.0    7.0
+
+windy
+  TRUE             4.0    4.0
+  FALSE            7.0    3.0
+  [total]         11.0    7.0
+```
+
+这个计算方式和前面表格演示的一样，不过每个数字都加了 1。例如，Outlook 的 Yes 在表格中为 2, 4, 3，而 weka 输出的为 3, 5, 4，weka 为了避免 0 频率的出现，导致相关的概率相乘全部为 0，因此每个次数都 +1。
+
+朴素贝叶斯总结：
+
+- 朴素贝叶斯假设所有属性共享相同且独立
+- 虽然独立假设不成立，但是朴素贝叶斯在实际应用中效果很好
+  - 可能因为分类不需要准确的概率估计，只需要正确类别的概率最大即可
+- 朴素贝叶斯的问题：如果两个属性的值完全相同，会导致朴素贝叶斯无法功能，此时可以采用特征选择排除冗余属性，然后就可以继续使用朴素贝叶斯
 
 ### 3.4 决策树
 
+下面通过 J48 模型介绍决策树。
+
+J48 采用 top-down 递归分治策略：
+
+- **选择**：选择一个属性作为 root-node
+- **拆分**：根据属性值将数据集拆分为不同子集
+  - 每类属性值一个分支
+- **重复**：对每个分支递归采用该策略
+- **终止**：分支所含样本的类别相同时，终止拆分
+
+这里的问题是，如何选择 root-note？
+
+<img src="./images/image-20250103100131711.png" alt="image-20250103100131711" style="zoom:50%;" />
+
+例如，下面是天气数据集以不同属性作为 root-node 的结果：
+
+<img src="./images/image-20250103100652255.png" alt="image-20250103100652255" style="zoom:50%;" />
+
+我们希望得到的分支越纯越好，这样就不需要继续拆分。outlook 的 overcast 分支只有 yes，不需要继续拆分，看上去最合适。那么如何量化纯度。
+
+最适合拆分的属性具有如下特点：
+
+- 目标是得到最小的决策树
+- top-down 方法采用启发式方法
+  - 选择生成最纯节点的属性（都是 yes 或都是 no 的节点），这样就不需要继续拆分
+  - 即最大信息增益的节点
+
+那么，如何计算纯度？这里用到信息论里的熵，信息熵以 bits 为单位：
+$$
+entropy(p_1,p_2,\cdots,p_n)=-p_1\log p_1-p_2\log p_2\cdots -p_n\log p_n
+$$
+因为概率都不会大于 1，所以 $\log p$ 为负数，前面加符号变为正数，所以信息熵的值为正数。
+
+信息增益（information gain）：
+
+- 知道属性后获得的额外信息量，是属性对训练数据分类的有效性的度量
+- 加上熵是样本中所含杂质的度量，那么信息增益就是根据属性对样本进行划分导致熵的减少
+- 拆分前的熵-拆分后的熵
+
+以天气数据为例：
+
+<img src="./images/image-20250103103948613.png" alt="image-20250103103948613" style="zoom:50%;" />
+
+**信息增益的计算**，以 windy 属性为例，拆分前的信息熵为：
+$$
+Entropy([9+,5-])=-9/14\log_2(9/14)-5/14\log_2(5/14)=0.94
+$$
+拆分后分为两部分：
+$$
+Entropy([6+,2-])=-6/8\log_2 (6/8)-2/8\log(2/8)=0.811
+$$
+
+$$
+Entropy([3+,3-])=-3/6\log_2(3/6)-3/6\log_2(3/6)=1
+$$
+
+信息增益为：
+$$
+gain(windy)=0.94-(8/14)*0.811-(6/14)*1=0.048
+$$
+其它属性的信息增益计算方法相同。
+
+ outlook 的信息增益最大，以 outlook 为 root-note，然后继续拆分：
+
+<img src="./images/image-20250103111306209.png" alt="image-20250103111306209" style="zoom:50%;" />
+
+对 sunny 分支继续拆分，sunny 分支的熵为：
+$$
+H(sunny)=-2/5\log_2(2/5)-3/5\log_2(3/5)=0.971
+$$
+如果以 temperature 拆分：
+$$
+H(sunny,hot)=0
+$$
+
+$$
+H(sunny,cool)=0
+$$
+
+$$
+H(sunny,mild)=-1/2\log_2(1/2)-1/2\log_2(1/2)=1
+$$
+
+因此，temperature 的平均值熵为：
+$$
+H(sunny,temperature)=(2/5)*0+(1/5)*0+(2/5)*1=0.4
+$$
+以 temperature 拆分 sunny 的信息增益为：
+$$
+gain(temperature)=0.971-0.4=0.571
+$$
+其它分支计算方法相同。显然，以 humidity 继续拆分的信息增益最大，且得到两个纯分支，不需要继续拆分。
+
+Weka 操作：
+
+- 打开 weather.nominal.arff 文件
+- 选择 J48 模型
+- 运行
+
+得到的模型如下：
+
+- 首先是 outlook
+- outlook 下的 sunny 以 humidity 继续拆分
+- outlook 下的 overcast 全部为 yes
+- outlook 下的 rainy 以 windy 继续拆分
+
+```
+outlook = sunny
+|   humidity = high: no (3.0)
+|   humidity = normal: yes (2.0)
+outlook = overcast: yes (4.0)
+outlook = rainy
+|   windy = TRUE: no (2.0)
+|   windy = FALSE: yes (3.0)
+```
+
+可视化树：
+
+<img src="./images/image-20250103113341542.png" alt="image-20250103113341542" style="zoom:50%;" />
+
+总结：
+
+- J48 是一个 top-down 决策树算法
+- 完全基于信息论
+- 生成的 tree 很容易理解
+- 选择属性的方法有很多，上面使用了信息增益，在实践中，不过的选择方法差别不大
+- 在实际应用中，还需要进行修改，J48 中包含了一些较为复杂的算法，以保证在不同情况下能够运行
+
 ### 3.5 修剪决策树
+
+修剪决策树，也许在训练集上表现差点，但是在测试集上可能更好。依然以天气数据集为例：
+
+<img src="./images/image-20250103114538542.png" alt="image-20250103114538542" style="zoom:50%;" />
+
+这里添加了一个 ID code 属性，每个样本的 ID code 值都不同。
+
+如果按照信息增益计算每个属性，可以发现 ID code 的信息增益为  0.940 bits。远大于 outlook 的 0.247，但是该属性完全无法泛化。
+
+如何**修剪决策树**：
+
+- 如果 node 太小，不再继续拆分（J48 的 `minNumObj` 参数，默认为 2）
+- 先构建完整的决策树，然后从叶节点回溯反向修剪，每个阶段使用统计检验（`confidenceFactor` 参数，默认 0.25，值越小修剪越多），这比一开始修剪效果更好
+- 有时候修建内部节点更合适，使得下方的 subtree 提升一级，`subtreeRaising` 参数，默认 true。该参数增加了算法的复杂度，所以关闭它可以缩短运行时间
+- 修剪决策树是一个复杂的主题，而且不是特别有启发性，**不建议修改 J48 的参数**，默认参数性能通常很好
+
+修剪决策树的目的是避免**过拟合**，修剪决策树，不仅得到一个更小的 tree，有时候还能得到更好的结果。例如：
+
+- 打开 **diabetes.arff** 文件
+- 选择 J48 模型
+- 默认修剪：73.8281 % accuracy，20 leaves, 39 nodes
+- 关闭修剪（`unpruned` 设置为 True）：72.6563 %，22 leaves, 43 nodes，tree 稍微第一点
+
+在以 **breast-cancer.arff** 数据集为例：
+
+- 默认修剪：75.5245 % accuracy，4 leaves, 6 nodes
+- 关闭修剪：69.5804 % accuracy, 152 leaves, 179 nodes，这个 tree 太大了
+
+所以，通常应该修剪决策树，在没有确信理由时，建议采用 J48 默认参数。
+
+总结：
+
+- C4.5/J48 是一个早期非常流行的机器学习方法
+- 决策树有许多剪枝方法
+  - 剪枝方法对决策树的大小影响很大，通常可以打打简化决策树
+  - 剪枝往往会稍微降低 accuracy，但是可以避免过拟合
+- 剪枝是一种通用技术，除了决策树也可以用于树以外的结构，如 decision rules
 
 ### 3.6 最近邻
 
+最近邻是最简单的机器学习算法，它只是记忆，没有学习：
 
+- 对新的样本，在训练集中搜索与它**最像**样本
+  - 样本本身代表知识
+  - 这是一种 lazy learning：在预测之前什么也不用做
+- 基于实例学习（instance-based learning）就是最近邻学习（nearest-neighbor learning）
+
+下面是一个二维样本空间示意图：
+
+- 蓝色和白色的点代表两种不同的类型
+- 红色为分类未知的点
+- 计算红色点与两个类别最近点的距离，就可以判断该点的类别
+
+<img src="./images/image-20250103131150297.png" alt="image-20250103131150297" style="zoom:50%;" />
+
+如何判断两个样本是否相似，需要一个**相似函数（similarity function）**：
+
+- 数字属性
+  - 常规的欧几里得距离：坐标差值的平方和
+  - 曼哈度距离：差值的绝对值的和
+- nominal 属性
+  - 不同距离为 1，相同距离为 0
+- 将属性标准化为 0 到 1 之间，避免距离完全由数值较大的属性主导
+
+**噪音样本**：
+
+- 噪音样本会导致分类错误
+- 通过 k-nearest-neighbors 可以部分避免噪音干扰
+  - 找到最近 k 个最近样本的分类，取频率最高的作为类别
+
+**Weka**
+
+weka 中的 kNN 算法为 IBk （instance-based learning）。示例：
+
+- 打开 glass.arff 数据集
+- 选择 lazy > IBk 模型，选择 k=1,5,20
+- 10-fold 交叉验证
+
+| k=1   | k=5   | k=20  |
+| ----- | ----- | ----- |
+| 70.6% | 67.8% | 65.4% |
+
+> [!TIP]
+>
+> 用 IBk 的 `KNN` 参数设置 k 值，默认为 1.
+
+对一个包含许多噪音的数据集，随着 k 增大，准确度会提高一点；随着 k 继续增大，准确率会开始降低；如果 k 设置为数据集大小，计算测试样本到所有训练样本的距离，并且求平均值，会得到一个接近 baseline 的准确率。
+
+**kNN 总结**：
+
+- kNN 通常比较准确，但是很慢
+  - 每次预测需要扫描整个训练集
+  - 采用特殊的数据结构可以更快一点
+- kNN 假设所有属性都一样重要
+  - 补救措施：属性选择或者加权属性
+- 噪音样本
+  - 采用 k 个最近邻居进行投票
+  - 根据预测准确率对样本进行加权
+  - 为每个类别确定可靠的原型
+- kNN 是一个古老的模型，从 1950s 开始使用
+  - 如果训练集 $n\rightarrow \infty$, $k\rightarrow \infty$，并且 $k/n \rightarrow 0$，此时 kNN 趋于这个数据集的理论最小错误率
+  - 随着 n 增大和 k 增大，kNN 可以得到较好的分类结果
 
 ## 4. 更多分类模型
+
+### 4.1 分类边界
+
+使用 Weka 的 Boundary Visualizer 可视化分类边界。
+
+下面以 OneR 模型和 iris.2D.arff 数据集为例：
+
+- 打开 iris.2D.arff 文件（删除 iris.arff 数据集中的 `sepallength` 和 `sepalwidth` 属性得到该数据集）
+- 在 Weka GUI Chooser，选择 Visualization>**BoundaryVisualizer**
+  - 打开 iris.2D.arff
+  - X 为 petallength, Y 为 petalwidth
+  - 不同类别的数据点用不同颜色标识
+
+<img src="./images/image-20250103140010011.png" alt="image-20250103140010011" style="zoom:50%;" />
+
+- 选择分类器 OneR
+- 勾选 Plot training data
+- 点击 Start
+
+<img src="./images/image-20250103140246378.png" alt="image-20250103140246378" style="zoom:50%;" />
+
+不同背景色显示了决策分界线，训练集叠加在上面。
+
+下面在 **Explorer** 查看 OneR 是如何处理该数据集：
+
+- 打开数据集 iris.2D.arff
+- 选择 OneR，运行
+
+```
+=== Classifier model (full training set) ===
+
+petalwidth:
+	< 0.8	-> Iris-setosa
+	< 1.75	-> Iris-versicolor
+	>= 1.75	-> Iris-virginica
+(144/150 instances correct)
+```
+
+可以发现，OneR 采用 petalwidth 进行分类，<0.8 为 Iris-setosa，<1.75 为 Iris-versicolor，>=1.75 为 Iris-virginica，与 BoundaryVisualizer 可视化结果一样。这就是 OneR 生成的决策分界线。
+
+再来看看其他模型的决策分界线：
+
+**IBk**
+
+- 选择 lazy>IBk
+- 勾选 Plot training data
+- 点击 Start
+
+<img src="./images/image-20250103141604382.png" alt="image-20250103141604382" style="zoom:50%;" />
+
+- 如果设置 k=5，会出现过渡区域
+
+过渡区域通过投票决定类别。
+
+<img src="./images/image-20250103143532573.png" alt="image-20250103143532573" style="zoom:50%;" />
+
+**NaiveBayes**
+
+- 选择 NaiveBayes，设置 `useSupervisedDiscretization` 为 true
+
+<img src="./images/image-20250103143847697.png" alt="image-20250103143847697" style="zoom:50%;" />
+
+朴素贝叶斯认为所有属性贡献相同，且互相独立。所以决策边界为两种属性相乘，得到一个概率的棋盘布局。
+
+**J48**
+
+结合 Explorer 中的输出更容易理解。
+
+```
+J48 pruned tree
+------------------
+
+petalwidth <= 0.6: Iris-setosa (50.0)
+petalwidth > 0.6
+|   petalwidth <= 1.7
+|   |   petallength <= 4.9: Iris-versicolor (48.0/1.0)
+|   |   petallength > 4.9
+|   |   |   petalwidth <= 1.5: Iris-virginica (3.0)
+|   |   |   petalwidth > 1.5: Iris-versicolor (3.0/1.0)
+|   petalwidth > 1.7: Iris-virginica (46.0/1.0)
+
+Number of Leaves  : 	5
+
+Size of the tree : 	9
+```
+
+
+
+<img src="./images/image-20250103144139012.png" alt="image-20250103144139012" style="zoom:50%;" />
+
+提高 `minNumObj` 可以简化决策树，得到的决策边界更简单。
+
+**总结：**
+
+- 分类模型在样本空间中创建决策边界
+- 不同模型有不同偏好：对比 OneR, IBk, NaiveBayes, J48
+- 决策边界可视化局限于数值属性和 2D 图，所以这个可视化工具应用有限，不过可以帮助理解不同模型
+
+### 4.2 线性回归
+
+
+
+### 4.3 回归
+
+### 4.4 逻辑回归
+
+### 4.5 SVM
+
+### 4.6 集成学习
+
+
 
 ## 5. 汇总
 
