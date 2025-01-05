@@ -1135,17 +1135,247 @@ Total Number of Instances              209
 
 ### 4.3 使用回归进行分类
 
+回归模型可用于分类。
 
+对二元分类问题：
+
+- 训练：类别 0 和 1
+- 预测：对类别 0 和 1 设置阈值
+
+多类别问题：
+
+- 训练：对每个类别用单独的回归模型
+  - 对属于该类别的样本，输出为 1，不属于该类别的样本为 1
+  - 包含 n 个类别的问题就会产生 n 个回归模型。
+- 预测：选择输出最大的类别
+
+也可以使用成对线性回归，对每对类别构建线性回归。
+
+下面以二元分类问题为例，演示**利用回归技术构建分类模型**：
+
+- 打开 diabetes.arff
+- 在 **Preprocess** 中使用 `NominalToBinary` filter 将 class 转换为数字
+  - 选择 class 所在位置 9，点击 **Apply**
+  - 不过首先要将 `Class: class(Nom)` 设置为 `No class`，因为属性 filter 不能应用于 class 值
+- 选择 **functions>LinearRegression**
+-  **Run**
+- 勾选 Output predictions
+- 再次 Run
+
+可以看到线性回归对样本的预测值。
+
+**进一步尝试**：
+
+- 在 Preprocess 使用 `AddClassification` filter 添加一个新的属性 "classification"
+  - 设置 `LinearRegression` 作为 classifier
+  - 设置 `outputClassification` 为 true
+  - 点击 Apply
+  - 这样就在数据集后面添加了一个 classfication 属性，包含线性回归的输出值
+
+<img src="./images/image-20250103231421092.png" alt="image-20250103231421092" style="zoom:50%;" />
+
+- 使用 OneR 优化两个类别的分割点
+  - 先用 `NumericToNominal` 将 class 属性转换回 nominal
+  - 现在希望使用 classification 数值预测 class 的值
+  - 先删除所有其它属性值，只保留 class 和 classification
+  - 选择 OneR 模型
+  - 取消勾选 Output predicitions
+  - 将输出从 `(Num)classification` 修改为 `(Nom)class`
+  - 运行
+
+得到一个过拟合模型：
+
+```
+classification:
+	< 0.2824512839034967	-> 0
+	< 0.29382502646301367	-> 1
+	< 0.37940870285866113	-> 0
+	< 0.39140476756441367	-> 1
+	< 0.39991515917441567	-> 0
+	< 0.408357088899183	-> 1
+	< 0.4196517257956418	-> 0
+	< 0.45395701669502597	-> 1
+	< 0.4701023336400427	-> 0
+	< 0.48523272153598906	-> 1
+	< 0.5078342313936239	-> 0
+	< 0.6366653148084418	-> 1
+	< 0.6591758248627334	-> 0
+	>= 0.6591758248627334	-> 1
+(615/768 instances correct)
+```
+
+准确度只有 72.9167 %。我们希望模型只有一个分割点。可以将 `OneR` 的 `minBucketSize` 修改为一个很大的值，比如 100，再次运行，此时模型要简单很多，准确度 76.8229 %，比上面的过拟合模型更好：
+
+```
+classification:
+	< 0.4701023336400427	-> 0
+	>= 0.4701023336400427	-> 1
+(595/768 instances correct)
+```
+
+这样就实现了用线性回归进行分类。
+
+使用**逻辑回归**，可以做得更好。
 
 ### 4.4 逻辑回归
 
+预测概率通常比直接预测类别更有用。
+
+- Naive Bayes 输出概率
+  - 打开 diabetes.arff，运行 Bayes>NaiveBayes with 90% percentage split，勾选 Output predictions
+  - 查看 actual  predicted error prediction 的值
+- 还有其他方法可以得到概率
+  - ZeroR，这个比较特殊，输出的概率为总体两个类别的比例，所有样本的概率都是该比例值
+  - J48，内部使用概率进行剪枝
+
+逻辑回归是让线性回归也生成概率：
+
+- 线性回归：计算线性方程，然后设置一个阈值，高于阈值为类别 1，低于阈值为类别 0
+- 逻辑回归：直接估计类别概率
+
+<img src="./images/image-20250104160201792.png" alt="image-20250104160201792" style="zoom:50%;" />
+
+选择最大化对数似然函数（log-likelihood）的权重（不是最小化L2）
+
+<img src="./images/image-20250104160258626.png" alt="image-20250104160258626" style="zoom: 25%;" />
+
+这就是逻辑回归的基础。
+
+Weka 操作：
+
+- 打开 diabetes.arff
+- 上一节介绍了，使用 classification-by-regression 的准确度为 76.8%，其它几个概率方法的准确度
+  - ZeroR 为 65.1%，10 次平均 65.1%
+  - Naive Bayes 76.3%，10 次平均 75.8%
+  - J48 73.8%，10 次平均 74.5%
+- 逻辑回归：**functions>Logistic**
+  - 10-fold cross-validation
+  - 准确率 77.2%，10 次平均 77.5%
+
+逻辑回归如何扩展到多种类别？
+
+- 不能针对每个类别执行一次回归，概率值加和不为 1
+- 可以通过 joint 优化问题解决
+
+逻辑回归总结：
+
+- 逻辑回归流行且强大
+- 使用 logit 转换直接预测概率
+
 ### 4.5 SVM
+
+支持向量最大化两个分类的边界：
+
+- 只使用支持向量，不使用其它点
+
+<img src="./images/image-20250105072800163.png" alt="image-20250105072800163" style="zoom:50%;" />
+
+对线性不可分的数据集，例如：
+
+<img src="./images/image-20250105073019907.png" alt="image-20250105073019907" style="zoom: 25%;" />
+
+此时找到超平面比较复杂。不过通过核方法也能解决。
+
+支持向量机总结：
+
+- SVM 得到线性决策边界，通过 kernel 可以得到更复杂的边界
+- SVM 很容易避免过拟合：边界取决于少量点（支持向量）
+- Weka 实现：funtsion>SMO
+  - 限于两个类别
+- functions>LibSVM
+  - 这是 weka 集成的一个外部库
+  - 比 SMO 快，更多选项
 
 ### 4.6 集成学习
 
+集成学习构建多种模型，让它们投票：
 
+- 通常可以提高预测性能
+- 输出结果比较难分析
+  - 也有方法可以只生成一个可理解的结构
+- 方法
+  - Bagging
+  - Randomization
+  - Boosting
+  - Stacking
+
+**Bagging**
+
+- 多个相同大小的训练集
+  - 通过放回抽样获得
+- 对每个训练集构建一个模型
+  - 使用相同的机器学习算法
+- 通过投票合并预测结果
+  - 对回归模型，可以取平均值
+- 该方法非常适合不稳定的学习算法
+  - 例如，训练集的小变化可以使模型发生很大变化
+  - 决策树就属于不稳定学习算法，不过 Naive Bayes 属于稳定学习，数据集的少量变化基本不影响性能
+- Weka: meta>Bagging
+  - glass.arff （10-fold cross-validation）
+  - J48: 66.8%
+  - Bagging（默认参数）：72.5%
+
+**Randomization**: 随机森林
+
+- 随机化算法，而不是训练集
+  - 如何随机化取决于算法
+- 随机森林
+  - J48 决策树的属性选择：不选择最佳属性，而是从 k 个最佳中随机选择
+  - 通常可以改善决策树
+- Weka：trees>RandomForests
+  - 选项：number of trees (default 10); maximum depth of trees; number of attributes
+- 示例：glass.arf
+  - J48：66.8%
+  - RandomForests (默认参数)：75.2%
+
+**Boosting**
+
+- 迭代：新模型受之前构建的模型的影响
+  - 对上一个模型错误分类的样本，新模型采用额外权重
+  - 鼓励新模型成为上一个模型错误分类样本的专家
+  - 直观理由：委员会成员应补充彼此的专业知识
+- 采用投票（对回归采用平均）
+  - 不过各个模型根据其性能进行加权
+- 通常可以很好提升性能
+- Weka: meta>AdaBoostM1
+- 示例，glass.arff
+  - J48: 66.8%
+  - AdaBoostM1 (using J48): 74.3%
+
+**Stacking**
+
+- 使用 meta-learner 集合 base-learner 的预测结果，而不是采用投票
+  - base learners: level-0 models
+  - meta learners: level-1 model
+  - base-learner 的输出作为 meta learner 的输入
+- base-learner 通常采用不同的学习算法
+- 不能使用训练集的预测结果来生成 level-1 模型，而是使用类似交叉验证的方案
+- Weka: meta>Stacking
+  - **StackingC** 为性能更高的版本
+  - 可以指定多个 level-0 模型
+- stacking 需要仔细调整参数，使用比较难
+
+**集成学习总结**
+
+- 集成多个模型，类似委员会投票
+- 对不稳定学习算法非常有用
+- 多种类型
+  - Bagging：对训练集重采用
+  - Random forests：决策树中采用替代分支
+  - Boosting：集中已有模型分类错误的样本
+  - Stacking：将上一个模型的输出作为当前模型的输入
 
 ## 5. 汇总
+
+### 5.1 数据挖掘流程
+
+### 5.2 注意事项
+
+### 5.3 数据挖掘与伦理
+
+### 5.4 总结
+
+
 
 ## 参考
 
