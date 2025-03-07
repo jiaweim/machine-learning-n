@@ -177,7 +177,7 @@ VAE encoder 将图像从像素空间压缩到较小维度的 latent 空间，从
 
 ### DataFrame
 
-虽然有些 smile 算法可以使用简单的 `double[]` 作为输入，但封装类 `DataFrame` 使用更多。`DataFrame` 是一种二维数据结构，就像一张 Excel 表格。每列都是一个 `ValueVector`，用于存储相同类型值的序列。`DataFrame` 中不同列可以有不同数据类型。对每个原始数据类型和通用对象类型，都有对应的 `ValueVector` 具体自雷实现。
+虽然有些 smile 算法可以使用简单的 `double[]` 作为输入，但封装类 `DataFrame` 使用更多。`DataFrame` 是一种二维数据结构，就像一张 Excel 表格。每列都是一个 `ValueVector`，用于存储相同类型值的序列。`DataFrame` 中不同列可以有不同数据类型。对每个原始数据类型和通用对象类型，都有对应的 `ValueVector` 具体实现。
 
 ```java
 DoubleVector v1 = ValueVector.of("A", 1.0, 2.0, 3.0);
@@ -269,27 +269,517 @@ System.out.println(df2.schema());
 }
 ```
 
-- 
+- 使用 records 或 beans 集合创建
 
+```java
+enum Gender {Male, Female}
+record Person(String name, Gender gender, String state, LocalDate birthday, int age, Double salary) {}
 
+List<Person> persons = new ArrayList<>();
+persons.add(new Person("Alex", Gender.Male, "NY", LocalDate.of(1980, 10, 1), 38, 10000.));
+persons.add(new Person("Bob", Gender.Male, "AZ", LocalDate.of(1995, 3, 4), 23, null));
+persons.add(new Person("Jane", Gender.Female, "CA", LocalDate.of(1970, 3, 1), 48, 230000.));
+persons.add(new Person("Amy", Gender.Female, "NY", LocalDate.of(2005, 12, 10), 13, null));
+DataFrame df = DataFrame.of(Person.class, persons);
+```
+
+```
++---+----+------+-----+----------+---+------+
+|   |name|gender|state|  birthday|age|salary|
++---+----+------+-----+----------+---+------+
+|  0|Alex|  Male|   NY|1980-10-01| 38| 10000|
+|  1| Bob|  Male|   AZ|1995-03-04| 23|  null|
+|  2|Jane|Female|   CA|1970-03-01| 48|230000|
+|  3| Amy|Female|   NY|2005-12-10| 13|  null|
++---+----+------+-----+----------+---+------+
+```
+
+其中，`state` col 是 String 类型，不过，按照尝试它是分类变量，可以按照如下方式修改类型：
+
+```java
+DataFrame df2 = df.factorize("state");
+```
+
+```java
+assertEquals("NY", df.get(0, 2)); // row-index, column-index
+assertEquals(2, df2.get(0, 2));
+```
+
+从表面看没有变化，实际上在 `df2` 中 state col 被转换为了整数值。
+
+Smile 为许多流行数据格式提供了解析器，且基本解析为 `DataFrame` 类型。
+
+```java
+var iris = Read.arff("data/weka/iris.arff")
+```
+
+`smile.datasets` 包也提供了许多公共数据集：
+
+```java
+var iris = new Iris().data() // use built-in dataset object
+```
 
 #### 索引
 
+可以为 `DataFrame` 设置 row-index，其长度必须与 rows 数相同，且没有重复或缺失值。row-index 作为 `DataFrame` 每行的识别符。可以通过 `loc()` 方法高效访问 row。与常规的序数索引相比，基于对象的 row-index 一般包含一定的语义信息。
+
+```java
+DataFrame df = DataFrame.of(MathEx.randn(6, 4));
+LocalDate[] dates = Dates.range(LocalDate.of(2025, 2, 1), 6); // 将日期设置为 row-index
+df = df.setIndex(dates);
+System.out.println(df);
+```
+
+```
++----------+---------+---------+---------+---------+
+|          |       V1|       V2|       V3|       V4|
++----------+---------+---------+---------+---------+
+|2025-02-01|-0.201469| 0.970363| 2.726932|-0.146014|
+|2025-02-02| 1.872161| 0.495932| 0.553859|-0.028237|
+|2025-02-03|-0.504866|-0.179409| 0.201377| 0.281267|
+|2025-02-04| 0.894446| 0.791521| 0.053346| 0.213519|
+|2025-02-05| 0.200011|-0.203736|-0.349196|-1.193759|
+|2025-02-06|  1.52529|-1.407597|  1.16758| -1.78291|
++----------+---------+---------+---------+---------+
+```
+
+- 使用 `loc` 查询，返回指定 row-index 的 row
+
+```java
+Tuple row = df.loc(dates[1]);
+System.out.println(row);
+```
+
+```
+{
+  V1: 1.872161,
+  V2: 0.495932,
+  V3: 0.553859,
+  V4: -0.028237
+}
+```
+
+- 使用 `loc` 查询多个 rows，以 `DataFrame` 类型返回
+
+```java
+DataFrame loc = df.loc(dates[1], dates[2]);
+```
+
+```
++----------+---------+---------+--------+---------+
+|          |       V1|       V2|      V3|       V4|
++----------+---------+---------+--------+---------+
+|2025-02-02| 1.872161| 0.495932|0.553859|-0.028237|
+|2025-02-03|-0.504866|-0.179409|0.201377| 0.281267|
++----------+---------+---------+--------+---------+
+```
+
+- 将已有 column 设置为 row-index，该 column 会从 data-frame 数据中删除
+
+```java
+DataFrame df1 = new DataFrame(
+        ValueVector.of("A", 1.0),
+        ValueVector.of("B", LocalDate.parse("2013-01-02")),
+        ValueVector.of("C", "foo"),
+        ObjectVector.of("D", Index.range(0, 4).toArray()),
+        ObjectVector.of("E", new int[]{3, 3, 3, 3})
+);
+df1 = df1.setIndex("B");
+System.out.println(df1);
+```
+
+```
++----------+---+---+------------+------------+
+|          |  A|  C|           D|           E|
++----------+---+---+------------+------------+
+|2013-01-02|  1|foo|[0, 1, 2, 3]|[3, 3, 3, 3]|
++----------+---+---+------------+------------+
+```
+
 #### 查看
+
+`DataFrame.toString()` 默认打印前 10 行内容。
+
+可以使用 `DataFrame.head()` 和 `DataFrame.tail()` 查看 `DataFrame` 的顶部或底部的 rows。
+
+```java
+DataFrame df = DataFrame.of(MathEx.randn(6, 4));
+LocalDate[] dates = Dates.range(LocalDate.of(2025, 2, 1), 6);
+df = df.setIndex(dates);
+
+System.out.println(df.head(3));
+```
+
+```
++----------+---------+---------+--------+---------+
+|          |       V1|       V2|      V3|       V4|
++----------+---------+---------+--------+---------+
+|2025-02-01|-0.201469| 0.970363|2.726932|-0.146014|
+|2025-02-02| 1.872161| 0.495932|0.553859|-0.028237|
+|2025-02-03|-0.504866|-0.179409|0.201377| 0.281267|
++----------+---------+---------+--------+---------+
+3 more rows...
+```
+
+```java
+System.out.println(df.tail(3));
+```
+
+```
++----------+--------+---------+---------+---------+
+|          |      V1|       V2|       V3|       V4|
++----------+--------+---------+---------+---------+
+|2025-02-04|0.894446| 0.791521| 0.053346| 0.213519|
+|2025-02-05|0.200011|-0.203736|-0.349196|-1.193759|
+|2025-02-06| 1.52529|-1.407597|  1.16758| -1.78291|
++----------+--------+---------+---------+---------+
+```
+
+`describe()` 显示数据结构和统计摘要：
+
+```java
+DataFrame iris = Read.arff("D:\\tools\\smile-4.3.0\\data\\weka\\iris.arff");
+System.out.println(iris.describe());
+```
+
+<img src="./images/image-20250307133440485.png" alt="image-20250307133440485" style="zoom: 67%;" />
 
 #### 选择
 
+- 可以使用数组语法选择一行，或切片选择 rows 子集。
+
+```java
+DataFrame iris = Read.arff("D:\\tools\\smile-4.3.0\\data\\weka\\iris.arff");
+Tuple row = iris.get(0);
+System.out.println(row);
+```
+
+```
+{
+  sepallength: 5.1,
+  sepalwidth: 3.5,
+  petallength: 1.4,
+  petalwidth: 0.2,
+  class: Iris-setosa
+}
+```
+
+```java
+DataFrame rows = iris.get(Index.range(10, 20));
+System.out.println(rows);
+```
+
+```
++---+-----------+----------+-----------+----------+-----------+
+|   |sepallength|sepalwidth|petallength|petalwidth|      class|
++---+-----------+----------+-----------+----------+-----------+
+|  0|        5.4|       3.7|        1.5|       0.2|Iris-setosa|
+|  1|        4.8|       3.4|        1.6|       0.2|Iris-setosa|
+|  2|        4.8|         3|        1.4|       0.1|Iris-setosa|
+|  3|        4.3|         3|        1.1|       0.1|Iris-setosa|
+|  4|        5.8|         4|        1.2|       0.2|Iris-setosa|
+|  5|        5.7|       4.4|        1.5|       0.4|Iris-setosa|
+|  6|        5.4|       3.9|        1.3|       0.4|Iris-setosa|
+|  7|        5.1|       3.5|        1.4|       0.3|Iris-setosa|
+|  8|        5.7|       3.8|        1.7|       0.3|Iris-setosa|
+|  9|        5.1|       3.8|        1.5|       0.3|Iris-setosa|
++---+-----------+----------+-----------+----------+-----------+
+```
+
+- 类似地，可以通过名称访问 column，或者选择多个 columns 构成一个新的 `DataFrame`：
+
+```java
+smile> iris.column("sepallength")
+$8 ==> sepallength[5.1, 4.9, 4.7, 4.6, 5, 5.4, 4.6, 5, 4.4, 4.9, ..., 140 more]
+
+smile> iris.select("sepallength", "sepalwidth")
+$9 ==>
++---+-----------+----------+
+|   |sepallength|sepalwidth|
++---+-----------+----------+
+|  0|        5.1|       3.5|
+|  1|        4.9|         3|
+|  2|        4.7|       3.2|
+|  3|        4.6|       3.1|
+|  4|          5|       3.6|
+|  5|        5.4|       3.9|
+|  6|        4.6|       3.4|
+|  7|          5|       3.4|
+|  8|        4.4|       2.9|
+|  9|        4.9|       3.1|
++---+-----------+----------+
+140 more rows...
+```
+
+- 还可以使用 boolean-indexing 选择 rows。下面使用 `isin()` 方法过滤
+
+```java
+smile> iris.get(iris.column("class").isin("Iris-setosa", "Iris-virginica"))
+$10 ==>
++---+-----------+----------+-----------+----------+-----------+
+|   |sepallength|sepalwidth|petallength|petalwidth|      class|
++---+-----------+----------+-----------+----------+-----------+
+|  0|        5.1|       3.5|        1.4|       0.2|Iris-setosa|
+|  1|        4.9|         3|        1.4|       0.2|Iris-setosa|
+|  2|        4.7|       3.2|        1.3|       0.2|Iris-setosa|
+|  3|        4.6|       3.1|        1.5|       0.2|Iris-setosa|
+|  4|          5|       3.6|        1.4|       0.2|Iris-setosa|
+|  5|        5.4|       3.9|        1.7|       0.4|Iris-setosa|
+|  6|        4.6|       3.4|        1.4|       0.3|Iris-setosa|
+|  7|          5|       3.4|        1.5|       0.2|Iris-setosa|
+|  8|        4.4|       2.9|        1.4|       0.2|Iris-setosa|
+|  9|        4.9|       3.1|        1.5|       0.1|Iris-setosa|
++---+-----------+----------+-----------+----------+-----------+
+90 more rows...
+```
+
 #### 设置
+
+- 按位置设置值
+
+```java
+smile> iris.set(0, 0, 1.5)
+```
+
+- 添加 cols
+
+```java
+smile> var df = DataFrame.of(MathEx.randn(150, 3))
+       iris.add(df.column("V1"), df.column("V3"))
+```
+
+- 设置 col
+
+```java
+smile> iris.set("V1", df.column("V3"))
+```
 
 #### 合并
 
+- `merge()` 水平合并 data-frames
+
+```java
+smile> var df3 = iris.merge(df)
+```
+
+- `concat()` 垂直合并 data-frames
+
+```java
+smile> var iris2 = iris.concat(iris)
+```
+
+- 根据 index 合并
+
+```java
+var dates = Dates.range(LocalDate.of(2025,2,1), 6);
+var df1 = DataFrame.of(MathEx.randn(6, 4)).setIndex(dates);
+var df2 = DataFrame.of(MathEx.randn(6, 4)).setIndex(dates);
+var df = df1.join(df2);
+```
+
 #### 缺失值
+
+对 object-col，`null` 表示缺失值。对基础类型，smile 使用一个 bit-mask 表示缺失值。但是，用户通常使用 NaN 来表示浮点数类型的缺失数据。
+
+可以使用 `DataFrame.isNullAt(i,j)` 检查单元格是否为 `null` 或 NaN。
+
+`DataFrame.dropna()` 删除任何包含 null 或缺失值的 rows：
+
+```java
+smile> var df = DataFrame.of(MathEx.randn(6, 4))
+       df.set(0, 0, Double.NaN)
+       df.set(1, 3, Double.NaN)
+       df.dropna()
++---+---------+---------+---------+---------+
+|   |       V1|       V2|       V3|       V4|
++---+---------+---------+---------+---------+
+|  0|-0.504866|-0.179409| 0.201377| 0.281267|
+|  1| 0.894446| 0.791521| 0.053346| 0.213519|
+|  2| 0.200011|-0.203736|-0.349196|-1.193759|
+|  3|  1.52529|-1.407597|  1.16758| -1.78291|
++---+---------+---------+---------+---------+
+```
+
+`DataFrame.fillna()` 填充数字 col 中的缺失值：
+
+```java
+smile> df.fillna(100)
++---+---------+---------+---------+---------+
+|   |       V1|       V2|       V3|       V4|
++---+---------+---------+---------+---------+
+|  0|      100| 0.970363| 2.726932|-0.146014|
+|  1| 1.872161| 0.495932| 0.553859|      100|
+|  2|-0.504866|-0.179409| 0.201377| 0.281267|
+|  3| 0.894446| 0.791521| 0.053346| 0.213519|
+|  4| 0.200011|-0.203736|-0.349196|-1.193759|
+|  5|  1.52529|-1.407597|  1.16758| -1.78291|
++---+---------+---------+---------+---------+
+```
 
 #### 操作
 
+支持 `exists`, `forall`, `find`, `filter` 等高级操作。在 Java API 中，这些操作都在 `Stream` 上。相应的方法为 `anyMatch`, `allMatch`, `findAny` 和 `filter`。这些函数的 `predicate` 接受 `Tuple` 输入：
 
+```java
+smile> iris.stream().anyMatch(row -> row.getDouble(0) > 4.5)
+$14 ==> true
+
+smile> iris.stream().allMatch(row -> row.getDouble(0) < 10)
+$15 ==> true
+
+smile> iris.stream().filter(row -> row.getByte("class") == 1).findAny()
+$17 ==> Optional[{
+  sepallength: 6.2,
+  sepalwidth: 2.9,
+  petallength: 4.3,
+  petalwidth: 1.3,
+  class: Iris-versicolor
+}]
+
+smile> iris.stream().filter(row -> row.getString("class").equals("Iris-versicolor")).findAny()
+$18 ==> Optional[{
+  sepallength: 6.2,
+  sepalwidth: 2.9,
+  petallength: 4.3,
+  petalwidth: 1.3,
+  class: Iris-versicolor
+}]
+
+smile> var stream = iris.stream().filter(row -> row.getDouble(1) > 3 && row.getByte("class") != 0)
+       DataFrame.of(iris.schema(), stream)
+$20 ==>
++-----------+----------+-----------+----------+---------------+
+|sepallength|sepalwidth|petallength|petalwidth|          class|
++-----------+----------+-----------+----------+---------------+
+|          7|       3.2|        4.7|       1.4|Iris-versicolor|
+|        6.4|       3.2|        4.5|       1.5|Iris-versicolor|
+|        6.9|       3.1|        4.9|       1.5|Iris-versicolor|
+|        6.3|       3.3|        4.7|       1.6|Iris-versicolor|
+|        6.7|       3.1|        4.4|       1.4|Iris-versicolor|
+|          6|       3.4|        4.5|       1.6|Iris-versicolor|
+|        6.7|       3.1|        4.7|       1.5|Iris-versicolor|
+|        6.3|       3.3|          6|       2.5| Iris-virginica|
+|        7.2|       3.6|        6.1|       2.5| Iris-virginica|
++-----------+----------+-----------+----------+---------------+
+15 more rows...
+```
+
+对数据整理，`DataFrame` 最重要的功能是 `map` 和 `groupBy`：
+
+```java
+smile> var x6 = iris.stream().map(row -> {
+           var x = new double[6];
+           for (int i = 0; i < 4; i++) x[i] = row.getDouble(i);
+           x[4] = x[0] * x[1];
+           x[5] = x[2] * x[3];
+           return x;
+       })
+x6 ==> java.util.stream.ReferencePipeline$3@32eff876
+
+smile> x6.forEach(xi -> System.out.println(Arrays.toString(xi)))
+[6.199999809265137, 2.9000000953674316, 4.300000190734863, 1.2999999523162842, 17.980000038146954, 5.590000042915335]
+[7.300000190734863, 2.9000000953674316, 6.300000190734863, 1.7999999523162842, 21.170001249313373, 11.340000042915335]
+[7.699999809265137, 3.0, 6.099999904632568, 2.299999952316284, 23.09999942779541, 14.029999489784245]
+[6.699999809265137, 2.5, 5.800000190734863, 1.7999999523162842, 16.749999523162842, 10.440000066757193]
+[7.199999809265137, 3.5999999046325684, 6.099999904632568, 2.5, 25.919998626709003, 15.249999761581421]
+[6.5, 3.200000047683716, 5.099999904632568, 2.0, 20.800000309944153, 10.199999809265137]
+[6.400000095367432, 2.700000047683716, 5.300000190734863, 1.899999976158142, 17.28000056266785, 10.070000236034389]
+[5.699999809265137, 2.5999999046325684, 3.5, 1.0, 14.819998960495013, 3.5]
+[4.599999904632568, 3.5999999046325684, 1.0, 0.20000000298023224, 16.55999921798707, 0.20000000298023224]
+[5.400000095367432, 3.0, 4.5, 1.5, 16.200000286102295, 6.75]
+[6.699999809265137, 3.0999999046325684, 4.400000095367432, 1.399999976158142, 20.76999876976015, 6.160000028610227]
+[5.099999904632568, 3.799999952316284, 1.600000023841858, 0.20000000298023224, 19.379999394416814, 0.32000000953674324]
+[5.599999904632568, 3.0, 4.5, 1.5, 16.799999713897705, 6.75]
+[6.0, 3.4000000953674316, 4.5, 1.600000023841858, 20.40000057220459, 7.200000107288361]
+[5.099999904632568, 3.299999952316284, 1.7000000476837158, 0.5, 16.82999944210053, 0.8500000238418579]
+[5.5, 2.4000000953674316, 3.799999952316284, 1.100000023841858, 13.200000524520874, 4.1800000381469715]
+[7.099999904632568, 3.0, 5.900000095367432, 2.0999999046325684, 21.299999713897705, 12.38999963760375]
+[6.300000190734863, 3.4000000953674316, 5.599999904632568, 2.4000000953674316, 21.420001249313373, 13.440000305175772]
+[5.099999904632568, 2.5, 3.0, 1.100000023841858, 12.749999761581421, 3.3000000715255737]
+[6.400000095367432, 3.0999999046325684, 5.5, 1.7999999523162842, 19.839999685287466, 9.899999737739563]
+[6.300000190734863, 2.9000000953674316, 5.599999904632568, 1.7999999523162842, 18.27000115394594, 10.079999561309819]
+[5.5, 2.4000000953674316, 3.700000047683716, 1.0, 13.200000524520874, 3.700000047683716]
+[6.5, 3.0, 5.800000190734863, 2.200000047683716, 19.5, 12.76000069618226]
+[7.599999904632568, 3.0, 6.599999904632568, 2.0999999046325684, 22.799999713897705, 13.859999170303354]
+[4.900000095367432, 2.5, 4.5, 1.7000000476837158, 12.250000238418579, 7.650000214576721]
+[5.0, 2.299999952316284, 3.299999952316284, 1.0, 11.499999761581421, 3.299999952316284]
+[5.599999904632568, 2.700000047683716, 4.199999809265137, 1.2999999523162842, 15.120000009536739, 5.45999955177308]
+...
+```
+
+`groupBy` 操作根据分类函数对元素进行分组，并以 `Map` 类型返回结果：
+
+- 分类函数将元素映射到某个键类型 `K`；
+- collector 生成映射，映射的 key 即为分类函数生成；映射的值为输入元素 list
+
+```java
+smile> iris.stream().collect(java.util.stream.Collectors.groupingBy(row -> row.getString("class")))
+$24 ==> {Iris-versicolor=[{
+  sepallength: 7,
+  sepalwidth: 3.2,
+  petallength: 4.7,
+  petalwidth: 1.4,
+  class: Iris-versicolor
+}, {
+  sepallength: 6.4,
+  sepalwidth: 3.2,
+  petallength: 4.5,
+  petalwidth: 1.5,
+  class: Iris-versicolor
+}, {
+  sepallength: 6.9,
+  sepalwidth: 3.1,
+  petallength: 4.9,
+  petalwidth: 1.5,
+  class: Iris-versicolor
+}, {
+  sepallength: 5.5,
+  sepalwidth: 2.3,
+  petallength: 4,
+  petalwidth: 1.3,
+  class: Iris-versicolor
+}, {
+  sepallength: 6.5,
+  sepalwidth: 2.8,
+  petallength: 4.6,
+  petalwidth: 1.5,
+  class: Iris-versicolor
+}, {
+  sepallength: 5.7,
+  sepalwidth: 2.8,
+  petallength: 4.5,
+  petalwidth: 1.3,
+  class: Iris-versicolor
+},  ...  class: Iris-setosa
+}, {
+  sepallength: 4.6,
+  sepalwidth: 3.2,
+  petallength: 1.4,
+  petalwidth: 0.2,
+  class: Iris-setosa
+}, {
+  sepallength: 5.3,
+  sepalwidth: 3.7,
+  petallength: 1.5,
+  petalwidth: 0.2,
+  class: Iris-setosa
+}, {
+  sepallength: 5,
+  sepalwidth: 3.3,
+  petallength: 1.4,
+  petalwidth: 0.2,
+  class: Iris-setosa
+}]}
+```
 
 ### SQL
+
+虽然 Smile 提供了许多以上所示的操作，但使用 SQL 可能更容易。
+
+```java
+```
+
+
 
 ### 稀疏数据集
 
