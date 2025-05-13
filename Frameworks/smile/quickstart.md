@@ -1,12 +1,87 @@
-# Smile 概述
+# Smile快速入门
 
-Smile 是一个快速且全面的机器学习包，没有其它依赖项，只需要 Java 标准库。
+2025-05-13⭐
+@author Jiawei Mao
 
-从 v1.4 开始，Smile 支持利用本地 BLAS、LAPCK库。还提供 Scala 中的高级运算符和交互式 shell。
+***
+## 简介
 
-在实际应用中，数据科学家通常使用高级工具，如 R、Matlab、SAS 等构建模型。但是，开发人员必须花费大量时间和精力将这些模型纳入生产系统中，这些模型通常一通用编程语言，如 Java、Scala 实施。Smile 为数据科学家和开发人员提供相同的工作环境。
+Smile 是一个快速且全面的机器学习包，通过先进的数据结构和算法实现了卓越的性能。从 v1.4 开始，Smile 支持利用本地 BLAS、LAPCK库。还提供 Scala 中的高级运算符和交互式 shell。
 
-## iris 示例
+在实际应用中，数据科学家通常使用高级工具，如 R、Matlab、SAS 等构建模型。但是，开发人员必须花费大量时间和精力将这些模型纳入生产系统中，这些模型通常以通用编程语言，如 Java、Scala 实施。Smile 为数据科学家和开发人员提供相同的工作环境。
+
+## 简单示例
+
+下面展示如何使用 Smile 从 Java 建模。首先，加载数据集。Smile 提供了一些常见数据格式的解析器，如 Parquet、Avro、Arrow、SAS7BDAT、ARFF 以及 LibSVM 的文件格式、tab、JSON 等。这些类位于 `smile.io` 包中。下面使用 ARFF 解析器加载天气数据集：
+
+```java
+DataFrame weather = Read.arff("\\data\\weka\\weather.nominal.arff");
+```
+
+大多数 smile 数据解析器都返回 `DataFrame` 对象，其中包含命名 columns。我们也可以解析纯文本文件，解析器会自动推断其结构。例如，下面加载空格分隔的 USPS 邮政编码手写数据集：
+
+```java
+CSVFormat csvFormat = CSVFormat.DEFAULT.withDelimiter(' ');
+DataFrame zipTrain = Read.csv("data\\usps\\zip.train", csvFormat);
+DataFrame zipTest = Read.csv("data\\usps\\zip.test", csvFormat);
+```
+
+显然，Smile 采用 commons-csv 解析 csv 文件。
+
+由于该数据集没有标题行，解析器自动将 column-names 命名为 V1, V2,...
+
+Smile 实现了许多分类和回归算法。接下来，我们基于 USPS 数据集训练一个随机森林模型。随机森林是一个集成分类器，由多棵决策树组成，输出多个决策树投票最多的结果。该方法结合了 bagging 思想和随机特征选择。
+
+```java
+CSVFormat csvFormat = CSVFormat.DEFAULT.withDelimiter(' ');
+DataFrame zipTrain = Read.csv("data\\usps\\zip.train", csvFormat);
+DataFrame zipTest = Read.csv("data\\usps\\zip.test", csvFormat);
+
+Formula formula = Formula.lhs("V1");
+Properties prop = new Properties();
+prop.setProperty("smile.random.forest.trees", "200");
+RandomForest forest = RandomForest.fit(formula, zipTrain);
+System.out.println(forest.metrics());
+```
+
+```
+{
+  fit time: 122879.948 ms,
+  score time: 415.595 ms,
+  validation data size: 7291,
+  RSS: 8191.3264,
+  MSE: 1.1235,
+  RMSE: 1.0599,
+  MAD: 0.6787,
+  R2: 87.48%
+}
+```
+
+这里首先定义了一个 `Formula` 对象，它以符号形式指定模型。公式左侧（left-hand-side, LHS）表示响应变量，右侧（right-hand-side, RHS）表示左侧自变量列表。如果未指定 RHS，则默认使用 dataframe 余下 columns。在最简单的情况，LHS 和 RHS 都是 column-names。但它们也可以是函数（如 log）和变换。这些函数和变换都是符号化的，因此是惰性的。
+
+对随机森林，我们可以使用袋外（out-of-bag, OOB）样本估算模型准确率。这样在缺乏独立测试集时很有用。
+
+现在，我们在 USPS 数据集上训练一个 SVM。由于 SVM 是一种 kernel 学习模型，只需要在数据上定义 Mercer kernel 就可以用于任意类型的数据。因此，`SVM` 类不接受 `DataFrame` 作为输入，而是接受一个通用数组。我们可以利用 `Formula` 来提取训练样本和标签。
+
+```java
+CSVFormat csvFormat = CSVFormat.DEFAULT.withDelimiter(' ');
+DataFrame zipTrain = Read.csv("data\\usps\\zip.train", csvFormat);
+DataFrame zipTest = Read.csv("data\\usps\\zip.test", csvFormat);
+
+Formula formula = Formula.lhs("V1");
+double[][] x = formula.x(zipTrain).toArray();
+int[] y = formula.y(zipTest).toIntArray();
+
+double[][] testX = formula.x(zipTest).toArray();
+int[] testY = formula.y(zipTest).toIntArray();
+```
+
+由于这是一个多分类问题，SVM 采用高斯核和 one-to-one 策略。我们还使用 `Validation` 类在测试集上评估模型，该类提供了多种模型验证方法，如交叉验证、bootstrap 等。
+
+```java
+```
+
+
 
 ```java
 import smile.data.DataFrame;
@@ -20,7 +95,7 @@ import java.text.ParseException;
 
 public class IrisDemo {
     public static void main(String[] args) throws IOException, ParseException {
-        DataFrame data = Read.arff(Path.of("D:\\tools\\smile-4.3.0\\data\\weka\\iris.arff"));
+        DataFrame data = Read.arff(Path.of("data\\weka\\iris.arff"));
         System.out.println(data);
 
         Formula formula = Formula.lhs("class"); // 设置 y
@@ -72,7 +147,7 @@ public class IrisDemo {
 
 当模型描述的是随机误差或噪声而不是底层关系时，就称为**过拟合**（overfitting）。过拟合通常发生在模型过于复杂时，如相对于样本量，模型的参数过多。过拟合模型的泛化性能通常较差，因为它会夸大数据中的微小波动。
 
-<img src="./images/Overfitting-1741057470591-2.svg" alt="Overfitting" style="zoom:50%;" />
+<img src="./images/Overfitting-1741057470591-2.svg" alt="Overfitting" style="zoom: 33%;" />
 
 > 绿色的过拟合模型在训练数据集上没有误差。但它过于复杂，描述了随机噪声。
 

@@ -1,6 +1,6 @@
 # smile
 
-- [概述](quick_start.md)
+- [Smile 快速入门](quickstart.md)
 
 ## 参考
 
