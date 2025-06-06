@@ -57,11 +57,16 @@ System.out.println(forest.metrics());
 }
 ```
 
-这里首先定义了一个 `Formula` 对象，它以符号形式指定模型。公式左侧（left-hand-side, LHS）表示响应变量，右侧（right-hand-side, RHS）表示左侧自变量列表。如果未指定 RHS，则默认使用 dataframe 余下 columns。在最简单的情况，LHS 和 RHS 都是 column-names。但它们也可以是函数（如 log）和变换。这些函数和变换都是符号化的，因此是惰性的。
+这里首先定义了一个 `Formula` 对象，`Formula` 以符号形式指定模型：
 
-对随机森林，我们可以使用袋外（out-of-bag, OOB）样本估算模型准确率。这样在缺乏独立测试集时很有用。
+- 公式左侧（left-hand-side, LHS）表示响应变量
+- 右侧（right-hand-side, RHS）表示自变量列表。如果未指定 RHS，则默认使用 dataframe 余下 columns。
 
-现在，我们在 USPS 数据集上训练一个 SVM。由于 SVM 是一种 kernel 学习模型，只需要在数据上定义 Mercer kernel 就可以用于任意类型的数据。因此，`SVM` 类不接受 `DataFrame` 作为输入，而是接受一个通用数组。我们可以利用 `Formula` 来提取训练样本和标签。
+在最简单的情况，LHS 和 RHS 都是 column-names。但它们也可以是函数（如 log）和变换。这些函数和变换都是符号化的，因此是 lazy 的。
+
+对随机森林，我们可以使用袋外（out-of-bag, OOB）样本估算模型准确率，这在缺乏独立测试集时很有用。
+
+现在，我们在 USPS 数据集上训练一个 SVM。由于 SVM 是一种 kernel 学习模型，在数据上定义 Mercer kernel 就可以用于任意类型的数据。因此，`SVM` 类不接受 `DataFrame` 作为输入，而是接受一个通用数组。我们可以利用 `Formula` 来提取训练样本和标签。
 
 ```java
 CSVFormat csvFormat = CSVFormat.DEFAULT.withDelimiter(' ');
@@ -77,11 +82,6 @@ int[] testY = formula.y(zipTest).toIntArray();
 ```
 
 由于这是一个多分类问题，SVM 采用高斯核和 one-to-one 策略。我们还使用 `Validation` 类在测试集上评估模型，该类提供了多种模型验证方法，如交叉验证、bootstrap 等。
-
-```java
-```
-
-
 
 ```java
 import smile.data.DataFrame;

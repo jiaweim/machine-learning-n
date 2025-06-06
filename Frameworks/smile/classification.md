@@ -133,6 +133,74 @@ KNN<double[]> model = KNN.fit(x, y, 3);
 
 ## 线性判别分析
 
+线性判别分析（Linear Discriminant Analysis, LDA）基于贝叶斯理论，假设条件概率密度哈数服从正态分布，还做了同方差假设（即类协方差相同）和协方差满秩的简化假设。基于这些假设，通过自变量的线性组合判断类别。
+
+```java
+public class LDA {
+    public static LDA fit(double[][] x, int[] y, double[] priori, double tol);
+}
+```
+
+参数 `priori` 是每个类的先验概率。如果为 `null`，则根据训练数据估算。
+
+参数 `tol` 用于判断协方差矩阵是否为奇异矩阵的 tolerance。该函数会拒绝方差小于 $\text{tol}^2$ 的变量。
+
+```java
+LDA.fit(x, y);
+```
+
+<img src="./images/lda.png" alt="img" style="zoom:67%;" />
+
+如图所示，LDA 的决策边界是线性的。需要注意的是，图中的决策边界是测试网格上的估计轮廓，而不是精确的决策函数，因此，存在由离散网格导致 artifact 的问题。
+
+LDA 与方差分析（ANOVA）和线性回归密切相关，它们试图将一个因变量表示为其它特征的线性组合。与其他两种方法不同的是，在方差分析和线性回归中，因变量是数值型，而 LDA 中因变量是分类变量。logit 回归和概率回归与 LDA 更相似。这些方法适合那些无法假设自变量服从正态分布（LDA的基本假设）的应用。
+
+## Fisher 线性判别
+
+Fisher 线性判别（FLD）是另一种流行的线性分类器。Fisher 将两个分布之间的分离定义为类间方差与类内方差的比值，从某种意义上来说，这是类标记信噪比的度量。FLD 会找到一个特征的线性组合，使投影后的分离最大化。
+
+```java
+public class FLD {
+    public static FLD fit(double[][] x, int[] y, int L, double tol);
+}
+```
+
+参数 `L` 是映射空间的维数。默认值为类别数-1。
+
+在 FLD 中，特征被映射到特征子空间。
+
+Fisher 线性判别式和 LDA 这两个术语经常互换使用，尽管 FLD 实际上描述的时一种略有不同的判别式，但它不满足 LDA 的一些假设，例如类别服从正态分布和类协方差相等假设。当满足 LDA 的假设时，FLD 等同于 LDA。
+
+FLD 与主成分分析（PCA）也密切相关，PCA 寻找能够最好解释数据的变量线性组合。作为一种监督方法，FLD 尝试对数据类别之间的差异进行建模。另一方面，PCA 是一种无监督方法，不考虑任何类别差异。
+
+## 二次判别分析
+
+二次判别分析（Quadratic Discriminant Analysis, QDA）与 LDA 类似，将条件概率密度函数建模为高斯分布，然后使用后验分布来估计测试数据的类别。
+
+```java
+public class QDA {
+    public static QDA fit(double[][] x, int[] y, double[] priori, double tol);
+}
+```
+
+与 LDA 不同的事，QDA 不假设每个类的协方差相同。因此，最终得到的类间分类面是二次的。
+
+<img src="./images/qda.png" alt="img" style="zoom:67%;" />
+
+可以使用最大似然（Maximum Likelihood, ML）从训练数据估计每个类的高斯参数。然而，当训练实例的数量相对于输入空间的维度较小时，ML 无法估计协方差。
+
+## 正则化判别分析
+
+在正则化判别分析（Regularized Discriminant Analysis, RDA）中，每个类的正则化协方差矩阵为 $\sum_k(\alpha)=\alpha\sum_k+(1-\alpha)\sum$。
+
+```java
+public class RDA {
+    public static RDA fit(double[][] x, int[] y, double alpha, double[] priori, double tol);
+}
+```
+
+
+
 ## 参考
 
 - https://haifengl.github.io/classification.html

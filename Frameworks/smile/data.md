@@ -1,6 +1,6 @@
 # Smile 数据处理
 
-2025-06-05
+2025-06-05⭐
 @author Jiawei Mao
 ***
 
@@ -737,7 +737,464 @@ Smile 为一些流行的数据格式提供了解析器。如 Parquet, Avro, Arro
 
 ### Apache Parquet
 
+Apache Parquet 是一种支持嵌套数据结构的列式存储格式：
 
+```java
+smile> var df = Read.parquet("data/kylo/userdata1.parquet")
+df ==>
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+|  registration_dttm| id|first_name|last_name|               email|gender|    ip_address|              cc|             country| birthdate|   salary|               title|comments|
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+|2016-02-03T07:55:29|  1|    Amanda|   Jordan|    ajordan0@com.com|Female|   1.197.201.2|6759521864920116|           Indonesia|  3/8/1971| 49756.53|    Internal Auditor|   1E+02|
+|2016-02-03T17:04:03|  2|    Albert|  Freeman|     afreeman1@is.gd|  Male|218.111.175.34|                |              Canada| 1/16/1968|150280.17|       Accountant IV|        |
+|2016-02-03T01:09:31|  3|    Evelyn|   Morgan|emorgan2@altervis...|Female|  7.161.136.94|6767119071901597|              Russia|  2/1/1960|144972.51| Structural Engineer|        |
+|2016-02-03T00:36:21|  4|    Denise|    Riley|    driley3@gmpg.org|Female| 140.35.109.83|3576031598965625|               China|  4/8/1997| 90263.05|Senior Cost Accou...|        |
+|2016-02-03T05:05:31|  5|    Carlos|    Burns|cburns4@miitbeian...|      |169.113.235.40|5602256255204850|        South Africa|          |     null|                    |        |
+|2016-02-03T07:22:34|  6|   Kathryn|    White|  kwhite5@google.com|Female|195.131.81.179|3583136326049310|           Indonesia| 2/25/1983| 69227.11|   Account Executive|        |
+|2016-02-03T08:33:08|  7|    Samuel|   Holmes|sholmes6@foxnews.com|  Male|232.234.81.197|3582641366974690|            Portugal|12/18/1987| 14247.62|Senior Financial ...|        |
+|2016-02-03T06:47:06|  8|     Harry|   Howell| hhowell7@eepurl.com|  Male|  91.235.51.73|                |Bosnia and Herzeg...|  3/1/1962|186469.43|    Web Developer IV|        |
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+990 more rows...
+```
+
+### Apache Avro
+
+Apache Avro 是一种数据序列化系统。Avro 提供了丰富的数据结构，紧凑、快速的二进制数据格式，以及存储序列化数据的文件。Avro 依赖于 Schema。当 Avro 存储数据到文件，其 shema 也同时存储。Avro schema 使用 JSON 定义。
+
+```java
+smile> var avrodf = Read.avro(smile.util.Paths.getTestData("kylo/userdata1.avro"), smile.util.Paths.getTestData("kylo/userdata.avsc"))
+avrodf ==>
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+|  registration_dttm| id|first_name|last_name|               email|gender|    ip_address|              cc|             country| birthdate|   salary|               title|comments|
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+|2016-02-03T07:55:29|  1|    Amanda|   Jordan|    ajordan0@com.com|Female|   1.197.201.2|6759521864920116|           Indonesia|  3/8/1971| 49756.53|    Internal Auditor|   1E+02|
+|2016-02-03T17:04:03|  2|    Albert|  Freeman|     afreeman1@is.gd|  Male|218.111.175.34|                |              Canada| 1/16/1968|150280.17|       Accountant IV|        |
+|2016-02-03T01:09:31|  3|    Evelyn|   Morgan|emorgan2@altervis...|Female|  7.161.136.94|6767119071901597|              Russia|  2/1/1960|144972.51| Structural Engineer|        |
+|2016-02-03T00:36:21|  4|    Denise|    Riley|    driley3@gmpg.org|Female| 140.35.109.83|3576031598965625|               China|  4/8/1997| 90263.05|Senior Cost Accou...|        |
+|2016-02-03T05:05:31|  5|    Carlos|    Burns|cburns4@miitbeian...|      |169.113.235.40|5602256255204850|        South Africa|          |     null|                    |        |
+|2016-02-03T07:22:34|  6|   Kathryn|    White|  kwhite5@google.com|Female|195.131.81.179|3583136326049310|           Indonesia| 2/25/1983| 69227.11|   Account Executive|        |
+|2016-02-03T08:33:08|  7|    Samuel|   Holmes|sholmes6@foxnews.com|  Male|232.234.81.197|3582641366974690|            Portugal|12/18/1987| 14247.62|Senior Financial ...|        |
+|2016-02-03T06:47:06|  8|     Harry|   Howell| hhowell7@eepurl.com|  Male|  91.235.51.73|                |Bosnia and Herzeg...|  3/1/1962|186469.43|    Web Developer IV|        |
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+990 more rows...
+```
+
+### Apache Arrow
+
+Apache Arrow 是一种跨语言的内存数据格式。它为扁平和分层数据指定一种标准化的、独立于语言的列式内存格式，以便在现代硬件上进行高效分析。
+
+Feather 使用 Apache Arrow 列式内存规范来表示磁盘上的 binary 数据。这使得读写操作非常快。这对于编码 null/NA 值以及 UTF8 等可变长类型尤为重要。Feather 是 Apache Arrow 扩展项目的一部分，定义了自己的简化架构和元数据以便于磁盘存储。
+
+下面将 DataFrame 写入 Feather 文件，然后重新读入：
+
+```java
+smile> var temp = java.io.File.createTempFile("chinook", "arrow")
+temp ==> /var/folders/cb/577dvd4n2db0ghdn3gn7ss0h0000gn/T/chinook5430879887643149276arrow
+
+smile> var path = temp.toPath()
+path ==> /var/folders/cb/577dvd4n2db0ghdn3gn7ss0h0000gn/T/chinook5430879887643149276arrow
+
+smile> Write.arrow(df, path)
+[main] INFO smile.io.Arrow - write 1000 rows
+
+smile> var arrowdf = Read.arrow(path)
+[main] INFO smile.io.Arrow - read 1000 rows and 13 columns
+arrowdf ==>
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+|  registration_dttm| id|first_name|last_name|               email|gender|    ip_address|              cc|             country| birthdate|   salary|               title|comments|
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+|2016-02-03T07:55:29|  1|    Amanda|   Jordan|    ajordan0@com.com|Female|   1.197.201.2|6759521864920116|           Indonesia|  3/8/1971| 49756.53|    Internal Auditor|   1E+02|
+|2016-02-03T17:04:03|  2|    Albert|  Freeman|     afreeman1@is.gd|  Male|218.111.175.34|                |              Canada| 1/16/1968|150280.17|       Accountant IV|        |
+|2016-02-03T01:09:31|  3|    Evelyn|   Morgan|emorgan2@altervis...|Female|  7.161.136.94|6767119071901597|              Russia|  2/1/1960|144972.51| Structural Engineer|        |
+|2016-02-03T00:36:21|  4|    Denise|    Riley|    driley3@gmpg.org|Female| 140.35.109.83|3576031598965625|               China|  4/8/1997| 90263.05|Senior Cost Accou...|        |
+|2016-02-03T05:05:31|  5|    Carlos|    Burns|cburns4@miitbeian...|      |169.113.235.40|5602256255204850|        South Africa|          |     null|                    |        |
+|2016-02-03T07:22:34|  6|   Kathryn|    White|  kwhite5@google.com|Female|195.131.81.179|3583136326049310|           Indonesia| 2/25/1983| 69227.11|   Account Executive|        |
+|2016-02-03T08:33:08|  7|    Samuel|   Holmes|sholmes6@foxnews.com|  Male|232.234.81.197|3582641366974690|            Portugal|12/18/1987| 14247.62|Senior Financial ...|        |
+|2016-02-03T06:47:06|  8|     Harry|   Howell| hhowell7@eepurl.com|  Male|  91.235.51.73|                |Bosnia and Herzeg...|  3/1/1962|186469.43|    Web Developer IV|        |
++-------------------+---+----------+---------+--------------------+------+--------------+----------------+--------------------+----------+---------+--------------------+--------+
+990 more rows...
+```
+
+### SAS7BDAT
+
+SAS7BDAT 是 SAS 数据集的主要格式。
+
+```java
+smile> var sasdf = Read.sas("data/sas/airline.sas7bdat")
+sasdf ==>
++----+-----+-----+------+-----+-----+
+|YEAR|    Y|    W|     R|    L|    K|
++----+-----+-----+------+-----+-----+
+|1948|1.214|0.243|0.1454|1.415|0.612|
+|1949|1.354| 0.26|0.2181|1.384|0.559|
+|1950|1.569|0.278|0.3157|1.388|0.573|
+|1951|1.948|0.297| 0.394| 1.55|0.564|
+|1952|2.265| 0.31|0.3559|1.802|0.574|
+|1953|2.731|0.322|0.3593|1.926|0.711|
+|1954|3.025|0.335|0.4025|1.964|0.776|
+|1955|3.562| 0.35|0.3961|2.116|0.827|
+|1956|3.979|0.361|0.3822|2.435|  0.8|
+|1957| 4.42|0.379|0.3045|2.707|0.921|
++----+-----+-----+------+-----+-----+
+22 more rows...
+```
+
+### Relational Database
+
+通过 JDBC 很容易从关系数据库加载数据：
+
+```java
+smile> Class.forName("org.sqlite.JDBC")
+$1 ==> class org.sqlite.JDBC
+
+smile> var url = String.format("jdbc:sqlite:%s", smile.util.Paths.getTestData("sqlite/chinook.db").toAbsolutePath())
+url ==> "jdbc:sqlite:/Users/hli/github/smile/shell/target ... ../data/sqlite/chinook.db"
+
+smile> var sql = """
+          select e.firstname as 'Employee First', e.lastname as 'Employee Last', c.firstname as 'Customer First', c.lastname as 'Customer Last', c.country, i.total
+          from employees as e
+          join customers as c on e.employeeid = c.supportrepid
+          join invoices as i on c.customerid = i.customerid"""
+sql ==> "select e.firstname as 'Employee First', e.lastna ... ustomerid = i.customerid"
+
+smile> var conn = java.sql.DriverManager.getConnection(url)
+conn ==> org.sqlite.jdbc4.JDBC4Connection@1df82230
+
+smile> var stmt = conn.createStatement()
+stmt ==> org.sqlite.jdbc4.JDBC4Statement@75329a49
+
+smile> var rs = stmt.executeQuery(sql)
+rs ==> org.sqlite.jdbc4.JDBC4ResultSet@48aaecc3
+
+smile> var sqldf = DataFrame.of(rs)
+sqldf ==>
++--------------+-------------+--------------+-------------+-------+-----+
+|Employee First|Employee Last|Customer First|Customer Last|Country|Total|
++--------------+-------------+--------------+-------------+-------+-----+
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil| 3.98|
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil| 3.96|
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil| 5.94|
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil| 0.99|
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil| 1.98|
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil|13.86|
+|          Jane|      Peacock|          Luís|    Gonçalves| Brazil| 8.91|
+|         Steve|      Johnson|        Leonie|       Köhler|Germany| 1.98|
+|         Steve|      Johnson|        Leonie|       Köhler|Germany|13.86|
+|         Steve|      Johnson|        Leonie|       Köhler|Germany| 8.91|
++--------------+-------------+--------------+-------------+-------+-----+
+402 more rows...
+```
+
+### Weka ARFF
+
+Weka ARFF 是一种 ASCII 文本文件格式，本质上是带有标题元数据的 CSV 文件。ARFF 是为 Weka 机器学习软件开发的。
+
+ARFF 文件格式相对 CSV 的显著优势在于元数据集信息。此外，添加的注释功能有助于记录有关数据的额外信息。
+
+```java
+smile> var cpu = Read.arff("https://github.com/haifengl/smile/blob/master/shell/src/universal/data/weka/cpu.arff?raw=true")
+[main] INFO smile.io.Arff - Read ARFF relation cpu
+cpu ==>
++----+-----+-----+----+-----+-----+-----+
+|MYCT| MMIN| MMAX|CACH|CHMIN|CHMAX|class|
++----+-----+-----+----+-----+-----+-----+
+| 125|  256| 6000| 256|   16|  128|  199|
+|  29| 8000|32000|  32|    8|   32|  253|
+|  29| 8000|32000|  32|    8|   32|  253|
+|  29| 8000|32000|  32|    8|   32|  253|
+|  29| 8000|16000|  32|    8|   16|  132|
+|  26| 8000|32000|  64|    8|   32|  290|
+|  23|16000|32000|  64|   16|   32|  381|
+|  23|16000|32000|  64|   16|   32|  381|
+|  23|16000|64000|  64|   16|   32|  749|
+|  23|32000|64000| 128|   32|   64| 1238|
++----+-----+-----+----+-----+-----+-----+
+199 more rows...
+```
+
+### Delimited Text & CSV
+
+带分隔符的文件文件在机器学习领域应用广泛，特别是逗号分隔文件（CSV）。Smile 使用 Apache Commons CSV 解析 CSV 文件。
+
+使用 Java API，用户需要提供 `CSVFormat` 参指定 CSV 文件格式。`Read.csv` 方法：
+
+```java
+public interface Read {
+    static DataFrame csv(String path) throws IOException, URISyntaxException
+    static DataFrame csv(String path, CSVFormat format) throws IOException, URISyntaxException
+    static DataFrame csv(String path, CSVFormat format, StructType schema) throws IOException, URISyntaxException
+    static DataFrame csv(Path path) throws IOException
+
+    /** Reads a CSV file. */
+    static DataFrame csv(Path path, CSVFormat format) throws IOException
+
+    /** Reads a CSV file. */
+    static DataFrame csv(Path path, CSVFormat format, StructType schema) throws IOException
+}
+```
+
+解析器会从最上面几行推断数据的 schema：
+
+```java
+import org.apache.commons.csv.CSVFormat
+var format = CSVFormat.DEFAULT.withDelimiter(' ')
+var zip = Read.csv("data/usps/zip.train", format)
+```
+
+如果解析器无法推断 schema，用户可以自定义 schema：
+
+```java
+smile> import smile.data.type.*
+   import smile.data.measure.*
+   var airport = new NominalScale("ABE", "ABI", "ABQ", "ABY", "ACK", "ACT",
+      "ACV", "ACY", "ADK", "ADQ", "AEX", "AGS", "AKN", "ALB", "ALO", "AMA", "ANC",
+      "APF", "ASE", "ATL", "ATW", "AUS", "AVL", "AVP", "AZO", "BDL", "BET", "BFL",
+      "BGM", "BGR", "BHM", "BIL", "BIS", "BJI", "BLI", "BMI", "BNA", "BOI", "BOS",
+      "BPT", "BQK", "BQN", "BRO", "BRW", "BTM", "BTR", "BTV", "BUF", "BUR", "BWI",
+      "BZN", "CAE", "CAK", "CDC", "CDV", "CEC", "CHA", "CHO", "CHS", "CIC", "CID",
+      "CKB", "CLD", "CLE", "CLL", "CLT", "CMH", "CMI", "CMX", "COD", "COS", "CPR",
+      "CRP", "CRW", "CSG", "CVG", "CWA", "CYS", "DAB", "DAL", "DAY", "DBQ", "DCA",
+      "DEN", "DFW", "DHN", "DLG", "DLH", "DRO", "DSM", "DTW", "EAU", "EGE", "EKO",
+      "ELM", "ELP", "ERI", "EUG", "EVV", "EWN", "EWR", "EYW", "FAI", "FAR", "FAT",
+      "FAY", "FCA", "FLG", "FLL", "FLO", "FMN", "FNT", "FSD", "FSM", "FWA", "GEG",
+      "GFK", "GGG", "GJT", "GNV", "GPT", "GRB", "GRK", "GRR", "GSO", "GSP", "GST",
+      "GTF", "GTR", "GUC", "HDN", "HHH", "HKY", "HLN", "HNL", "HOU", "HPN", "HRL",
+      "HSV", "HTS", "HVN", "IAD", "IAH", "ICT", "IDA", "ILG", "ILM", "IND", "INL",
+      "IPL", "ISO", "ISP", "ITO", "IYK", "JAC", "JAN", "JAX", "JFK", "JNU", "KOA",
+      "KTN", "LAN", "LAR", "LAS", "LAW", "LAX", "LBB", "LBF", "LCH", "LEX", "LFT",
+      "LGA", "LGB", "LIH", "LIT", "LNK", "LRD", "LSE", "LWB", "LWS", "LYH", "MAF",
+      "MBS", "MCI", "MCN", "MCO", "MDT", "MDW", "MEI", "MEM", "MFE", "MFR", "MGM",
+      "MHT", "MIA", "MKE", "MLB", "MLI", "MLU", "MOB", "MOD", "MOT", "MQT", "MRY",
+      "MSN", "MSO", "MSP", "MSY", "MTH", "MTJ", "MYR", "OAJ", "OAK", "OGD", "OGG",
+      "OKC", "OMA", "OME", "ONT", "ORD", "ORF", "OTZ", "OXR", "PBI", "PDX", "PFN",
+      "PHF", "PHL", "PHX", "PIA", "PIE", "PIH", "PIT", "PLN", "PMD", "PNS", "PSC",
+      "PSE", "PSG", "PSP", "PUB", "PVD", "PVU", "PWM", "RAP", "RCA", "RDD", "RDM",
+      "RDU", "RFD", "RHI", "RIC", "RNO", "ROA", "ROC", "ROW", "RST", "RSW", "SAN",
+      "SAT", "SAV", "SBA", "SBN", "SBP", "SCC", "SCE", "SDF", "SEA", "SFO", "SGF",
+      "SGU", "SHV", "SIT", "SJC", "SJT", "SJU", "SLC", "SLE", "SMF", "SMX", "SNA",
+      "SOP", "SPI", "SPS", "SRQ", "STL", "STT", "STX", "SUN", "SUX", "SWF", "SYR",
+      "TEX", "TLH", "TOL", "TPA", "TRI", "TTN", "TUL", "TUP", "TUS", "TVC", "TWF",
+      "TXK", "TYR", "TYS", "VCT", "VIS", "VLD", "VPS", "WRG", "WYS", "XNA", "YAK",
+      "YKM", "YUM")
+airport ==> nominal[ABE, ABI, ABQ, ABY, ACK, ACT, ACV, ACY, A ... , WYS, XNA, YAK, YKM, YUM]
+
+smile> var schema = new StructType(
+      new StructField("Month", DataTypes.ByteType, new NominalScale("c-1", "c-2", "c-3", "c-4",
+        "c-5", "c-6", "c-7", "c-8", "c-9", "c-10", "c-11", "c-12")),
+      new StructField("DayofMonth", DataTypes.ByteType, new NominalScale("c-1", "c-2", "c-3", "c-4",
+        "c-5", "c-6", "c-7", "c-8", "c-9", "c-10", "c-11", "c-12", "c-13", "c-14", "c-15", "c-16", "c-17", "c-18",
+        "c-19", "c-20", "c-21", "c-22", "c-23", "c-24", "c-25", "c-26", "c-27", "c-28", "c-29", "c-30", "c-31")),
+      new StructField("DayOfWeek", DataTypes.ByteType, new NominalScale("c-1", "c-2", "c-3", "c-4",
+        "c-5", "c-6", "c-7")),
+      new StructField("DepTime", DataTypes.IntType),
+      new StructField("UniqueCarrier", DataTypes.ByteType, new NominalScale("9E", "AA", "AQ", "AS",
+        "B6", "CO", "DH", "DL", "EV", "F9", "FL", "HA", "HP", "MQ", "NW", "OH", "OO", "TZ", "UA", "US", "WN", "XE", "YV")),
+      new StructField("Origin", DataTypes.ShortType, airport),
+      new StructField("Dest", DataTypes.ShortType, airport),
+      new StructField("Distance", DataTypes.IntType),
+      new StructField("dep_delayed_15min", DataTypes.ByteType, new NominalScale("N", "Y"))
+   )
+schema ==> [Month: byte nominal[c-1, c-2, c-3, c-4, c-5, c-6 ... 15min: byte nominal[N, Y]]
+
+smile> var format = CSVFormat.DEFAULT.withFirstRecordAsHeader();
+format ==> Delimiter=<,> QuoteChar=<"> RecordSeparator=<
+>  ... eaderRecord:true Header:[]
+
+smile> var airline = Read.csv("data/airline/train-1m.csv", format, schema);
+airline ==> [Month: byte nominal[c-1, c-2, c-3, c-4, c-5, c-6 ... ----+
+999990 more rows...
+```
+
+### LibSVM
+
+LibSVM 是一个非常快速且流行的 SVM 库。LibSVM 使用稀疏格式，无需存储 0 值。libsvm 文件每一行的格式如下：
+
+```
+<label> <index1>:<value1> <index2>:<value2> ...
+```
+
+其中，`<label>` 是 target 值：
+
+- 对分类模型，它应该是一个整数，用于标识类别（支持多分类）
+- 对于回归，它可以是任意实数
+-  对 one-class SVM，无需要使用 `<label>`，因此可以是任何值
+
+`<index>` 是从 1 开始的整数，`<value>` 是实数。index 必须按升序排序。在测试数据中，labels 至少用于计算 accuracy 或 error。如果 label 未知，则只需填一个数字。
+
+`smile.io` 提供了读取 libsvm 文件的函数。
+
+虽然 libsvm 采用稀疏格式，但打都输 libsvm 文件包含 dense 数据。因此，smile 提供了将其转换为 dense 数组的函数。
+
+```java
+smile> var glass = Read.libsvm("data/libsvm/glass.txt")
+glass ==> smile.data.DatasetImpl@524f3b3a
+```
+
+对真正的稀疏数据，可以将其转换为 `SparseMatrix`，以实现更高效的矩阵计算：
+
+```java
+smile> var glass = Read.libsvm("data/libsvm/glass.txt")
+glass ==> smile.data.DatasetImpl@17baae6e
+
+smile> SparseDataset.of(glass).toMatrix()
+$4 ==> smile.math.matrix.SparseMatrix@6b53e23f
+```
+
+注意，`read.libsvm` 返回 `Dataset[Instance[SparseArray]]` 对象。`Instance` 类包含样本对象和标签。为了将数据集转换为稀疏矩阵，首先将 `Dataset` 抓换为 `SparseDataset`，该对象不包含标签。
+
+### Coordinate Triple Tuple List
+
+` SparseDataset.from(Path path, int arrayIndexOrigin)` 函数可以读取 coordinate triple truple 格式。参数 `arrayIndexOrigin` 是数组的起始索引，在 C/C++ 和 Java 中默认为 0。但在 Fortran 语言中可以是 1.
+
+coordinate 文件存储 (row,column,value) tuple list：
+
+```
+instanceID attributeID value
+instanceID attributeID value
+instanceID attributeID value
+instanceID attributeID value
+...
+instanceID attributeID value
+instanceID attributeID value
+instanceID attributeID value
+```
+
+理想情况下，entries 会先按 row-index 排序，然后按 column-index 排序，以提供随机访问速度。这种格式非常适合增量构建矩阵。
+
+另外，还可以额外包含2行标题：
+
+```
+D    // The number of instances
+W    // The number of attributes
+```
+
+或额外 3 行：
+
+```
+D    // The number of instances
+W    // The number of attributes
+N    // The total number of nonzero items in the dataset.
+```
+
+标题行会被忽略。
+
+`data/sparse/kos.txt` 为 coordinate 格式。
+
+```java
+smile> var kos = SparseDataset.from(java.nio.file.Paths.get("data/sparse/kos.txt"), 1)
+kos ==> smile.data.SparseDatasetImpl@4d826d77
+```
+
+### Harwell-Boeing Column-Compressed Sparse Matrix
+
+在 Harwell-Boeing 列式压缩稀疏矩阵文件中，非 0 值按照从上到下，从左到右的顺序存储。这些值对应的 row-index 也被存储。此外，还存储每个 column 的起始 index。`SparseMatrix` 类支持两种 Harwell-Boeing 文件格式。其中简单的格式为：
+
+- 第一行包含三个整数：矩阵的 rows 数，columns 数和非0 entries 数
+- 第二行为 m+1 个整数，表示 column 索引，其中 m 为 column 数
+- 然后， n 个整数，表示非零元素的 row-index，其中 n 为非零元素的个数
+- 最后，n 个浮点数，表示非零元素值
+
+`SparseMatrix.text(Path path)` 函数可以读取这种简单格式。在 `data/matrix` 中有几个示例文件。
+
+```java
+smile> import smile.math.matrix.*;
+
+smile> var blocks = SparseMatrix.text(java.nio.file.Paths.get("data/matrix/08blocks.txt"))
+blocks ==> smile.math.matrix.SparseMatrix@7ff95560
+```
+
+第二种格式更为复杂，称为 Harwell-Boeing Exchange 格式。详情可参考 https://people.sc.fsu.edu/~jburkardt/data/hb/hb.html 。smile 的实现只支持实数矩阵，并且忽略了可选的右侧向量。该格式由  `SparseMatrix.harwell(Path path)` 解析。
+
+```java
+smile> var five = SparseMatrix.harwell(java.nio.file.Paths.get("data/matrix/5by5_rua.hb"))
+[main] INFO smile.math.matrix.SparseMatrix - Reads sparse matrix file '/Users/hli/github/smile/shell/target/universal/stage/data/matrix/5by5_rua.hb'
+[main] INFO smile.math.matrix.SparseMatrix - Title                                                                   Key
+[main] INFO smile.math.matrix.SparseMatrix - 5             1             1             3             0
+[main] INFO smile.math.matrix.SparseMatrix - RUA                        5             5            13             0
+[main] INFO smile.math.matrix.SparseMatrix - (6I3)           (13I3)          (5E15.8)            (5E15.8)
+five ==> smile.math.matrix.SparseMatrix@6b4a4e18
+```
+
+### Wireframe
+
+smile 可以解析 Wavefront OBJ 文件中的 3D wireframe models。
+
+```scala
+def read.wavefront(file: String): (Array[Array[Double]], Array[Array[Int]])
+```
+
+在 `data/wireframe` 目录中有一个 teapot wireframe model。
+
+```scala
+smile> val (vertices, edges) = read.wavefront("data/wavefront/teapot.obj")
+vertices: Array[Array[Double]] = Array(
+  Array(40.6266, 28.3457, -1.10804),
+  Array(40.0714, 30.4443, -1.10804),
+  Array(40.7155, 31.1438, -1.10804),
+  Array(42.0257, 30.4443, -1.10804),
+  Array(43.4692, 28.3457, -1.10804),
+  Array(37.5425, 28.3457, 14.5117),
+  Array(37.0303, 30.4443, 14.2938),
+  Array(37.6244, 31.1438, 14.5466),
+  Array(38.8331, 30.4443, 15.0609),
+  Array(40.1647, 28.3457, 15.6274),
+  Array(29.0859, 28.3457, 27.1468),
+  Array(28.6917, 30.4443, 26.7527),
+  Array(29.149, 31.1438, 27.2099),
+  Array(30.0792, 30.4443, 28.1402),
+  Array(31.1041, 28.3457, 29.165),
+  Array(16.4508, 28.3457, 35.6034),
+  Array(16.2329, 30.4443, 35.0912),
+  Array(16.4857, 31.1438, 35.6853),
+  Array(16.9999, 30.4443, 36.894),
+  Array(17.5665, 28.3457, 38.2256),
+  Array(0.831025, 28.3457, 38.6876),
+  Array(0.831025, 30.4443, 38.1324),
+  Array(0.831025, 31.1438, 38.7764),
+  Array(0.831025, 30.4443, 40.0866),
+...
+edges: Array[Array[Int]] = Array(
+  Array(6, 5),
+  Array(5, 0),
+  Array(6, 0),
+  Array(0, 1),
+  Array(1, 6),
+  Array(0, 6),
+  Array(7, 6),
+  Array(6, 1),
+  Array(7, 1),
+  Array(1, 2),
+  Array(2, 7),
+  Array(1, 7),
+  Array(8, 7),
+  Array(7, 2),
+  Array(8, 2),
+  Array(2, 3),
+  Array(3, 8),
+  Array(2, 8),
+  Array(9, 8),
+  Array(8, 3),
+  Array(9, 3),
+  Array(3, 4),
+  Array(4, 9),
+  Array(3, 9),
+...
+```
 
 ## 导出数据和模型
+
+使用如下方法序列化模型：
+
+```java
+import smile.io.Write;
+Write.object(model, file)
+```
+
+该方法将模型序列化为 java 序列化格式。如果你想在 Spark 中使用模式，该格式很方便。
+
+还可以使用 `write.arff(data,file)` 将 `DataFrame` 保存为 ARFF 格式。ARFF 文件会保留数据类型信息。如果你更喜欢 CSV 格式，也可以使用 `write.csv(data, file)` 或 `write.table(data, file, "delimiter")` 方法保存二维数据数据。
+
+对一维数组，只需调用 `write(array, file)`。
+
+
 
