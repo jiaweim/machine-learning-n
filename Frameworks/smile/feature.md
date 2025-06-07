@@ -75,7 +75,9 @@ for (int epoch = 0; epoch < 10; epoch++) {
 
 `Normalizer` 将**样本**转换为单位范数。该类无状态，无需从数据中学习变换参数。每个包含至少一个非 0 特征的样本（即每一行）都会独立于其它样本进行缩放，使其范数（L1 或 L2）等于 1。将输入缩放到单位范数是文本分类或聚类等问题的常见操作。
 
-`smile.math.MathEx` 类也提供了几个类似用途的函数，例如用于矩阵的 `standardize()`
+`smile.math.MathEx` 类也提供了几个类似用途的函数，例如用于矩阵的 `standardize()`, `normalize()` 和 `scale()`。
+
+虽然有些算法（如决策树）能够直接处理 nominal 变量，但其它算法通常需要将 nominal 变量转换为多个 binary 变量，以表示特征的存在或不存在。`OneHotEncoder` 
 
 ## 参考
 
