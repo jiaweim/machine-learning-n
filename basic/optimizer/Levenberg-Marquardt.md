@@ -47,8 +47,6 @@ S(\beta+\sigma)\approx \sum_{i=1}^m [y_i-f(x_i,\beta)-J_i\delta]^2
 $$
 
 
-
-
 ## 参考
 
 - https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
