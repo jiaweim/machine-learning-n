@@ -73,8 +73,64 @@ y(x)=\begin{cases}
     \eta_n+\beta_{n_b}(x-b_{n_b-1})&b_{n-1}<x\le b_{n_b}
 \end{cases}
 $$
- 
-其中，$b_1$ 是第一个断点的 $x$ 值，$b_2$ 是第二个断点的 $x$ 值，
+
+其中，$b_1$ 是第一个断点的 $x$ 值，$b_2$ 是第二个断点的 $x$ 值，以此类推直到最后一个断点 $b_{n_b}$。断点也是有序的 $b_1<b_2<\cdots <b_{n_b}$。另外，第一个断点总是 $b_1=x_1$，最后一个断点总是 $b_{n_b}=x_n$。
+
+如果强制分段线性函数连续，得到：
+$$
+y(x)=\begin{cases}
+    \beta_1+\beta_2(x-b_1) & b_1\le x\le b_2\\
+    \beta_1+\beta_2(x-b_1)+\beta_3(x-b_2)&b_2\lt x\le b_3\\
+    \vdots\\
+    \beta_1+\beta_2(x-b_1)+\beta_3(x-b_2)+\cdots+\beta_{n_b+1}(x-b_{n_b-1})&b_{n-1}\lt x\le b_{n_b}
+\end{cases}
+$$
+
+表示为矩阵形式：
+$$
+\begin{bmatrix}
+    1 & x_1-b_1&(x_1-b_2)1_{x_1>b_2}&(x_1-b_3)1_{x_1>b_3}&\cdots& (x_1-b_{n_b-1})1_{x_1>b_{n_b-1}}\\
+    1&x_2-b_1&(x_2-b_2)1_{x_2>b_2}&(x_2-b_3)1_{x_2>b_3}&\cdots &(x_2-b_{n_b-1})1_{x_2>b_{n_b-1}}\\
+    \vdots & \vdots & \vdots&\vdots&\ddots&\vdots\\
+    1&x_n-b_1&(x_n-b_2)1_{x_n>b_2}&(x_n-b_3)1_{x_n>b_3}&\cdots &(x_n-b_{n_b-1})1_{x_n>b_{n_b-1}}
+\end{bmatrix}\begin{bmatrix}
+    \beta_1\\
+    \beta_2\\
+    \vdots\\
+    \beta_{n_b}
+\end{bmatrix}=\begin{bmatrix}
+    y_1\\
+    y_2\\
+    \vdots\\
+    y_n
+\end{bmatrix}
+$$
+
+其中，$1_{x_n>b_2}$ 表示如下形式的分段函数：
+
+$$
+1_{x_n>b_2}=\begin{cases}
+    0 & x_n\le b_2\\
+    1 & x_n>b_2
+\end{cases}
+$$
+
+其它函数类似。
+
+现在就是见证奇迹的时候。因为已经对数据排序，这就是一个下三角矩阵，可以通过替换非零值快速组装矩阵。如果知道断点位置 $b$，问题不大。如果需要优化断点的理想位置（pwlf 的做法），则可能需要组装矩阵上千次。
+
+可以将矩阵表达式表示为线程方程：
+$$
+\mathbf{A}\beta=\mathbf{y}
+$$
+
+其中 $\mathbf{A}$ 为回归矩阵，$\beta$ 是未知参数集合，$\mathbf{y}$ 是包含所有 $y$ 值的向量。可以使用最小二乘求解器来求解 $\beta$，在 Python 中，可以使用 numpy lstsq 中使用的 LAPACK 求解。
+
+找到一组最佳参数 $\beta$ 后，就看恶意通过组装回归矩阵 $\mathbf{A}$ 来为新 $x$ 值预测。新的 $y$ 值通过乘法求解：
+
+$$
+\mathbf{A}\beta=\mathbf{y}
+$$
 
 ## QA
 
