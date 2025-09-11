@@ -83,8 +83,13 @@ $D(x_n)=\sum_{k=1}^nP(x_k)$
 
 $\mu=\frac{1}{N}\sum_{k=1}^Nx_kP(x_k)$
 
+## 衡量形状：偏度和峰度
+
+
+
 ## References
 
 - [List of probability distributions](https://en.wikipedia.org/wiki/List_of_probability_distributions)
 - [Statistical Distributions](http://mathworld.wolfram.com/topics/StatisticalDistributions.html)
 - [Discrete Distribution](https://mathworld.wolfram.com/DiscreteDistribution.html)
+- https://brownmath.com/stat/shape.htm
