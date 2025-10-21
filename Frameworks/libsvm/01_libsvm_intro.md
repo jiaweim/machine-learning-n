@@ -1,6 +1,6 @@
 # LIBSVM 概述
 
-2025-05-13
+2025-05-13⭐
 @author Jiawei Mao
 ***
 
@@ -28,20 +28,20 @@ LIBSVM 是一个 SVM 集成工具包，支持：
 - 自动模型选择可以生成交叉验证准确率的轮廓图
 
 ## Quick Start
-如果你是 SVM 新手，并且数据集不大，可以在安装之后使用 "tools" 文件夹下的 easy.py 脚本。该脚本自动执行所有任务，从数据缩放和参数选择。
+如果你是 SVM 新手，并且数据集不大，可以在安装后使用 "tools" 文件夹下的 easy.py 脚本。该脚本自动执行所有任务，从数据缩放到参数选择。
 
 使用方式：
-```
+```sh
 easy.py training_file [testing_file]
 ```
 
-# 安装和数据格式
-## 安装
+## 安装和数据格式
+### 安装
 在 Unix 系统，使用 `make` 命令构建 `svm-train`, `svm-predict` 和 `svm-scale` 程序。不带参数运行可以查看使用方式。
 
-在其它系统，使用 "Makefile" 构建，或者使用预构建的二进制版本，其中 Windows 的可执行文件在 “windows” 文件夹。
+在其它系统，参考 "Makefile" 构建，或者使用预构建的二进制版本，其中 Windows 的可执行文件在 “windows” 文件夹。
 
-## 数据格式
+### 数据格式
 训练和测试数据集文件格式为：
 ```
 <label> <index1>:<value1> <index2>:<value2> ...
@@ -61,16 +61,19 @@ easy.py training_file [testing_file]
 0 1:1.794760e+01 2:3.439160e+01 3:6.074293e-01 4:1.535747e+02
 0 1:1.643700e+01 2:2.080002e-01 3:4.028665e-01 4:3.551385e+01
 ```
-每一行为一个样本数据，并以 '\n' 结尾。对训练数据集中的 `<label>`，有如下几种情况：
-- 分类：`<label>` 为整数值，表示其分类，支持多类（multi-class）;
-- 回归：`<label>` 为目标值，可以是任意实数；
-- 对 one-class SVM，不使用 `<label>` 值，可以是任何数。
+每行为一个样本数据，并以 '\n' 结尾。样本可以没有特征值（一行全是 0），但是 `<label>` 列不能为空。
 
-对测试数据集，`<label>` 仅用于计算准确率。如果未知，可以填充任意数值。对 one-class SVM，如果non-outliers/outliers 已知，则在测试文件中的 labels 值必须为 +1/-1，用于评估性能。
+对**训练集**中的 `<label>`，有如下几种情况：
+
+- 分类：`<label>` 为整数值，表示其分类，支持多类（multi-class）
+- 回归：`<label>` 为目标值，可以是任意实数
+- 对 one-class SVM，不使用 `<label>` 值，因此可以是任何数
+
+对**测试集**，`<label>` 仅用于计算准确率。如果未知，可以填充任意数。对 one-class SVM，如果non-outliers/outliers 已知，则在测试文件中的 labels 值必须为 +1/-1，用于评估性能。`<label>` 值使用 C 标准库的 `strtod()` 读取。
 
 `label` 后面的成对值 `<index>:<value>` 为 feature（attribute）：
-- `<index>` 是从 1 开始的整数；对预计算内核，`<index>` 从0开始；
-- `index` 必须升序排列；
+- `<index>` 是从 1 开始的整数；对预计算（precomputed）内核，`<index>` 从0开始
+- `index` 必须升序排列
 - `<value>` 实数
 
 下面是一个分类数据样例 "heart_scale"的前两行:
@@ -84,35 +87,38 @@ easy.py training_file [testing_file]
 - 输入 `svm-train heart_scale`，该程序会读入训练数据，输出模型文件 "heart_scale.model"；
 - 如果你有测试数据 heart_scale.t，可以输入 `svm-predict heart_scale.t heart_scale.model output` 查看预测准确性。输出文件 `output` 包含预测的分类。
 
-对分类，如果训练数据集只有一个分类（如，所有的 labels 一样），`svm-train` 会输出警告信息 `Warning: training data in only one class. See README for details`，表示训练数据集不平衡。
+对分类，如果训练集只有一个分类（即所有 labels 一样），`svm-train` 会输出警告信息 `Warning: training data in only one class. See README for details`，表示训练集不平衡。在测试时会直接返回训练集中的 label。
 
 在该包中还有其它一些工具：
 
 **svm-scale**  
+
 用于缩放输入数据。
 
 **svm-toy**  
-这是一个简单的图形界面，用于展示 SVM 如何在平面中分隔数据。你可以在界面中点击绘制数据点。
-- "change" 按钮选择数据点分类 1, 2 或 3（只支持三类）；
-- "load" 按钮从文件载入数据；
-- "save" 按钮保存数据到文件；
-- "run" 按钮获得 SVM 模型；
-- "clear" 按钮清空窗口。
 
-可以在底部窗口输入选项，其选项语法和 `svm-train` 一样。
+这是一个简单的图形界面，用于展示 SVM 如何在平面中分隔数据。你可以在界面中点击绘制数据点。
+
+- "change" 按钮选择数据点分类 1, 2 或 3（最多支持三类）
+- "load" 按钮从文件载入数据
+- "save" 按钮保存数据到文件
+- "run" 按钮获得 SVM 模型
+- "clear" 按钮清空窗口
+
+可以在底部窗口输入选项，选项语法和 `svm-train` 一样。
 
 "load" 和 "save" 在分类和回归中都考虑密集数据格式。
 - 对分类，每个数据点有一个标签，值为1, 2 或 3；和两个属性（x-axis 和 y-axis 值），在 [0, 1) 之间；
 - 对回归，每个数据点有一个目标值（y-axis）和一个属性（x-axis），范围 [0,1)
 
 
-# svm-train
-```
+## 使用 svm-train
+```sh
 svm-train [options] training_set_file [model_file]
 ```
 选项：
 
-`-s svm_type`
+- `-s svm_type`
 
 设置 SVM 类型，默认 0.
 |值|类型|
@@ -123,18 +129,20 @@ svm-train [options] training_set_file [model_file]
 |3|epsilon-SVR (regression)|
 |4|nu-SVM (regression)|
 
-`-k kernel_type`  
+- `-k kernel_type`  
+
 设置核函数类型，默认2.
+
 |值|类型|
 |---|---|
 |0|linear, u'*v|
 |1|多项式|
 |2|RBF|
 |3|sigmoid|
-|4|预置内核，training_set_file 内核值|
+|4|precomputed kernel，training_set_file 中的内核值|
 
 其他参数：
-|||
+|参数|说明|
 |---|---|
 |`-d degree`|设置核函数的自由度，默认3|
 |`-g gamma`|设置核函数的 gamma 值，默认 1/num_features|
@@ -151,7 +159,7 @@ svm-train [options] training_set_file [model_file]
 |`-q`|quiet mode (no outputs)|
 |`-v`|随机将数据分成 n 份，计算交叉验证准确度和均方差|
 
-## 输出含义
+### 输出含义
 
 train 输出内容如下：
 ```
@@ -171,22 +179,24 @@ Total nSV = 132
 |nu-svm|is a somewhat equivalent form of C-SVM where C is replaced by nu|
 |nu|simply shows the corresponding parameter|
 
-# svm-predict
-```
+## svm-predict
+```sh
 svm-predict [options] test_file model_file output_file
 ```
 
 选项：
-`-b probability_estimates`  
-是否预测概率估计，0 或 1，对 one-class SVM 只能为0.
+
+- `-b probability_estimates`  
+
+是否预测概率估计，0 或 1，对 one-class SVM 只能为0。
 
 参数
-- model_file 是由 `svm-train` 输出的模型文件；
-- test_file 是你希望预测的数据；
-- svm-predict 将结果输出到 output_file 中。
+- model_file 是由 `svm-train` 输出的模型文件
+- test_file 是你希望预测的数据
+- svm-predict 将结果输出到 output_file 中
 
-# svm-scale
-```
+## svm-scale
+```sh
 svm-scale [options] data_filename
 ```
 |选项|说明|
@@ -197,7 +207,7 @@ svm-scale [options] data_filename
 |`-s save_filename`|将缩放参数保存在 save_filename|
 |`-r restore_filename`|从 restore_filename 恢复缩放参数|
 
-# `grid` 使用
+## `grid` 使用
 grid.py 是用于RBF核函数 C-SVM 分类参数选择工具。使用交叉验证（CV）技术评价每个参数组合的准确度，找到适合问题的最优参数。
 
 使用：
@@ -229,18 +239,16 @@ svm_options : additional options for svm-train
 The program conducts v-fold cross validation using parameter C (and gamma)
 = 2^begin, 2^(begin+step), ..., 2^end.
 
-# 使用建议
+## 使用技巧
 具体内容：
-- 缩放数据，例如将所有属性缩放至 [0,1] 或 [-1,+1]；
-- 对 C-SVC，可以使用 tools 目录中的模型选择工具；
-- nu-SVC/one-class-SVM/nu-SVR 中的 nu 值近似训练误差和支持向量的比例；
-- 如果用于分类的训练数据不平衡（如许多正例，负例很少），可以通过 `-wi` 选项尝试使用不同的乘法参数 C 值；
+- 缩放数据，例如将所有属性缩放至 [0,1] 或 [-1,+1]
+- 对 C-SVC，可以使用 tools 目录中的模型选择工具
+- nu-SVC/one-class-SVM/nu-SVR 中的 nu 值近似于训练误差和支持向量的比例
+- 如果用于分类的训练数据不平衡（如许多正例，负例很少），可以通过 `-wi` 选项尝试使用不同的乘法参数 C 值
 - 如果数据量很大，通过 `-m` 设置更大的缓存值。
 
-
-
-# 实例
-```
+## 示例
+```sh
 svm-scale -l -1 -u 1 -s range train > train.scale
 svm-scale -r range test > test.scale
 ```
@@ -249,7 +257,7 @@ svm-scale -r range test > test.scale
 ```
 svm-train -s 0 -c 5 -t 2 -g 0.5 -e 0.1 data_file
 ```
-使用 RBF 内核 $exp(-0.5|u-v|^2)$, C=2, stopping tolerance=0.1。
+使用 RBF 内核 $\exp(-0.5|u-v|^2)$, C=2, stopping tolerance=0.1。
 
 ```
 svm-train -s 3 -p 0.1 -t 0 data_file
@@ -259,22 +267,54 @@ svm-train -s 3 -p 0.1 -t 0 data_file
 ```
 svm-train -c 10 -w1 1 -w-2 5 -w4 2 data_file
 ```
-训练分类器，对 class 1 惩罚值 $10=1*10$，对class -2 惩罚值 $50=5*10$，对分类 4 惩罚值 $20=2*10$
+训练分类器，对 class 1 惩罚值 $10=1*10$，对 class -2 惩罚值 $50=5*10$，对分类 4 惩罚值 $20=2*10$
 
 ```
 svm-train -s 0 -c 100 -g 0.1 -v 5 data_file
 ```
-Do five-fold cross validation for the classifier using
-the parameters C = 100 and gamma = 0.1
+使用参数 $C=100$ 和 $gamma=0.1$ 对分类任务执行五重交叉验证。
 
-> svm-train -s 0 -b 1 data_file
-> svm-predict -b 1 test_file data_file.model output_file
+```sh
+svm-train -s 0 -b 1 data_file
+svm-predict -b 1 test_file data_file.model output_file
+```
 
-Obtain a model with probability information and predict test data with
-probability estimates
+获得具有概率信息的模型，并使用概率估计测试数据。
 
-# 预先计算的内核
-用户可以先计算内核值，将它们输入到训练和测试文件。libsvm 就不需要原来的训练和测试数据集。
+## Precomputed Kernels
+用户可以先计算内核值，将它们输入到训练和测试文件。此时 libsvm 不需要原来的训练和测试数据集。
+
+假设有 L 个训练样本 $x_1,...,x_L$，令 $K(x,y)$ 为样本 $x$ 和 $y$ 的 kernel 值。
+
+此时，训练集的输入格式为：
+
+```
+<label> 0:i 1:K(xi,x1) ... L:K(xi,xL)
+```
+
+测试集的输入格式为：
+
+```
+<label> 0:? 1:K(x,x1) ... L:K(x,xL)
+```
+
+在训练集中，第一列必须是 $x_i$ 的 ID。在测试集中，$?$ 可以是任意值。
+
+必须显式提供所有 kernel 值，包括 0。训练集和测试集的任意重排或随机子集也必须有效。
+
+例如：
+
+假设原训练集 3 个样本，每个 样本 4 个特征，测试集有 1 个样本：
+
+```
+15  1:1 2:1 3:1 4:1
+45      2:3     4:3
+25          3:1
+
+15  1:1     3:1
+```
+
+
 
 # 准备数据
 训练一个大的数据集十分耗时，有时候，我们应该先从一个小的子集开始处理。 `subset.py` 脚本随机
@@ -310,3 +350,4 @@ LIBSVM 使用 cross-validation 计算概率，因此比常规的训练更为耗�
 ## 参考
 - https://www.csie.ntu.edu.tw/~cjlin/libsvm/
 - Chih-Chung Chang and Chih-Jen Lin, LIBSVM : a library for support vector machines. ACM Transactions on Intelligent Systems and Technology, 2:27:1--27:27, 2011. Software available at http://www.csie.ntu.edu.tw/~cjlin/libsvm
+- https://github.com/cjlin1/libsvm

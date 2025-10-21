@@ -2,13 +2,16 @@
 
 2025-05-13
 @author Jiawei Mao
-*** 
+
+***
 
 ## 简介
 
-LIBSVM 的函数和数据结构都声明在头文件 `svm.h` 中，所以需要在源码中声明 `#include svm.h`。
+LIBSVM 函数和数据结构都声明在头文件 `svm.h` 中，所以需要在源码中声明 `#include svm.h`。
 
-在分类测试数据前使用训练数据构建 SVM 模型，将模型保存在文件中。然后就可以使用保存的 SVM 模型分类数据。
+在 `svm-train.c` 和 `svm-predict.c` 可以看到如何使用这些函数。在 `svm.h` 中用 `LIBSVM_VERSION` 定义了 SVM 版本。
+
+在分类测试数据前，需要使用训练数据构建 SVM 模型，将模型保存在文件中。然后就可以使用保存的 SVM 模型分类数据。
 
 ## 训练
 
@@ -20,6 +23,7 @@ struct svm_model *svm_train(const struct svm_problem *prob,
 该函数根据训练数据和参数创建 SVM 模型。
 
 `svm_problem` 包含训练数据集：
+
 ```cpp
 struct svm_problem
 {
@@ -29,9 +33,9 @@ struct svm_problem
 };
 ```
 其中 ：
-- `l` 表示训练数据大小；
-- `y` 是目标值数组（对分类为整数值，对回归为实数）；
-- `x` 数组指针，每个指向一个 `svm_node` 数组，对应训练向量。
+- `l` 表示训练数据大小
+- `y` 是目标值数组（对分类为整数值，对回归为实数）
+- `x` 数组指针，每个指向一个 `svm_node` 数组，对应训练向量
 
 例如，对如下数据：
 |LABEL|ATTR1|ATTR2|ATTR3|ATTR4|ATTR5|
@@ -87,7 +91,10 @@ struct svm_parameter
     int probability; /* do probability estimates */
 };
 ```
-### `svm_type`
+### svm_type
+
+svm_type 支持的类型：
+
 |svm_type|说明|
 |---|----|
 |C_SVC|C-SVM classification, default|
@@ -96,7 +103,7 @@ struct svm_parameter
 |EPSILON_SVR|epsilon-SVM regression|
 |NU_SVR|nu-SVM regression|
 
-### `kernel_type`
+### kernel_type
 |kernel_type|说明|
 |---|---|
 |LINEAR|u'*v|
@@ -128,11 +135,15 @@ struct svm_parameter
 
  If you do not want to change penalty for any of the classes, just set `nr_weight` to 0.
 
+> [!NOTE]
+>
+> 由于 svm_model 包含指向 svm_problem 的指针，因此如果仍在使用 `svm_train()` 生成的 `svm_model`， 则不能释放 `svm_problem` 使用的内存。 
 
-## Java 使用
 
-预编译的 java 类放在 `libsvm.jar` 中。程序运行：
-```java
+## Java 版
+
+预编译的 java 类放在 `libsvm.jar` 中，源码在 java 目录。使用方法：
+```sh
 java -classpath libsvm.jar svm_train <arguments>
 java -classpath libsvm.jar svm_predict <arguments>
 java -classpath libsvm.jar svm_toy
@@ -142,7 +153,7 @@ java -classpath libsvm.jar svm_scale <arguments>
 库的使用类似于 C 版本，可用的函数如下：
 ```java
 public class svm {
-	public static final int LIBSVM_VERSION=324;
+	public static final int LIBSVM_VERSION=336;
 	public static svm_model svm_train(svm_problem prob, svm_parameter param);
 	public static void svm_cross_validation(svm_problem prob, svm_parameter param, int nr_fold, double[] target);
 	public static int svm_get_svm_type(svm_model model);
@@ -177,3 +188,32 @@ your_print_func = new svm_print_interface()
 };
 svm.svm_set_print_string_function(your_print_func);
 ```
+
+### svm_model
+
+`l` 是支持向量的数据量。`SV` 和 `sv_coef` 分别是支持向量和对应的系数。假设有 $k$ 个类别。对类别为 `j` 的样本，对应的 `sv_coef` 包含 $(k-1)y*alpha$ 个向量，其中 alpha 是以下两类问题的解：
+
+- 1 vs j, 2 vs j, ..., j-1 vs j, j vs j+1, j vs j+2,,,., j vs k 
+
+例如，如果有 4 个类别，则 `sv_coef` 和 `SV` 的样式：
+
+```
++-+-+-+--------------------+
+|1|1|1|                    |
+|v|v|v|  SVs from class 1  |
+|2|3|4|                    |
++-+-+-+--------------------+
+|1|2|2|                    |
+|v|v|v|  SVs from class 2  |
+|2|3|4|                    |
++-+-+-+--------------------+
+|1|2|3|                    |
+|v|v|v|  SVs from class 3  |
+|3|3|4|                    |
++-+-+-+--------------------+
+|1|2|3|                    |
+|v|v|v|  SVs from class 4  |
+|4|4|4|                    |
++-+-+-+--------------------+
+```
+

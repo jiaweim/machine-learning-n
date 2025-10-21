@@ -256,7 +256,3 @@ rpois(n, lambda)
 
 随机数生成器，`n` 为生成随机数的个数，`lambda` 是平均成功次数。
 
-## hipparchus 实现
-
-`org.hipparchus.distribution.discrete.PoissonDistribution`
-

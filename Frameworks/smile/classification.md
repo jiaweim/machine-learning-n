@@ -199,6 +199,14 @@ public class RDA {
 }
 ```
 
+## Support Vector Machines
+
+基本支持向量机（SVM）是一种二元线性分类模型，它选择两个类之间最大分离超平面进行分类。如果这样的超平面存在，则称其为最大边距超平面（maximum-margin hyperplane），对应的线性分类器称为 maximum-margin classifier.
+
+如果不存在可以完美分隔正例和负例的超平面，那么 soft-margin 方法将选择一个尽可能干净分离正例和负例的超平面，同时最大化到最近拆分实例的距离。
+
+
+
 
 
 ## 参考
