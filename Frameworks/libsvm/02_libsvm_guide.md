@@ -136,82 +136,183 @@ grid-search 简单直接，看着很傻。实际上，有好几种可以节省�
 ## 讨论
 在某些情况上，上面推荐的分析流程不好使，此时就需要采用其他的技术，比如**特征选择**（feature selection）。这些问题就有些超纲了，不在本节范围内。经验表面，该流程适用于特征不t太多的数据。如果有成千上万的属性，则在提供给 SVM 前，需要提取选择数据子集。
 
-### 推荐流程示例
-
 下面对比使用推荐的流程与一般初学者使用的流程所得模型的准确性。使用 LIVSVM 对 table 1 中提到的三个问题进行实验。对每个问题，首先通过直接训练和测试获得 accuracy。然后，展示 scaling 对 accuracy 的影响。根据前面讨论的内容可知，我们必须保存训练集中属性的范围，以对测试集应用相同操作。接着，使用推荐流程（scaling+模型选择）的 accuracy。最后，演示如何在 LIBSVM 自动执行整个过程。请注意，下面使用的 grid.py 在 R-LIBSVM 也有类似参数选择工具。
 
-#### Astroparticle Physics
+### 1. Astroparticle Physics
 
-- 原始数据集，默认参数
+1. **原始数据集，默认参数**
 
 ```sh
-Train train = new Train();
-train.setDataFile("G:\\tools\\libsvm\\svmguide1");
-train.go();
+SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1"));
+SVMProblem testSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.t"));
+
+SVMParameter parameter = new SVMParameter();
+SVMModel model = SVMUtils.train(trainSet, parameter);
+double[] predicted = SVMUtils.predict(model, testSet);
+System.out.println("Accuracy = " + SVMUtils.getAccuracy(testSet.y, predicted) * 100 + "%");
 ```
 
 ```java
-Predict predict = new Predict();
-predict.setTestFile("G:\\tools\\libsvm\\svmguide1.t");
-predict.setModelFile("G:\\tools\\libsvm\\svmguide1.model");
-predict.setOutFile("G:\\tools\\libsvm\\svmguide1.t.predict");
-predict.go();
+Accuracy = 66.925%
 ```
 
-```
-Accuracy = 66.925% (2677/4000) (classification)
-```
-
-- 缩放数据集，默认参数
+2. **缩放数据集，默认参数**
 
 ```java
-String trainingSet = "G:\\tools\\libsvm\\svmguide1";
-String testingSet = "G:\\tools\\libsvm\\svmguide1.t";
-String scaledTraining = "G:\\tools\\libsvm\\svmguide1.scale";
-String modelFile = "G:\\tools\\libsvm\\svmguide1.scale.model";
-String scaledParameters = "G:\\tools\\libsvm\\range1";
-String scaledTesting = "G:\\tools\\libsvm\\svmguide1.t.scale";
-String testout = "G:\\tools\\libsvm\\svmguide1.t.scale.predict";
+SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1"));
+SVMProblem testSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.t"));
 
-// scaling training
-Scale scale = new Scale();
-scale.setxLower(-1);
-scale.setxUpper(1);
-scale.setDataFilename(trainingSet);
-scale.setSaveFilename(scaledParameters);
-scale.setOutDataFilename(scaledTraining);
-scale.go();
+Scaler scaler = Scaler.fit(trainSet, false);
 
-// scaling testing
-scale.setSaveFilename(null);
-scale.setRestoreFilename(scaledParameters);
-scale.setDataFilename(testingSet);
-scale.setOutDataFilename(scaledTesting);
-scale.go();
+SVMProblem trainScaled = scaler.apply(trainSet, -1, 1);
+SVMProblem testScaled = scaler.apply(testSet, -1, 1);
 
-// train
-Train train = new Train();
-train.setDataFile(scaledTraining);
-train.setModelFile(modelFile);
-train.go();
-
-// predict
-Predict predict = new Predict();
-predict.setTestFile(scaledTesting);
-predict.setModelFile(modelFile);
-predict.setOutFile(testout);
-predict.go();
+SVMParameter parameter = new SVMParameter();
+SVMModel model = SVMUtils.train(trainScaled, parameter);
+double[] predicted = SVMUtils.predict(model, testScaled);
+System.out.println("Accuracy = " + SVMUtils.getAccuracy(testScaled.y, predicted) * 100 + "%");
 ```
 
 ```
-*
-optimization finished, #iter = 496
-nu = 0.2025987653352116
-obj = -507.30694865182556, rho = 2.6270365744847743
-nSV = 630, nBSV = 621
-Total nSV = 630
-Accuracy = 96.15% (3846/4000) (classification)
+Accuracy = 96.15%
 ```
+
+**3. 参数选择**
+
+首先，使用 grid-search 检索参数：
+
+```java
+SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.scale"));
+for (int c = -5; c <= 15; c += 2) {
+    for (int g = -15; g <= 3; g += 2) {
+        double C1 = Math.pow(2, c);
+        double g1 = Math.pow(2, g);
+
+        SVMParameter parameter = new SVMParameter();
+        parameter.C = C1;
+        parameter.gamma = g1;
+
+        double[] out = SVMUtils.classificationCV(5, trainSet, parameter);
+        double accuracy = SVMUtils.getAccuracy(trainSet.y, out);
+        System.out.println(C1 + "\t" + g1 + "\t" + accuracy);
+    }
+}
+```
+
+```
+32	0.5	0.970216899
+32	2	0.970216899
+8192	0.125	0.970216899
+8192	0.03125	0.969245711
+2	2	0.968598252
+8	0.5	0.968274522
+128	0.5	0.967950793
+2048	0.5	0.967950793
+8	2	0.967627064
+...
+```
+
+C 值为正则化参数：
+
+- C 值较大，则尽可能好的分离数据，优化器趋向于选择边距较小的超平面
+- C 值较小，优化器会寻找分隔较大的超平面，即使该超平面会导致更多错误分类
+
+Gamma 是 RBF kernel 的参数：
+
+- gamma 值越小，决策边界越平滑，容易欠拟合
+- gamma 值越大，决策边界越复杂，容易过拟合
+
+> [!TIP]
+>
+> 在保证分类准确的前提下，C 和 gamma 都是越小越好。
+
+可以发现，有许多参数组合性能近似，均在 96% 以上。这里采用值较小的参数组合，即取 $C=$, $g=2$。
+
+然后用最佳参数组合训练模型，测试性能：
+
+```java
+SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1"));
+SVMProblem testSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.t"));
+
+Scaler scaler = Scaler.fit(trainSet, false);
+
+SVMProblem trainScaled = scaler.apply(trainSet, -1, 1);
+SVMProblem testScaled = scaler.apply(testSet, -1, 1);
+
+// 设置参数
+SVMParameter parameter = new SVMParameter();
+parameter.gamma = 2;
+parameter.C = 2;
+SVMModel model = SVMUtils.train(trainScaled, parameter);
+double[] predicted = SVMUtils.predict(model, testScaled);
+System.out.println("Accuracy = " + SVMUtils.getAccuracy(testScaled.y, predicted) * 100 + "%");
+```
+
+```
+Accuracy = 96.875%
+```
+
+### 2. Bioinformatics
+
+**1. 原始数据集，默认参数**
+
+```java
+SVMDataset dataset = SVMDataset.read(new File("G:\\tools\\libsvm\\train.2"));
+SVMParameter parameter = new SVMParameter();
+double[] ys = SVMUtils.classificationCV(5, dataset, parameter);
+double accuracy = SVMUtils.getAccuracy(dataset.y, ys);
+System.out.println("Accuracy = " + DecimalFormatUtils.F4.format(accuracy * 100) + "%");
+```
+
+```
+Accuracy = 56.5217%
+```
+
+**2. 缩放数据集，默认参数**
+
+```java
+SVMDataset dataset = SVMDataset.read(new File("G:\\tools\\libsvm\\train.2"));
+// 缩放数据集
+Scaler scaler = Scaler.fit(dataset, false);
+SVMDataset scaledDataset = scaler.apply(dataset, -1, 1);
+
+SVMParameter parameter = new SVMParameter();
+double[] ys = SVMUtils.classificationCV(5, scaledDataset, parameter);
+double accuracy = SVMUtils.getAccuracy(dataset.y, ys);
+System.out.println("Accuracy = " + DecimalFormatUtils.F4.format(accuracy * 100) + "%");
+```
+
+```
+Accuracy = 78.2609%
+```
+
+**3. 参数选择**
+
+```java
+SVMDataset dataset = SVMDataset.read(new File("G:\\tools\\libsvm\\train.2"));
+Scaler scaler = Scaler.fit(dataset, false);
+SVMDataset scaledDataset = scaler.apply(dataset, -1, 1);
+
+GridSearch.create().grid(scaledDataset);
+```
+
+```
+C	g	Accuracy
+2.0	0.5	0.8516624040920716
+128.0	0.03125	0.8516624040920716
+512.0	0.001953125	0.8388746803069054
+8.0	0.125	0.8363171355498721
+2048.0	4.8828125E-4	0.8363171355498721
+32.0	0.03125	0.8337595907928389
+512.0	0.0078125	0.8337595907928389
+...
+```
+
+最佳参数为 $C=2.0$, $g=0.5$，准确度为 85.1662。
+
+### 3. Vehicle
+
+
 
 ## 参数
 
@@ -222,3 +323,4 @@ Accuracy = 96.15% (3846/4000) (classification)
 ## 参考
 
 - https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf
+- 数据集：https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/

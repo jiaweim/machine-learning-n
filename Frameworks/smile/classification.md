@@ -203,9 +203,117 @@ public class RDA {
 
 基本支持向量机（SVM）是一种二元线性分类模型，它选择两个类之间最大分离超平面进行分类。如果这样的超平面存在，则称其为最大边距超平面（maximum-margin hyperplane），对应的线性分类器称为 maximum-margin classifier.
 
-如果不存在可以完美分隔正例和负例的超平面，那么 soft-margin 方法将选择一个尽可能干净分离正例和负例的超平面，同时最大化到最近拆分实例的距离。
+如果不存在可以完美分隔正例和负例的超平面，那么 soft-margin 方法将选择一个尽可能干净分离正例和负例的超平面，同时最大化到距离最近拆分实例的距离。
 
+非线性 SVM 将 kernel 应用于 maximum-margin hyperplane。生成的算法在形式上相似，只是将点积替换为 kernel 函数。这样就可以在变换 feature-space 拟合 maximum-margin hyperplane。该变换可以是非线性的，变换后的空间是高维的。例如，高斯 kernel 的 feature-space 为无限维的 Hilbert space。因此，尽管 classifier 在高维空间是一个超平面，但它在原始空间中可能是非线性的。maximum margin classifier 正则化良好，因此无限维度不会破坏结果。
 
+```java
+public class SVM {
+    // Fits a binary-class linear SVM
+    public static Classifier<double[]> fit(double[][] x, int[] y, 
+                                           Options options);
+    
+    // Fits a binary-class linear SVM of binary sparse data
+    public static Classifier<int[]> fit(int[][] x, int[] y, 
+                                        int p, Options options);
+    
+    // Fits a binary-class linear SVM of binary sparse data
+    public static Classifier<SparseArray> fit(SparseArray[] x, int[] y, 
+                                              int p, Options options);
+    
+    // Fits a non-linear SVM
+    public static SVM<T> fit(T[] x, int[] y, 
+                             MercerKernel<T> kernel, Options options);
+}
+```
+
+SVM 的有效性取决于 **kernel** 的选择、**kernel 的参数**，以及 **soft-margin 参数 C**。给定 kernel，kernel 的参数和 C 的最佳组合通常通过交叉验证的 grid-search 来选择。
+
+分类 SVM 的实现的主要方法是将一个 multi-class 问题拆分为多个二分类问题。常用方法是构建二元分类器，区分：
+
+1. 一个 label 与其它 label (one-versus-rest 或 one-versus-all) 的二元分类
+2. 每两个 labels 之间构建一个分类器（one-versus-one）
+
+one-versus-all 对新实例采用打分最高的类别。
+
+one-versus-one 通过投票完成，每个 classifier 将实例分配给两个类别之一，得票最多的类别即为预测分类。
+
+```java
+public class OneVersusOne {
+     public static OneVersusOne<T> fit(T[] x, int[] y, BiFunction<T[], int[], 
+                                       Classifier<T>> trainer);
+}
+
+public class OneVersusRest {
+     public static OneVersusRest<T> fit(T[] x, int[] y, BiFunction<T[], int[], 
+                                        Classifier<T>> trainer);
+}
+```
+
+```java
+var zip = Read.csv("data/usps/zip.train", CSVFormat.DEFAULT.withDelimiter(' '));
+var x = zip.drop(0).toArray();
+var y = zip.column(0).toIntArray();
+var kernel = new GaussianKernel(8.0);
+var model = OneVersusRest.fit(x, y, (x, y) -> SVM.fit(x, y, kernel, 
+                                                      new SVM.Options(5)));
+```
+
+当高斯核参数 $\gamma=1.0$, $C=10$，SVM 在 toy 数据集上的决策边界如下：
+
+<img src="./images/svm.png" alt="img" width="600" />
+
+高斯 kernel SVM 与具有高斯径向函数的 RBF 网络具有相似结构。但是，SVM 方法自动解决了网络复杂性问题。当支持 vector/center 数量相似，当训练数据较小时，SVM 性能优于 RBF 网络；而在大型数据集上 RBF 优于 SVM。
+
+### SVM 示例
+
+```java
+System.out.println("svmguide1");
+MathEx.setSeed(19650218);
+
+SparseDataset<Integer> train = Read.libsvm("D:\\tools\\smile-4.3.0\\data\\libsvm\\svmguide1");
+SparseDataset<Integer> test = Read.libsvm("D:\\tools\\smile-4.3.0\\data\\libsvm\\svmguide1.t");
+
+int n = train.size();
+double[][] x = new double[n][4];
+int[] y = new int[n];
+for (int i = 0; i < n; i++) {
+    SampleInstance<SparseArray, Integer> sample = train.get(i);
+    for (SparseArray.Entry e : sample.x()) {
+        x[i][e.index()] = e.value();
+    }
+    y[i] = sample.y() > 0 ? +1 : -1;
+}
+
+n = test.size();
+double[][] testX = new double[n][4];
+int[] testy = new int[n];
+for (int i = 0; i < n; i++) {
+    SampleInstance<SparseArray, Integer> sample = test.get(i);
+    for (SparseArray.Entry entry : sample.x()) {
+        testX[i][entry.index()] = entry.value();
+    }
+    testy[i] = sample.y() > 0 ? +1 : -1;
+}
+
+GaussianKernel kernel = new GaussianKernel(90);
+SVM<double[]> model = SVM.fit(x, y, kernel, new SVM.Options(100));
+
+int[] prediction = model.predict(testX);
+int error = Error.of(testy, prediction);
+System.out.format("Test Error = %d, Accuracy = %.2f%%%n", error, 100.0 - 100.0 * error / testX.length);
+assertEquals(130, error, 10)
+```
+
+```
+svmguide1
+13:33:07 [main] INFO smile.base.svm.LASVM[165] - 1000 iterations, 72 support vectors
+13:33:07 [main] INFO smile.base.svm.LASVM[165] - 2000 iterations, 164 support vectors
+13:33:07 [main] INFO smile.base.svm.LASVM[165] - 3000 iterations, 254 support vectors
+13:33:07 [main] INFO smile.base.svm.LASVM[467] - Finalizing the training by reprocess.
+13:33:07 [main] INFO smile.base.svm.LASVM[457] - 3089 samples, 250 support vectors, 229 bounded
+Test Error = 135, Accuracy = 96.63%
+```
 
 
 
