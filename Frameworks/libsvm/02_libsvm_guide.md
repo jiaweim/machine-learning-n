@@ -1,6 +1,6 @@
 # LIBSVM 指南
 
-2025-05-13
+2025-05-13⭐
 @author Jiawei Mao
 ***
 
@@ -143,38 +143,40 @@ grid-search 简单直接，看着很傻。实际上，有好几种可以节省�
 1. **原始数据集，默认参数**
 
 ```sh
-SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1"));
-SVMProblem testSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.t"));
+SVMDataset trainSet = SVMDataset.read(new File("svmguide1"));
+SVMDataset testSet = SVMDataset.read(new File("svmguide1.t"));
 
 SVMParameter parameter = new SVMParameter();
 SVMModel model = SVMUtils.train(trainSet, parameter);
-double[] predicted = SVMUtils.predict(model, testSet);
-System.out.println("Accuracy = " + SVMUtils.getAccuracy(testSet.y, predicted) * 100 + "%");
+double[] predicted = model.predict(testSet);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(testSet.y, predicted) * 100) + "%");
 ```
 
 ```java
-Accuracy = 66.925%
+Accuracy = 66.9250%
 ```
 
 2. **缩放数据集，默认参数**
 
 ```java
-SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1"));
-SVMProblem testSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.t"));
+SVMDataset trainSet = SVMDataset.read(new File("svmguide1"));
+SVMDataset testSet = SVMDataset.read(new File("svmguide1.t"));
 
-Scaler scaler = Scaler.fit(trainSet, false);
+Scaler scaler = Scaler.fit(trainSet);
 
-SVMProblem trainScaled = scaler.apply(trainSet, -1, 1);
-SVMProblem testScaled = scaler.apply(testSet, -1, 1);
+SVMDataset trainScaled = scaler.apply(trainSet, -1, 1);
+SVMDataset testScaled = scaler.apply(testSet, -1, 1);
 
 SVMParameter parameter = new SVMParameter();
 SVMModel model = SVMUtils.train(trainScaled, parameter);
-double[] predicted = SVMUtils.predict(model, testScaled);
-System.out.println("Accuracy = " + SVMUtils.getAccuracy(testScaled.y, predicted) * 100 + "%");
+double[] predicted = model.predict(testScaled);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(testScaled.y, predicted) * 100) + "%");
 ```
 
 ```
-Accuracy = 96.15%
+Accuracy = 96.1500%
 ```
 
 **3. 参数选择**
@@ -182,7 +184,10 @@ Accuracy = 96.15%
 首先，使用 grid-search 检索参数：
 
 ```java
-SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.scale"));
+SVMDataset trainSet = SVMDataset.read(new File("svmguide1"));
+Scaler scaler = Scaler.fit(trainSet);
+SVMDataset trainScaled = scaler.apply(trainSet, -1, 1);
+
 for (int c = -5; c <= 15; c += 2) {
     for (int g = -15; g <= 3; g += 2) {
         double C1 = Math.pow(2, c);
@@ -192,23 +197,19 @@ for (int c = -5; c <= 15; c += 2) {
         parameter.C = C1;
         parameter.gamma = g1;
 
-        double[] out = SVMUtils.classificationCV(5, trainSet, parameter);
-        double accuracy = SVMUtils.getAccuracy(trainSet.y, out);
+        double[] out = SVMUtils.cvClassification(5, trainScaled, parameter);
+        double accuracy = SVMUtils.getAccuracy(trainScaled.y, out);
         System.out.println(C1 + "\t" + g1 + "\t" + accuracy);
     }
 }
 ```
 
 ```
-32	0.5	0.970216899
-32	2	0.970216899
-8192	0.125	0.970216899
-8192	0.03125	0.969245711
-2	2	0.968598252
-8	0.5	0.968274522
-128	0.5	0.967950793
-2048	0.5	0.967950793
-8	2	0.967627064
+2	2	0.970864357
+512	0.125	0.970216899
+2	8	0.969893169
+8	2	0.969893169
+512	0.5	0.96956944
 ...
 ```
 
@@ -231,37 +232,40 @@ Gamma 是 RBF kernel 的参数：
 然后用最佳参数组合训练模型，测试性能：
 
 ```java
-SVMProblem trainSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1"));
-SVMProblem testSet = SVMProblem.read(new File("G:\\tools\\libsvm\\svmguide1.t"));
+SVMDataset trainSet = SVMDataset.read(new File("svmguide1"));
+SVMDataset testSet = SVMDataset.read(new File("svmguide1.t"));
 
-Scaler scaler = Scaler.fit(trainSet, false);
+Scaler scaler = Scaler.fit(trainSet);
 
-SVMProblem trainScaled = scaler.apply(trainSet, -1, 1);
-SVMProblem testScaled = scaler.apply(testSet, -1, 1);
+SVMDataset trainScaled = scaler.apply(trainSet, -1, 1);
+SVMDataset testScaled = scaler.apply(testSet, -1, 1);
 
-// 设置参数
 SVMParameter parameter = new SVMParameter();
 parameter.gamma = 2;
 parameter.C = 2;
 SVMModel model = SVMUtils.train(trainScaled, parameter);
-double[] predicted = SVMUtils.predict(model, testScaled);
-System.out.println("Accuracy = " + SVMUtils.getAccuracy(testScaled.y, predicted) * 100 + "%");
+double[] predicted = model.predict(testScaled);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(testScaled.y, predicted) * 100) + "%");
 ```
 
 ```
-Accuracy = 96.875%
+Accuracy = 96.8750%
 ```
 
 ### 2. Bioinformatics
 
+该示例只有一个一个数据集，因此采用 CV 来评估。
+
 **1. 原始数据集，默认参数**
 
 ```java
-SVMDataset dataset = SVMDataset.read(new File("G:\\tools\\libsvm\\train.2"));
+SVMDataset dataset = SVMDataset.read("train.2");
 SVMParameter parameter = new SVMParameter();
-double[] ys = SVMUtils.classificationCV(5, dataset, parameter);
+double[] ys = SVMUtils.cvClassification(5, dataset, parameter);
 double accuracy = SVMUtils.getAccuracy(dataset.y, ys);
-System.out.println("Accuracy = " + DecimalFormatUtils.F4.format(accuracy * 100) + "%");
+System.out.println("Accuracy = " 
+                   + DecimalFormatUtils.F4.format(accuracy * 100) + "%");
 ```
 
 ```
@@ -271,26 +275,26 @@ Accuracy = 56.5217%
 **2. 缩放数据集，默认参数**
 
 ```java
-SVMDataset dataset = SVMDataset.read(new File("G:\\tools\\libsvm\\train.2"));
-// 缩放数据集
-Scaler scaler = Scaler.fit(dataset, false);
+SVMDataset dataset = SVMDataset.read("train.2");
+Scaler scaler = Scaler.fit(dataset);
 SVMDataset scaledDataset = scaler.apply(dataset, -1, 1);
 
 SVMParameter parameter = new SVMParameter();
-double[] ys = SVMUtils.classificationCV(5, scaledDataset, parameter);
-double accuracy = SVMUtils.getAccuracy(dataset.y, ys);
-System.out.println("Accuracy = " + DecimalFormatUtils.F4.format(accuracy * 100) + "%");
+double[] ys = SVMUtils.cvClassification(5, scaledDataset, parameter);
+double accuracy = SVMUtils.getAccuracy(scaledDataset.y, ys);
+System.out.println("Accuracy = " 
+                   + DecimalFormatUtils.F4.format(accuracy * 100) + "%");
 ```
 
 ```
-Accuracy = 78.2609%
+Accuracy = 78.5166%
 ```
 
 **3. 参数选择**
 
 ```java
-SVMDataset dataset = SVMDataset.read(new File("G:\\tools\\libsvm\\train.2"));
-Scaler scaler = Scaler.fit(dataset, false);
+SVMDataset dataset = SVMDataset.read("train.2");
+Scaler scaler = Scaler.fit(dataset);
 SVMDataset scaledDataset = scaler.apply(dataset, -1, 1);
 
 GridSearch.create().grid(scaledDataset);
@@ -298,23 +302,249 @@ GridSearch.create().grid(scaledDataset);
 
 ```
 C	g	Accuracy
-2.0	0.5	0.8516624040920716
-128.0	0.03125	0.8516624040920716
-512.0	0.001953125	0.8388746803069054
-8.0	0.125	0.8363171355498721
-2048.0	4.8828125E-4	0.8363171355498721
-32.0	0.03125	0.8337595907928389
+2.0	0.5	0.8542199488491049
+128.0	0.03125	0.8439897698209718
+8.0	0.125	0.8414322250639387
+128.0	0.001953125	0.8337595907928389
 512.0	0.0078125	0.8337595907928389
 ...
 ```
 
-最佳参数为 $C=2.0$, $g=0.5$，准确度为 85.1662。
+最佳参数为 $C=2.0$, $g=0.5$，准确度为 85.42%。
 
 ### 3. Vehicle
 
+包含训练集和测试集。
 
+**1. 原始数据集，默认参数**
+
+```java
+SVMDataset trainSet = SVMDataset.read("train.3");
+SVMDataset testSet = SVMDataset.read("test.3");
+
+SVMParameter parameter = new SVMParameter();
+SVMModel model = SVMUtils.train(trainSet, parameter);
+double[] predicted = model.predict(testSet);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(testSet.y, predicted) * 100) + "%");
+```
+
+```
+Accuracy = 2.4390%
+```
+
+**2. 缩放数据集，默认参数**
+
+```java
+SVMDataset trainSet = SVMDataset.read("train.3");
+SVMDataset testSet = SVMDataset.read("test.3");
+
+Scaler scaler = Scaler.fit(trainSet);
+
+SVMDataset trainScaled = scaler.apply(trainSet, -1, 1);
+SVMDataset testScaled = scaler.apply(testSet, -1, 1);
+
+SVMParameter parameter = new SVMParameter();
+SVMModel model = SVMUtils.train(trainScaled, parameter);
+double[] predicted = model.predict(testScaled);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(testScaled.y, predicted) * 100) + "%");
+```
+
+```
+Accuracy = 12.1951%
+```
+
+**3. 参数选择**
+
+```java
+SVMDataset trainSet = SVMDataset.read("train.3");
+Scaler scaler = Scaler.fit(trainSet);
+SVMDataset trainScaled = scaler.apply(trainSet, -1, 1);
+
+GridSearch.create().grid(trainScaled);
+```
+
+```
+C	g	Accuracy
+32768.0	0.0078125	0.8527755430410298
+32.0	0.125	0.8439259855189059
+128.0	0.03125	0.8431214802896219
+2048.0	0.0078125	0.8415124698310539
+8192.0	0.0078125	0.8399034593724859
+8.0	0.125	0.8382944489139179
+128.0	0.125	0.8382944489139179
+512.0	0.03125	0.8358809332260659
+512.0	0.0078125	0.835076427996782
+2048.0	0.03125	0.83266291230893
+2048.0	0.001953125	0.831858407079646
+32768.0	4.8828125E-4	0.831858407079646
+8192.0	4.8828125E-4	0.831053901850362
+32768.0	0.001953125	0.831053901850362
+...
+```
+
+靠前的准确性相差不大，这里采用较小的参数组合，$C=8$, $g=0.125$。
+
+用该参数建模：
+
+```java
+SVMDataset trainSet = SVMDataset.read("train.3");
+SVMDataset testSet = SVMDataset.read("test.3");
+
+Scaler scaler = Scaler.fit(trainSet);
+
+SVMDataset trainScaled = scaler.apply(trainSet, -1, 1);
+SVMDataset testScaled = scaler.apply(testSet, -1, 1);
+
+SVMParameter parameter = new SVMParameter();
+parameter.C = 8;
+parameter.gamma = 0.125;
+SVMModel model = SVMUtils.train(trainScaled, parameter);
+double[] predicted = model.predict(testScaled);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(testScaled.y, predicted) * 100) + "%");
+```
+
+```
+Accuracy = 73.1707%
+```
+
+用 $C=128$, $g=0.125$：
+
+```
+Accuracy = 87.8049%
+```
+
+> [!NOTE]
+>
+> CV 计算结果有一定随机性，对参数选择有一定影响。
+>
+> 所以，为了达到更好效果，是否应该用 CV 筛选出几组参数，然后分别训练模型，在测试集上，以最终效果为准？
+
+## Linear vs RBF
+
+当 **features 很多**，则可能不需要将数据映射到高维空间。也就是说，非线性映射可能不会提高性能，此时**使用 linear-kernel** 就足够了，因此只需要搜索参数 $C$。
+
+虽然前面说了，RBF 至少与 linear-kernel 一样好，但有个前提：搜索到合适的 $(C,\gamma)$ 参数组合。
+
+### 样本数 << feature 数
+
+生物信息学中许多 microarray 数据都是这种类型，即样本数远小于 feature 数。以 [Leukemia](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/) 为例，training-set 和 testing-set 分别包含 38 和 34  个样本。Features 数为 7129，远大于样本数。下面将训练集和测试集合并，然后比较使用 RBF 和 linear 的 CV 准确性。
+
+- RBF kernel 参数选择
+
+```java
+SVMDataset dataset = SVMDataset.read("leu.combined");
+GridSearch.create().grid(dataset);
+```
+
+```
+C	g	Accuracy
+128.0	3.0517578125E-5	0.9861111111111112
+8192.0	3.0517578125E-5	0.9861111111111112
+32768.0	3.0517578125E-5	0.9861111111111112
+8.0	3.0517578125E-5	0.9722222222222222
+32.0	3.0517578125E-5	0.9722222222222222
+512.0	3.0517578125E-5	0.9722222222222222
+128.0	1.220703125E-4	0.9583333333333334
+2.0	1.220703125E-4	0.9444444444444444
+32.0	1.220703125E-4	0.9444444444444444
+512.0	1.220703125E-4	0.9444444444444444
+2048.0	3.0517578125E-5	0.9444444444444444
+8.0	1.220703125E-4	0.9305555555555556
+...
+```
+
+可以发现，最佳的 gamma 参数相同，对 $C$，我们选择靠前最小的 8。
+
+- Linear kernel 参数选择
+
+```java
+SVMDataset dataset = SVMDataset.read("leu.combined");
+SVMParameter parameter = new SVMParameter();
+parameter.kernel_type = SVMParameter.LINEAR;
+
+GridSearch.create()
+        .parameters(parameter)
+        .setLog2g(1, 1, 1) // 固定 gamma 值，linear-kernel 不使用 gamma
+        .setLog2C(-1, 2, 1)
+        .grid(dataset);
+```
+
+```
+C	g	Accuracy
+0.5	2.0	0.9861111111111112
+1.0	2.0	0.9861111111111112
+2.0	2.0	0.9722222222222222
+4.0	2.0	0.9722222222222222
+```
+
+最佳 $C=0.5$，准确性 98.6%。
+
+使用 Linear-kernel 的 CV 准确性与使用 RBF kernel 相当。显然，当 features 数量很大，不需要映射数据。
+
+除了 SVM，[LIBLINEAR](http://www.csie.ntu.edu.tw/~cjlin/liblinear) 专门为这类情况情况设计，不过其 Java 版有点过时。
+
+### 样本数和 feature 数都很大
+
+这类数据通常出现在文档分类中。LIBSVM 对这类问题不是很合适。LIBLINEAR 更适合这类问题。
+
+### 样本数 >> feature 数
+
+由于 feature 数量少，人们通常将数据映射到高维空间，即使用非线性 kernel。但是，如果你更想使用 linear-kernel，则可以使用带 `-s 2` 的 LIBLINEAR，当 feature 数量少，`-s 2` 通常比默认的 `-s ` 更快。
+
+ 以 [covtype.libsvm.binary.scale](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html) 数据为例，样本数为 581012，feature 数为 54。使用 LIBLINEAR：
+
+```sh
+$ time liblinear-2.47/train -c 4 -v 5 -s 2 covtype.libsvm.binary.scale
+```
+
+```
+Cross Validation Accuracy = 75.6683%
+25.148s
+```
+
+```sh
+$ time liblinear-2.47/train -c 4 -v 5 -s 1 covtype.libsvm.binary.scale
+```
+
+```
+Cross Validation Accuracy = 75.6728%
+134.857s
+```
+
+用 LIBSVM 测试：太慢了。。。
+
+```java
+SVMDataset dataset = SVMDataset.read("covtype.libsvm.binary.scale");
+SVMParameter parameter = new SVMParameter();
+parameter.kernel_type = SVMParameter.LINEAR;
+parameter.C = 4;
+parameter.cache_size = 1000;
+
+double[] predicted = SVMUtils.cvClassification(5, dataset, parameter);
+System.out.println("Accuracy = " +
+        DecimalFormatUtils.F4.format(SVMUtils.getAccuracy(dataset.y, predicted) * 100) + "%");
+```
 
 ## 参数
+
+C 值为正则化参数：
+
+- C 值较大，则尽可能好的分离数据，优化器趋向于选择边距较小的超平面
+- C 值较小，优化器会寻找分隔较大的超平面，即使该超平面会导致更多错误分类
+
+Gamma 是 RBF kernel 的参数：
+
+- gamma 值越小，决策边界越平滑，容易欠拟合
+- gamma 值越大，决策边界越复杂，容易过拟合
+
+> [!TIP] 
+>
+> 在保证分类准确的前提下，C 和 gamma 都是越小越好。
+
+
 
 - kernel cache size
 
@@ -323,4 +553,4 @@ C	g	Accuracy
 ## 参考
 
 - https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf
-- 数据集：https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
+- 数据集：https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/ 
