@@ -1,5 +1,20 @@
 # Java 机器学习库
 
+## 选择
+
+- 如果必须在原生 Java/JVM 环境运行，推荐使用 Deeplearning4J
+- 如果需要处理大型数据集，需要分布式计算能力：推荐 Apache Spark MLlib
+- 如果是初学者，需要快速进行传统的分类、聚类分析，或者需要一个带 GUI 的工具：推荐 Weka
+- 如果想在 Java 中部署其它框架（如 TensorFlow, PyTorch, Scikit-learn）训练的模型：推荐 ONNX Runtime 或 TensorFlow/PyTorch 的 Java API （通常用户模型部署，而非训练）
+
+对机器学习框架：
+
+- 对新手或学生，专注于传统算法研究，推荐 Weka
+- 如果是软件工程师，需要将高性能 ML 集成到 Java/Scale 生产代码，推荐 SMILE
+- 如果是在企业环境，需要结构清晰、支持可解释性，易于部署和维护模型的库，推荐 Tribuo
+
+## 简介
+
 - [Tribuo](https://github.com/oracle/tribuo)
 - [Weka](https://waikato.github.io/weka-site/index.html)
 - [Deep Java Library](https://djl.ai/)
@@ -29,4 +44,3 @@ Weka >
 **内存**
 
 Weka < Tribuo < SMILE
-
