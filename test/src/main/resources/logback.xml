@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+<!--debug: output logback status data-->
+<configuration debug="false">
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.FileAppender"/>
+
+    <appender name="STDOUT" class="ConsoleAppender">
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss} [%thread] %level %logger{36}[%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE" class="FileAppender">
+        <file>pdk.log</file>
+        <append>true</append>
+        <immediateFlush>true</immediateFlush>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss} [%thread] %level %logger{36}[%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--TRACE < DEBUG < INFO < WARN < ERROR-->
+    <!--ALL, OFF, INHERITED-->
+    <logger name="ml" level="DEBUG">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

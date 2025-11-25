@@ -17,6 +17,33 @@
 
     <!--update dependencies on 2023/11/22-->
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/ai.djl/api -->
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
+            <version>0.35.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>basicdataset</artifactId>
+            <version>0.35.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>model-zoo</artifactId>
+            <version>0.35.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.mxnet</groupId>
+            <artifactId>mxnet-engine</artifactId>
+            <version>0.35.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.mxnet</groupId>
+            <artifactId>mxnet-model-zoo</artifactId>
+            <version>0.35.0</version>
+        </dependency>
         <dependency>
             <groupId>org.tribuo</groupId>
             <artifactId>tribuo-all</artifactId>
@@ -42,6 +69,11 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.21</version>
         </dependency>
     </dependencies>
 </project>
