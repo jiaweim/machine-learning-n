@@ -1,8 +1,12 @@
 # Deep Java Library
 
+- [引擎](./engine.md)
+
 ## 简介
 
 Deep Java Library (DJL)是 Amazone 开发的一个面向 Java 开发者的深度学习工具包，支持多种深度学习引擎。
+
+
 
 ## 添加依赖项
 
@@ -11,4 +15,5 @@ Deep Java Library (DJL)是 Amazone 开发的一个面向 Java 开发者的深度
 ## 参考
 
 - https://djl.ai/
+- https://d2l-zh.djl.ai/chapter_preliminaries/ndarray.html
 

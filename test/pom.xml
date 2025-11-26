@@ -9,41 +9,67 @@
     <version>0.2.0</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skipTests>true</skipTests>
+        <djl.version>0.35.0</djl.version>
     </properties>
 
     <!--update dependencies on 2023/11/22-->
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/ai.djl/api -->
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>api</artifactId>
-            <version>0.35.0</version>
+            <version>${djl.version}</version>
         </dependency>
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>basicdataset</artifactId>
-            <version>0.35.0</version>
+            <version>${djl.version}</version>
         </dependency>
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>model-zoo</artifactId>
-            <version>0.35.0</version>
+            <version>${djl.version}</version>
         </dependency>
         <dependency>
-            <groupId>ai.djl.mxnet</groupId>
-            <artifactId>mxnet-engine</artifactId>
-            <version>0.35.0</version>
-            <scope>runtime</scope>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+            <version>${djl.version}</version>
         </dependency>
         <dependency>
-            <groupId>ai.djl.mxnet</groupId>
-            <artifactId>mxnet-model-zoo</artifactId>
-            <version>0.35.0</version>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-jni</artifactId>
+            <version>2.7.1-0.35.0</version>
         </dependency>
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-model-zoo</artifactId>
+            <version>${djl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-jsplot</artifactId>
+            <version>0.44.4</version>
+        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>ai.djl.pytorch</groupId>-->
+        <!--            <artifactId>pytorch-native-cu128</artifactId>-->
+        <!--            <classifier>win-x86_64</classifier>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>ai.djl.mxnet</groupId>-->
+        <!--            <artifactId>mxnet-engine</artifactId>-->
+        <!--            <version>0.35.0</version>-->
+        <!--            <scope>runtime</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>ai.djl.mxnet</groupId>-->
+        <!--            <artifactId>mxnet-model-zoo</artifactId>-->
+        <!--            <version>0.35.0</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.tribuo</groupId>
             <artifactId>tribuo-all</artifactId>
@@ -66,14 +92,31 @@
             <version>1.0.3</version>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.1</version>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.21</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>6.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.6</version>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ai.djl</groupId>
+                <artifactId>bom</artifactId>
+                <version>0.35.0</version>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 </project>
