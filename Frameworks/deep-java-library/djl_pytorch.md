@@ -4,4 +4,5 @@
 
 对以下示例，假设：
 
+- `manager` 为 `ai.jdl.ndarray.NDManager` 实例
 - 
