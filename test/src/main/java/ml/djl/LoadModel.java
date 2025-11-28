@@ -1,5 +1,9 @@
 package ml.djl;
 
+import ai.djl.modality.Classifications;
+import ai.djl.modality.cv.Image;
+import ai.djl.repository.zoo.Criteria;
+
 /**
  *
  *
@@ -9,6 +13,9 @@ package ml.djl;
  */
 public class LoadModel {
     static void main() {
-
+        Criteria<Image, Classifications> criteria =
+                Criteria.builder()
+                        .setTypes(Image.class, Classifications.class)
+                        .build();
     }
 }

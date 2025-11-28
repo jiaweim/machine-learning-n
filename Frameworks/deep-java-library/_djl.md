@@ -8,7 +8,7 @@ Deep Java Library (DJL)是 Amazone 开发的一个面向 Java 开发者的深度
 
 ## 指南
 
-- [内存管理](./memory_management.md)
+- [内存管理](./guide_memory_management.md)
 
 ## 添加依赖项
 

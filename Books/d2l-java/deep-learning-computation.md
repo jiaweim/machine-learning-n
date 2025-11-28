@@ -34,10 +34,6 @@ gpu(1)
 
 我们可以查询可用gpu的数量。
 
-```java
-
-```
-
 ## 参考
 
 - https://d2l-zh.djl.ai/chapter_deep-learning-computation/index.html
