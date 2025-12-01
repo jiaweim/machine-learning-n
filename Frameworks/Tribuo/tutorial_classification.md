@@ -1,4 +1,4 @@
-# Tribuo 教程
+# Tribuo 分类教程
 
 ## 简介
 
