@@ -40,3 +40,6 @@ Tribuo 对每个预测任务提供了单独的模块：
 - 为预测任务提供的基础类
 - tribuo-interop-core: 处理大型外部库的基础类，如 TensorFlow 和 ONNX Runtime
 - 用于特定任务的独立库。例如 InformationTheory 是一个用于信息理论的函数库，Tokens 提供 tokenization 相关的接口和实现
+
+## 配置、选项和来源信息
+
