@@ -1,5 +1,8 @@
 # Tribuo 分类教程
 
+2025-12-03
+@author Jiawei Mao
+***
 ## 简介
 
 如果刚接触 Tribuo，可以按照[分类](#分类)教程学习基本操作。它介绍了训练和测试模型的方方面面，以及如何加载和保存模型。
@@ -23,11 +26,9 @@ Tribuo  被拆分为许多模块，允许你只加载其中的一部分。这对
 </dependency>
 ```
 
-## 分类
-
 下面展示如何使用 Tribuo 的分类模型，使用 Fisher 的著名 Iris 数据集，预测鸢尾花的物种。这个使用简单的 logistic-regression，并研究 Tribuo 在每个模型中存储的信息。
 
-### Setup
+## Setup
 
 首先，需要下载 iris 数据集：
 
@@ -35,7 +36,7 @@ Tribuo  被拆分为许多模块，允许你只加载其中的一部分。这对
 wget https://archive.ics.uci.edu/ml/machine-learning-databases/iris/bezdekIris.data
 ```
 
-然后记在 Trubuo jars。这里需要使用分类 jar，以及 json interop jar 来读取和写入信息 。
+然后加载 Trubuo jars。这里需要使用分类 jar，以及 json interop jar 来读取和写入来源信息 。
 
 ```java
 %jars ./olcut-core-5.1.4-SNAPSHOT.jar
@@ -47,7 +48,7 @@ wget https://archive.ics.uci.edu/ml/machine-learning-databases/iris/bezdekIris.d
 import java.nio.file.Paths;
 ```
 
-导入 org.tribuo 包的所有内容、CSV loader，以及分类包。
+导入 `org.tribuo` 包的所有内容、CSV loader，以及分类包。
 
 ```java
 import org.tribuo.*;
@@ -66,7 +67,7 @@ import com.oracle.labs.mlrg.olcut.provenance.ProvenanceUtil;
 import com.oracle.labs.mlrg.olcut.config.json.*;
 ```
 
-### 加载数据
+## 加载数据
 
 在 Tribuo 中，所有预测类型都有一个关联的 `OutputFactory` 实现，它可以根据输入创建合适的 `Output` 子类。这里使用 `LabelFactory`，因为执行的是多类分类。将 `labelFactory` 传递给 `CSVLoader`，`CSVLoader` 会读取所有列的数据到 `DataSource`。
 
@@ -1388,67 +1389,6 @@ System.out.println(jsonEvaluationProvenance);
 ### 总结
 
 研究 Tribuo 的 CSV 加载机制，如何训练简单分类模型，如何使用测试集评估模型，以及 Tribuo 模型和评估对象中存储了哪些元数据和来源信息。
-
-## HDBSCAN Clustering
-
-下面在一个 toy 数据集上展示如何使用 Tribuo 的 HDBSCAN 聚类包进行聚类和查找离群值。同时探讨如何可视化结果，并对新数据点进行预测。该实现细节可参考 [An Implementation of the HDBSCAN* Clustering Algorithm](https://www.mdpi.com/2076-3417/12/5/2405) .
-
-### Setup
-
-下面加载一些 jars，导入几个包。xchart jar 用于绘图，可以从 Maven 下载。
-
-```java
-%jars ./tribuo-clustering-hdbscan-4.3.0-jar-with-dependencies.jar
-%jars ./xchart-3.8.1.jar
-```
-
-```java
-import org.tribuo.*;
-import org.tribuo.clustering.*;
-import org.tribuo.clustering.hdbscan.*;
-import org.tribuo.data.columnar.*;
-import org.tribuo.data.columnar.processors.field.DoubleFieldProcessor;
-import org.tribuo.data.columnar.processors.response.EmptyResponseProcessor;
-import org.tribuo.data.csv.CSVDataSource;
-import org.tribuo.math.distance.DistanceType;
-import org.tribuo.math.neighbour.NeighboursQueryFactoryType;
-import org.knowm.xchart.*;
-import org.knowm.xchart.style.markers.*;
-import java.awt.Color;
-import java.nio.file.Paths;
-import java.util.*;
-```
-
-### 辅助绘图方法
-
-下面声明几个用于可视化结果的方法。
-
-```java
-// A method to get a new instance of a chart, configured the same way each time
-XYChart getNewXYChart(String title) {
-    XYChart chart = new XYChartBuilder().width(600).height(400)
-        .title(title).xAxisTitle("X").yAxisTitle("Y").build();
-    chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Scatter);
-    chart.getStyler().setChartTitleVisible(false);
-    chart.getStyler().setLegendVisible(false);
-    chart.getStyler().setMarkerSize(8);
-    chart.getStyler().setPlotGridHorizontalLinesVisible(false);
-    chart.getStyler().setPlotGridVerticalLinesVisible(false);
-    return chart;
-}
-```
-
-```java
-// A method to add a set of (x,y) points to a chart
-void addSeriesToChart(XYChart chart, List<Double> xList, List<Double> yList,
-                      String seriesName, Color color, Marker marker) {
-    XYSeries xYseries = chart.addSeries(seriesName,
-            xList.stream().mapToDouble(Double::doubleValue).toArray(),
-            yList.stream().mapToDouble(Double::doubleValue).toArray());
-    xYseries.setMarkerColor(color);
-    xYseries.setMarker(marker);
-}
-```
 
 
 

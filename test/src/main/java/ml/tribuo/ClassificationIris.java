@@ -26,7 +26,7 @@ import java.nio.file.Paths;
  */
 public class ClassificationIris {
 
-    public static void main(String[] args) throws IOException {
+    static void main() throws IOException {
         // load data
         LabelFactory labelFactory = new LabelFactory();
         CSVLoader<Label> csvLoader = new CSVLoader<>(labelFactory);
