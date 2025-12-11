@@ -6,8 +6,8 @@
 ## 分布
 
 - [离散概率分布](./discrete_distribution.md)
-
-- [均匀分布](uniform-distribution.md)
+- [均匀分布](./uniform.md)
+- [Beta 分布](./beta.md)
 - [伯努利分布](bernoulli.md)
 - [二项分布](binomial.md)
 - [泊松分布](poisson.md)
@@ -28,9 +28,10 @@
 
 ### 概率密度函数
 
-概率密度函数（Probability Density Function, PDF）对连续型随机变量定义的，本身不是概率，对概率密度函数在某区间内进行积分才得到概率。
-
-$F_X(x)=\int_{-\infty}^xf_X(t)dt$
+**概率密度函数**（Probability Density Function, PDF）对连续型随机变量定义的，本身不是概率，对概率密度函数在某区间内进行积分才得到概率。
+$$
+F_X(x)=\int_{-\infty}^xf_X(t)dt
+$$
 
 ### 概率质量函数
 
@@ -52,15 +53,19 @@ $$p_i=P(X=a_i), i=1,2,...$$
 
 ### 累积分布函数
 
-累积分布函数（Cumulative Distribution Function, CDF）也称为累积密度函数（Cumulative Density Function）或分布函数，为随机变量 `X` 取值小于或等于 `x` 的概率。
+**累积分布函数**（Cumulative Distribution Function, CDF）也称为累积密度函数（Cumulative Density Function）或分布函数，为随机变量 `X` 取值小于或等于 `x` 的概率。
 
 CDF 和 PDF 的关系为：
 
-$D(x)=P(X\leq x)=\int_{-\infty}^xP(\xi)d\xi$
+$$
+D(x)=P(X\leq x)=\int_{-\infty}^xP(\xi)d\xi
+$$
 
 所以PDF 是 CDF 的倒数：
 
-$P(x)=D'(x)$
+$$
+P(x)=D'(x)
+$$
 
 类似的，累积分布函数和离散概率密度函数（概率质量函数）的关系是：
 
@@ -93,3 +98,4 @@ $\mu=\frac{1}{N}\sum_{k=1}^Nx_kP(x_k)$
 - [Statistical Distributions](http://mathworld.wolfram.com/topics/StatisticalDistributions.html)
 - [Discrete Distribution](https://mathworld.wolfram.com/DiscreteDistribution.html)
 - https://brownmath.com/stat/shape.htm
+- [查看不同分布的可视化工具](https://www.acsu.buffalo.edu/~adamcunn/probability/beta.html)
