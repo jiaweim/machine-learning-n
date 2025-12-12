@@ -48,7 +48,7 @@
 
 - [相关系数](./bivariate_distribution/2_correlation_coefficient.md)
 
-## Reference
+## 参考
 
 - https://seeing-theory.brown.edu/cn.html
 
@@ -60,3 +60,4 @@ Seeing Theory是一个在线学习概率论与数理统计的学习平台，涉�
 
 - [Statistics: Data analysis and modelling](https://mspeekenbrink.github.io/sdam-book/index.html)
 - https://rcompute.nursing.umich.edu/DistributionCalculator/
+- https://statswithr.github.io/book/
