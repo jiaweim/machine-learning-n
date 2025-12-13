@@ -4,3 +4,6 @@
 
 - [计数](./counting.md)
 
+## 参考
+
+- https://apurvanakade.github.io/Monte-Carlo-Methods/chapters/sampling/accept_reject.html
