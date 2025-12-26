@@ -44,3 +44,8 @@ Weka >
 **内存**
 
 Weka < Tribuo < SMILE
+
+## 贝叶斯
+
+- [UnBBayes](https://unbbayes.sourceforge.net/index.html)
+- [OpenMarkov](https://www.openmarkov.org/users.html)
