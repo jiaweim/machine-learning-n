@@ -1,5 +1,8 @@
 # Gamma 函数
 
+2026-01-04⭐
+@author Jiawei Mao
+***
 ## 简介
 
 完整的 Gamma 函数 $\Gamma (n)$ 是阶乘函数到复数和实数的扩展。它与阶乘的关系：
@@ -135,3 +138,4 @@ Gamma 函数对实部大于 0 的复数也成立。
 
 - https://mathworld.wolfram.com/GammaFunction.html
 - https://www.mathsisfun.com/numbers/gamma-function.html
+- https://en.wikipedia.org/wiki/Gamma_function
