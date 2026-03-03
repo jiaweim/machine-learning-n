@@ -204,4 +204,3 @@ print('Between-class scatter matrix: '
 ```
 Between-class scatter matrix: 13x13
 ```
-
