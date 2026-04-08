@@ -36,8 +36,3 @@ $$
 Y\sim Binomial(n=1,p=\theta)
 $$
 
-PyMC 实现：
-
-```python
-```
-
