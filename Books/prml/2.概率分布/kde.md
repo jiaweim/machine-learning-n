@@ -44,7 +44,7 @@ $$
 
 ## bandwidth
 
-核的选择不是那么重要，但 bandwidth 的选择非常重要。我们用 $h$ 控制 $\hat{f}(x)$ 的 bandwidth：
+核的选择不是那么重要，但 **bandwidth 的选择非常重要**。我们用 $h$ 控制 $\hat{f}(x)$ 的 bandwidth：
 $$
 \hat{f}(x)=\frac{1}{Nh}\sum_{i=1}^N K(\frac{x-x_i}{h})
 $$
@@ -250,7 +250,7 @@ KDE 能够从任何数据创建平滑的概率密度函数，无需对底层做�
 
 KDE 的特点：
 
-- 由单一的函数构建而成，成为核函数（kernel function）
+- 由单一的函数构建而成，称为核函数（kernel function）
 - 这是一个非参估计方法，即它的函数形式由数据点决定；
 - 生成的 PDF 形状受带宽 bandwidth 影响很大；
 - 无需优化技术即可拟合数据集

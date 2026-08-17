@@ -16,6 +16,34 @@ $$
 $$
 该密度函数通过正态和指数概率密度函数的卷积得到。
 
+将 $\lambda$ 替换为均值 $\tau$，并加上振幅：
+$$
+f(x;\mu,\sigma,\tau)=\frac{A}{2\tau}\exp[\frac{1}{2\tau}(2\mu+\sigma^2/\tau-2x)]\text{erfc}(\frac{\mu+\sigma^2/\tau-x}{\sqrt{2}\sigma})
+$$
+要拟合该函数，需要计算该函数相对四个参数的偏导数：
+
+- 振幅：$A$
+- 高斯均值：$\mu$
+- 高斯标准差：$\sigma$
+- 指数部分均值：$\tau$
+
+定义中间变量：
+$$
+z=\frac{1}{2\tau}(2\mu+\frac{\sigma^2}{\tau}-2x)=\frac{\mu}{\tau}+\frac{\sigma^2}{2\tau^2}-\frac{x}{\tau}
+$$
+
+$$
+\frac{\mu+\sigma^2/\tau-x}{\sqrt{2}\sigma}
+$$
+
+
+
+那么：
+$$
+f=\frac{1}{2\tau}e^z\text{erfc}(u)
+$$
+
+
 ## 另一种定义形式
 
 EMG 分布的另一种等效形式用于描述色谱中峰的形状。如下所示：
@@ -27,15 +55,7 @@ $$
 - $h$ 为高斯振幅
 - $\tau=1/\lambda$ 指数弛豫时间，$\tau^2$ 为指数概率密函函数的方差
 
-由于数值溢出，该函数对部分参数（如 $\tau=0$）无法计算值。Delley 等提出了另一种等效写法：
-$$
-f(x;h,\mu,\sigma,\tau)=h
-$$
-
-
-## 色谱峰拟合
-
-
+由于数值溢出，该函数对部分参数（如 $\tau=0$）无法计算值。
 
 ## 参考
 

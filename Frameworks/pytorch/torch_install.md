@@ -34,7 +34,7 @@ https://www.nvidia.com/en-us/drivers/
 
 <img src="./images/image-20241022110653005.png" alt="image-20241022110653005" style="zoom: 67%;" />
 
-根据驱动版本确定兼容的 CUDA 版本：
+根据驱动版本确定兼容的 CUDA 版本： https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/
 
 ![image-20241022110815888](./images/image-20241022110815888.png)
 

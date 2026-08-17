@@ -1,14 +1,5 @@
 # 使用 torch.autograd 执行自动微分
 
-- [使用 torch.autograd 执行自动微分](#使用-torchautograd-执行自动微分)
-  - [简介](#简介)
-  - [Tensor, Function 和计算图](#tensor-function-和计算图)
-  - [计算梯度](#计算梯度)
-  - [禁用梯度跟踪](#禁用梯度跟踪)
-  - [计算图详解](#计算图详解)
-  - [Tensor Gradient 和 Jacobian Product](#tensor-gradient-和-jacobian-product)
-  - [参考](#参考)
-
 Last updated: 2022-11-08, 13:57
 ****
 
