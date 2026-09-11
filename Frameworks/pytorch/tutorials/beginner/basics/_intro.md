@@ -15,7 +15,7 @@
 如果你是深度学习框架新手，请直接从分步教程的第一节开始学习：1. 张量 (Tensors)。
 
 - [快速入门](./quickstart_tutorials.md)
-- 张量
+- [张量](./tensorqs_tutorial.md)
 - 数据集与数据加载器
 - 数据变换
 - 构建模型
